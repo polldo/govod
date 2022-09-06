@@ -9,6 +9,7 @@ import (
 	"github.com/jmoiron/sqlx"
 	"github.com/polldo/govod/api/middleware"
 	"github.com/polldo/govod/api/web"
+	"github.com/polldo/govod/core/user"
 	"github.com/sirupsen/logrus"
 )
 
@@ -37,6 +38,9 @@ func APIMux(cfg APIConfig) http.Handler {
 	a.mw = append(a.mw, middleware.Logger(cfg.Log))
 	a.mw = append(a.mw, middleware.Errors(cfg.Log))
 	a.mw = append(a.mw, middleware.Panics())
+
+	// Setup the handlers.
+	a.Handle(http.MethodPost, "/user", user.HandleCreate(cfg.DB))
 
 	return a.Router
 }
