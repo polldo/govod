@@ -8,6 +8,8 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
+
+	"github.com/dimfeld/httptreemux"
 )
 
 // A Handler is a type that handles a http request, it differs from http.Handler
@@ -78,4 +80,10 @@ func Decode(r *http.Request, val interface{}) error {
 	}
 
 	return nil
+}
+
+// Param returns the web call parameters from the request.
+func Param(r *http.Request, key string) string {
+	m := httptreemux.ContextParams(r.Context())
+	return m[key]
 }
