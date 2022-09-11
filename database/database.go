@@ -4,10 +4,15 @@ package database
 
 import (
 	"context"
+	"embed"
 	"errors"
 	"net/url"
 	"time"
 
+	"github.com/golang-migrate/migrate/v4"
+	"github.com/golang-migrate/migrate/v4/database/postgres"
+	_ "github.com/golang-migrate/migrate/v4/source/file"
+	"github.com/golang-migrate/migrate/v4/source/iofs"
 	"github.com/jmoiron/sqlx"
 	"github.com/lib/pq"
 	_ "github.com/lib/pq"
@@ -23,6 +28,37 @@ var (
 	ErrDBNotFound        = errors.New("not found")
 	ErrDBDuplicatedEntry = errors.New("duplicated entry")
 )
+
+//go:embed migration/*.sql
+var sqlFS embed.FS
+
+func Migrate(db *sqlx.DB) error {
+	driver, err := postgres.WithInstance(db.DB, &postgres.Config{})
+	if err != nil {
+		return err
+	}
+
+	fs, err := iofs.New(sqlFS, "migration")
+	if err != nil {
+		return err
+	}
+
+	m, err := migrate.NewWithInstance(
+		"iofs",
+		fs,
+		"postgres",
+		driver,
+	)
+	if err != nil {
+		return err
+	}
+
+	// if err := m.Up(); err != nil {
+	// 	return err
+	// }
+	// return nil
+	return m.Up()
+}
 
 // Open knows how to open a database connection based on the configuration.
 func Open(cfg config.DB) (*sqlx.DB, error) {
