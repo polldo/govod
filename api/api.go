@@ -40,7 +40,8 @@ func APIMux(cfg APIConfig) http.Handler {
 	a.mw = append(a.mw, middleware.Panics())
 
 	// Setup the handlers.
-	a.Handle(http.MethodPost, "/user", user.HandleCreate(cfg.DB))
+	a.Handle(http.MethodPost, "/users", user.HandleCreate(cfg.DB))
+	a.Handle(http.MethodGet, "/users/{id}", user.HandleShow(cfg.DB))
 
 	return a.Router
 }

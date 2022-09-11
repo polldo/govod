@@ -42,7 +42,11 @@ func HandleCreate(db *sqlx.DB) web.Handler {
 			UpdatedAt:    now,
 		}
 
-		return Create(ctx, db, user)
+		if err := Create(ctx, db, user); err != nil {
+			return err
+		}
+
+		return web.Respond(ctx, w, user, http.StatusCreated)
 	}
 }
 
