@@ -9,7 +9,7 @@ import (
 	"fmt"
 	"net/http"
 
-	"github.com/dimfeld/httptreemux"
+	"github.com/gorilla/mux"
 )
 
 // A Handler is a type that handles a http request, it differs from http.Handler
@@ -84,6 +84,6 @@ func Decode(r *http.Request, val interface{}) error {
 
 // Param returns the web call parameters from the request.
 func Param(r *http.Request, key string) string {
-	m := httptreemux.ContextParams(r.Context())
+	m := mux.Vars(r)
 	return m[key]
 }

@@ -82,5 +82,10 @@ func startDB() (*sqlx.DB, func() error, error) {
 		return nil
 	}
 
+	if err := database.Migrate(db); err != nil {
+		purge()
+		return nil, nil, fmt.Errorf("cannot complete migration on new db: %w", err)
+	}
+
 	return db, purge, nil
 }
