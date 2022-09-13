@@ -43,20 +43,11 @@ func Migrate(db *sqlx.DB) error {
 		return err
 	}
 
-	m, err := migrate.NewWithInstance(
-		"iofs",
-		fs,
-		"postgres",
-		driver,
-	)
+	m, err := migrate.NewWithInstance("iofs", fs, "postgres", driver)
 	if err != nil {
 		return err
 	}
 
-	// if err := m.Up(); err != nil {
-	// 	return err
-	// }
-	// return nil
 	return m.Up()
 }
 
