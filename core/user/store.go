@@ -44,3 +44,26 @@ func Fetch(ctx context.Context, db sqlx.ExtContext, id string) (User, error) {
 
 	return user, nil
 }
+
+func FetchByEmail(ctx context.Context, db sqlx.ExtContext, email string) (User, error) {
+	in := struct {
+		Email string `db:"email"`
+	}{
+		Email: email,
+	}
+
+	const q = `
+	SELECT
+		*
+	FROM
+		users
+	WHERE 
+		email = :email`
+
+	var user User
+	if err := database.NamedQueryStruct(ctx, db, q, in, &user); err != nil {
+		return User{}, fmt.Errorf("selecting user email[%q]: %w", email, err)
+	}
+
+	return user, nil
+}
