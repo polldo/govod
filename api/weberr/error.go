@@ -1,7 +1,6 @@
 package weberr
 
 import (
-	"errors"
 	"net/http"
 )
 
@@ -29,12 +28,12 @@ func (e *RequestError) Unwrap() error { return e.Err }
 // NewError wraps a provided error with HTTP details that can be used later on
 // to build and log an appropriate HTTP error response.
 // This function should be used when handlers encounter expected errors.
-func NewError(err error, status int, opts ...Opt) error {
+func NewError(err error, msg string, status int, opts ...Opt) error {
 	e := &RequestError{Err: err}
 
 	// Add the Response behavior.
 	opts = append(opts, WithResponse(
-		&ErrorResponse{err.Error()},
+		&ErrorResponse{msg},
 		status,
 	))
 
@@ -43,10 +42,21 @@ func NewError(err error, status int, opts ...Opt) error {
 }
 
 // NotFound returns a new `Status Not Found` request error.
-func NotFound(opts ...Opt) error {
+func NotFound(err error, opts ...Opt) error {
 	return NewError(
-		errors.New("the resource could not be found"),
+		err,
+		"the resource could not be found",
 		http.StatusNotFound,
+		opts...,
+	)
+}
+
+// NotAuthorized returns a new `Status Not Authorized` request error.
+func NotAuthorized(err error, opts ...Opt) error {
+	return NewError(
+		err,
+		"not authorized to access resource",
+		http.StatusUnauthorized,
 		opts...,
 	)
 }
