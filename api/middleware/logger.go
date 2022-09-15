@@ -17,15 +17,20 @@ func Logger(log logrus.FieldLogger) web.Middleware {
 	m := func(handler web.Handler) web.Handler {
 		h := func(ctx context.Context, w http.ResponseWriter, r *http.Request) error {
 
+			// Copy the logger to avoid side effects.
+			log := log
+
 			// Logs the request id if it's found in context.
 			if rid := ContextRequestID(ctx); rid != "" {
 				log = log.WithField("req_id", rid)
 			}
+
 			log = log.WithFields(logrus.Fields{
 				"method":     r.Method,
 				"path":       r.URL.Path,
 				"remoteaddr": r.RemoteAddr,
 			})
+
 			log.Info("started")
 			startTime := time.Now().UTC()
 
