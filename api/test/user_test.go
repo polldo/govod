@@ -1,78 +1,55 @@
 package test
 
 import (
-	"bytes"
 	"encoding/json"
-	"fmt"
 	"net/http"
 	"net/http/httptest"
-	"os"
 	"testing"
 
 	"github.com/google/go-cmp/cmp"
-	"github.com/polldo/govod/api"
 	"github.com/polldo/govod/core/user"
-	"github.com/sirupsen/logrus"
 )
 
 type userTest struct {
-	api http.Handler
+	srv *httptest.Server
 }
 
 func TestUser(t *testing.T) {
-	log := logrus.New()
-	log.SetOutput(os.Stdout)
+	env, err := NewTestEnv(t, "user_test")
+	if err != nil {
+		t.Fatalf("initializing test env: %v", err)
+	}
 
-	api := api.APIMux(api.APIConfig{
-		Log: log,
-		DB:  db,
-	})
+	ut := &userTest{srv: env.Server}
 
-	ut := &userTest{api: api}
-
-	u := ut.postUserOK(t)
-	ut.getUserOK(t, u.ID)
-}
-
-func (ut *userTest) postUserOK(t *testing.T) user.User {
-	body, err := json.Marshal(&user.UserNew{
+	usr, err := Signup(ut.srv, user.UserNew{
 		Name:            "Paolo Calao",
 		Email:           "polldo@test.com",
+		Password:        "pass",
+		PasswordConfirm: "pass",
 		Role:            "USER",
-		Password:        "testpass",
-		PasswordConfirm: "testpass",
 	})
 	if err != nil {
 		t.Fatal(err)
 	}
 
-	r := httptest.NewRequest(http.MethodPost, "/users", bytes.NewBuffer(body))
-	w := httptest.NewRecorder()
-	ut.api.ServeHTTP(w, r)
-
-	var got user.User
-	if err := json.NewDecoder(w.Body).Decode(&got); err != nil {
-		t.Fatalf("cannot unmarshal created user: %v", err)
+	if err := Login(ut.srv, "polldo@test.com", "pass"); err != nil {
+		t.Fatal(err)
 	}
 
-	exp := got
-	exp.Name = "Paolo Calao"
-	exp.Email = "polldo@test.com"
-	exp.Role = "USER"
-
-	if diff := cmp.Diff(got, exp); diff != "" {
-		t.Fatalf("wrong user payload. Diff: \n%s", diff)
-	}
-
-	return got
+	ut.getUserOK(t, usr.ID)
 }
 
 func (ut *userTest) getUserOK(t *testing.T, id string) user.User {
-	r := httptest.NewRequest(http.MethodGet, "/users/"+id, nil)
-	w := httptest.NewRecorder()
-	ut.api.ServeHTTP(w, r)
+	r, err := http.NewRequest(http.MethodGet, ut.srv.URL+"/users/"+id, nil)
+	if err != nil {
+		t.Fatal(err)
+	}
 
-	fmt.Printf("%+v", w)
+	w, err := ut.srv.Client().Do(r)
+	if err != nil {
+		t.Fatal(err)
+	}
 
 	var got user.User
 	if err := json.NewDecoder(w.Body).Decode(&got); err != nil {
