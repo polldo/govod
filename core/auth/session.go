@@ -33,8 +33,6 @@ func Authenticate(s *scs.SessionManager) web.Middleware {
 
 			ctx = SetClaims(ctx, Claims{UserID: uid, Role: role})
 
-			fmt.Println("Authenticate middleware")
-
 			return handler(ctx, w, r)
 		}
 		return h
