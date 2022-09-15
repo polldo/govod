@@ -8,7 +8,9 @@ import (
 	"os"
 	"os/signal"
 	"syscall"
+	"time"
 
+	"github.com/alexedwards/scs/v2"
 	"github.com/ardanlabs/conf/v3"
 	"github.com/polldo/govod/api"
 	"github.com/polldo/govod/config"
@@ -49,10 +51,15 @@ func Run(logger *logrus.Logger) error {
 		return fmt.Errorf("failed to open db connection: %w", err)
 	}
 
+	// Init the session manager.
+	sessionManager := scs.New()
+	sessionManager.Lifetime = 24 * time.Hour
+
 	// Construct the mux for the API calls.
 	mux := api.APIMux(api.APIConfig{
-		Log: logger,
-		DB:  db,
+		Log:     logger,
+		DB:      db,
+		Session: sessionManager,
 	})
 
 	// Construct a server to service the requests against the mux.

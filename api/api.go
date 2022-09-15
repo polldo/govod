@@ -5,18 +5,21 @@ package api
 import (
 	"net/http"
 
+	"github.com/alexedwards/scs/v2"
 	"github.com/gorilla/mux"
 	"github.com/jmoiron/sqlx"
 	"github.com/polldo/govod/api/middleware"
 	"github.com/polldo/govod/api/web"
+	"github.com/polldo/govod/core/auth"
 	"github.com/polldo/govod/core/user"
 	"github.com/sirupsen/logrus"
 )
 
 // APIConfig contains all the mandatory dependencies required by handlers.
 type APIConfig struct {
-	Log logrus.FieldLogger
-	DB  *sqlx.DB
+	Log     logrus.FieldLogger
+	DB      *sqlx.DB
+	Session *scs.SessionManager
 }
 
 // api represents our server api.
@@ -34,14 +37,16 @@ func APIMux(cfg APIConfig) http.Handler {
 	}
 
 	// Setup the middleware common to each handler.
+	a.mw = append(a.mw, auth.LoadAndSave(cfg.Session))
 	a.mw = append(a.mw, middleware.RequestID())
 	a.mw = append(a.mw, middleware.Logger(cfg.Log))
 	a.mw = append(a.mw, middleware.Errors(cfg.Log))
 	a.mw = append(a.mw, middleware.Panics())
 
 	// Setup the handlers.
-	a.Handle(http.MethodPost, "/users", user.HandleCreate(cfg.DB))
-	a.Handle(http.MethodGet, "/users/{id}", user.HandleShow(cfg.DB))
+	a.Handle(http.MethodPost, "/signup", auth.HandleSignup(cfg.DB))
+	a.Handle(http.MethodPost, "/login", auth.HandleLogin(cfg.DB, cfg.Session))
+	a.Handle(http.MethodGet, "/users/{id}", user.HandleShow(cfg.DB), auth.Authenticate(cfg.Session))
 
 	return a.Router
 }
