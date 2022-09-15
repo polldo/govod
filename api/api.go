@@ -43,10 +43,12 @@ func APIMux(cfg APIConfig) http.Handler {
 	a.mw = append(a.mw, middleware.Errors(cfg.Log))
 	a.mw = append(a.mw, middleware.Panics())
 
+	authen := auth.Authenticate(cfg.Session)
+
 	// Setup the handlers.
 	a.Handle(http.MethodPost, "/signup", auth.HandleSignup(cfg.DB))
 	a.Handle(http.MethodPost, "/login", auth.HandleLogin(cfg.DB, cfg.Session))
-	a.Handle(http.MethodGet, "/users/{id}", user.HandleShow(cfg.DB), auth.Authenticate(cfg.Session))
+	a.Handle(http.MethodGet, "/users/{id}", user.HandleShow(cfg.DB), authen)
 
 	return a.Router
 }
