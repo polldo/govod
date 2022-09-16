@@ -12,6 +12,7 @@ import (
 	"github.com/jmoiron/sqlx"
 	"github.com/polldo/govod/api/web"
 	"github.com/polldo/govod/api/weberr"
+	"github.com/polldo/govod/core/claims"
 	"github.com/polldo/govod/core/user"
 	"golang.org/x/crypto/bcrypt"
 )
@@ -58,6 +59,10 @@ func HandleSignup(db *sqlx.DB) web.Handler {
 
 		if err := validate.Check(u); err != nil {
 			return fmt.Errorf("validating data: %w", err)
+		}
+
+		if u.Role != claims.RoleUser && !claims.IsAdmin(ctx) {
+			return weberr.NotAuthorized(errors.New("only admin can create other admins"))
 		}
 
 		hash, err := bcrypt.GenerateFromPassword([]byte(u.Password), bcrypt.DefaultCost)
