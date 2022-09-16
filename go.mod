@@ -3,6 +3,7 @@ module github.com/polldo/govod
 go 1.19
 
 require (
+	github.com/alexedwards/scs/v2 v2.5.0
 	github.com/ardanlabs/conf/v3 v3.1.2
 	github.com/ardanlabs/service v0.0.0-20220906174316-293c0b4d1dc2
 	github.com/golang-migrate/migrate/v4 v4.15.2
@@ -20,7 +21,6 @@ require (
 	github.com/Azure/go-ansiterm v0.0.0-20210617225240-d185dfc1b5a1 // indirect
 	github.com/Microsoft/go-winio v0.5.2 // indirect
 	github.com/Nvveen/Gotty v0.0.0-20120604004816-cd527374f1e5 // indirect
-	github.com/alexedwards/scs/v2 v2.5.0 // indirect
 	github.com/cenkalti/backoff/v4 v4.1.3 // indirect
 	github.com/containerd/continuity v0.3.0 // indirect
 	github.com/docker/cli v20.10.14+incompatible // indirect
