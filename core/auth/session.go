@@ -13,6 +13,7 @@ import (
 	"github.com/alexedwards/scs/v2"
 	"github.com/polldo/govod/api/web"
 	"github.com/polldo/govod/api/weberr"
+	"github.com/polldo/govod/core/claims"
 )
 
 const userKey = "userID"
@@ -31,7 +32,7 @@ func Authenticate(s *scs.SessionManager) web.Middleware {
 				return weberr.NotAuthorized(errors.New("no user role in session"))
 			}
 
-			ctx = SetClaims(ctx, Claims{UserID: uid, Role: role})
+			ctx = claims.Set(ctx, claims.Claims{UserID: uid, Role: role})
 
 			return handler(ctx, w, r)
 		}
@@ -48,7 +49,7 @@ func Admin(s *scs.SessionManager) web.Middleware {
 				return weberr.NotAuthorized(errors.New("no user role in session"))
 			}
 
-			if role != RoleAdmin {
+			if role != claims.RoleAdmin {
 				return weberr.NotAuthorized(fmt.Errorf("user role is not admin: %s", role))
 			}
 
