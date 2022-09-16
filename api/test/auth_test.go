@@ -63,7 +63,7 @@ func Login(srv *httptest.Server, email string, pass string) error {
 }
 
 type authTest struct {
-	srv *httptest.Server
+	*TestEnv
 }
 
 func TestAuth(t *testing.T) {
@@ -72,9 +72,11 @@ func TestAuth(t *testing.T) {
 		t.Fatalf("initializing test env: %v", err)
 	}
 
-	at := &authTest{srv: env.Server}
+	at := &authTest{env}
 
 	at.signupOK(t)
+	at.signupUnauth(t)
+	at.signupAlreadyExistent(t)
 	at.loginOK(t)
 	at.loginWrongPass(t)
 }
@@ -88,7 +90,7 @@ func (at *authTest) signupOK(t *testing.T) {
 		PasswordConfirm: "testpass",
 	}
 
-	got, err := Signup(at.srv, usr)
+	got, err := Signup(at.Server, usr)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -103,14 +105,44 @@ func (at *authTest) signupOK(t *testing.T) {
 	}
 }
 
+func (at *authTest) signupUnauth(t *testing.T) {
+	usr := user.UserNew{
+		Name:            "Paolo Calao",
+		Email:           "polldo@test.com",
+		Role:            "ADMIN",
+		Password:        "testpass",
+		PasswordConfirm: "testpass",
+	}
+
+	_, err := Signup(at.Server, usr)
+	if err == nil {
+		t.Fatal("simple users cannot create admin")
+	}
+}
+
+func (at *authTest) signupAlreadyExistent(t *testing.T) {
+	usr := user.UserNew{
+		Name:            "Paolo Calao",
+		Email:           at.UserEmail,
+		Role:            "ADMIN",
+		Password:        "testpass",
+		PasswordConfirm: "testpass",
+	}
+
+	_, err := Signup(at.Server, usr)
+	if err == nil {
+		t.Fatal("cannot create already existing user")
+	}
+}
+
 func (at *authTest) loginOK(t *testing.T) {
-	if err := Login(at.srv, "polldo@test.com", "testpass"); err != nil {
+	if err := Login(at.Server, "polldo@test.com", "testpass"); err != nil {
 		t.Fatalf("login failed: %v", err)
 	}
 }
 
 func (at *authTest) loginWrongPass(t *testing.T) {
-	if err := Login(at.srv, "polldo@test.com", "wrongpass"); err == nil {
+	if err := Login(at.Server, "polldo@test.com", "wrongpass"); err == nil {
 		t.Fatal("login should have failed")
 	}
 }

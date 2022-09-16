@@ -1,8 +1,10 @@
 package test
 
 import (
+	"bytes"
 	"context"
 	"fmt"
+	"html/template"
 	"net/http"
 	"net/http/cookiejar"
 	"net/http/httptest"
@@ -18,6 +20,7 @@ import (
 	"github.com/polldo/govod/config"
 	"github.com/polldo/govod/database"
 	"github.com/sirupsen/logrus"
+	"golang.org/x/crypto/bcrypt"
 )
 
 var dbTest config.DB
@@ -100,8 +103,61 @@ func startDB(user string, pass string, dbname string) (*dockertest.Resource, fun
 	return container, purge, nil
 }
 
+const seedTest = `
+INSERT INTO users (id, name, email, role, password_hash, created_at, updated_at) VALUES
+	('ae127240-ce13-4789-aafd-d2f31e7ee487', 'Admin', '{{ .AdminEmail}}', 'ADMIN', '{{ .AdminPassHash}}', '2022-09-16 00:00:00', '2022-09-16 00:00:00'),
+	('45b5fbd3-755f-4379-8f07-a58d4a30fa2f', 'User Test', '{{ .UserEmail}}', 'USER', '{{ .UserPassHash}}', '2019-03-24 00:00:00', '2019-03-24 00:00:00')
+	ON CONFLICT DO NOTHING;
+`
+
 type TestEnv struct {
 	*httptest.Server
+
+	// Admin test credentials in seed.
+	AdminEmail string
+	AdminPass  string
+
+	// User test credentials in seed.
+	UserEmail string
+	UserPass  string
+}
+
+func (te *TestEnv) parseSeed() (string, error) {
+	tmp := struct {
+		AdminEmail    string
+		AdminPassHash string
+		UserEmail     string
+		UserPassHash  string
+	}{
+		AdminEmail: te.AdminEmail,
+		UserEmail:  te.UserEmail,
+	}
+
+	h, err := bcrypt.GenerateFromPassword([]byte(te.AdminPass), bcrypt.DefaultCost)
+	if err != nil {
+		fmt.Println(err)
+	}
+
+	tmp.AdminPassHash = string(h)
+
+	h, err = bcrypt.GenerateFromPassword([]byte(te.UserPass), bcrypt.DefaultCost)
+	if err != nil {
+		fmt.Println(err)
+	}
+
+	tmp.UserPassHash = string(h)
+
+	t, err := template.New("seed").Parse(seedTest)
+	if err != nil {
+		return "", err
+	}
+
+	var res bytes.Buffer
+	if err = t.Execute(&res, tmp); err != nil {
+		return "", err
+	}
+
+	return res.String(), nil
 }
 
 func NewTestEnv(t *testing.T, dbname string) (*TestEnv, error) {
@@ -126,6 +182,24 @@ func NewTestEnv(t *testing.T, dbname string) (*TestEnv, error) {
 		return nil, fmt.Errorf("cannot complete migration on new db: %v", err)
 	}
 
+	// Setup the test environment with some users.
+	te := &TestEnv{
+		AdminEmail: "admin@govod.com",
+		AdminPass:  "admin-password123",
+		UserEmail:  "user@govod.com",
+		UserPass:   "user-password123",
+	}
+
+	seed, err := te.parseSeed()
+	if err != nil {
+		return nil, err
+	}
+
+	// Apply the seed to the new db.
+	if err := database.Seed(dbEnv, seed); err != nil {
+		return nil, fmt.Errorf("cannot init db with seed: %v", err)
+	}
+
 	// Redirect log to stdout.
 	log := logrus.New()
 	log.SetOutput(os.Stdout)
@@ -140,16 +214,16 @@ func NewTestEnv(t *testing.T, dbname string) (*TestEnv, error) {
 		Session: sess,
 	})
 
-	ts := httptest.NewTLSServer(api)
 	jar, err := cookiejar.New(nil)
 	if err != nil {
 		return nil, err
 	}
 
-	ts.Client().Jar = jar
-	ts.Client().CheckRedirect = func(req *http.Request, via []*http.Request) error {
+	te.Server = httptest.NewTLSServer(api)
+	te.Server.Client().Jar = jar
+	te.Server.Client().CheckRedirect = func(req *http.Request, via []*http.Request) error {
 		return http.ErrUseLastResponse
 	}
 
-	return &TestEnv{Server: ts}, nil
+	return te, nil
 }

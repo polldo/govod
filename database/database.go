@@ -29,13 +29,8 @@ var (
 	ErrDBDuplicatedEntry = errors.New("duplicated entry")
 )
 
-var (
-	//go:embed sql/migration/*.sql
-	sqlFS embed.FS
-
-	//go:embed sql/seed.sql
-	seedDoc string
-)
+//go:embed sql/migration/*.sql
+var sqlFS embed.FS
 
 func Migrate(db *sqlx.DB) error {
 	driver, err := postgres.WithInstance(db.DB, &postgres.Config{})
@@ -56,13 +51,13 @@ func Migrate(db *sqlx.DB) error {
 	return m.Up()
 }
 
-func Seed(db *sqlx.DB) error {
+func Seed(db *sqlx.DB, seed string) error {
 	tx, err := db.Begin()
 	if err != nil {
 		return err
 	}
 
-	if _, err := tx.Exec(seedDoc); err != nil {
+	if _, err := tx.Exec(seed); err != nil {
 		if err := tx.Rollback(); err != nil {
 			return err
 		}
