@@ -29,8 +29,13 @@ var (
 	ErrDBDuplicatedEntry = errors.New("duplicated entry")
 )
 
-//go:embed migration/*.sql
-var sqlFS embed.FS
+var (
+	//go:embed sql/migration/*.sql
+	sqlFS embed.FS
+
+	//go:embed sql/seed.sql
+	seedDoc string
+)
 
 func Migrate(db *sqlx.DB) error {
 	driver, err := postgres.WithInstance(db.DB, &postgres.Config{})
@@ -38,7 +43,7 @@ func Migrate(db *sqlx.DB) error {
 		return err
 	}
 
-	fs, err := iofs.New(sqlFS, "migration")
+	fs, err := iofs.New(sqlFS, "sql/migration")
 	if err != nil {
 		return err
 	}
@@ -49,6 +54,22 @@ func Migrate(db *sqlx.DB) error {
 	}
 
 	return m.Up()
+}
+
+func Seed(db *sqlx.DB) error {
+	tx, err := db.Begin()
+	if err != nil {
+		return err
+	}
+
+	if _, err := tx.Exec(seedDoc); err != nil {
+		if err := tx.Rollback(); err != nil {
+			return err
+		}
+		return err
+	}
+
+	return tx.Commit()
 }
 
 // Open knows how to open a database connection based on the configuration.
