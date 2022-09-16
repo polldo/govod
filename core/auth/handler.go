@@ -52,17 +52,12 @@ func HandleSignup(db *sqlx.DB) web.Handler {
 	return func(ctx context.Context, w http.ResponseWriter, r *http.Request) error {
 		var u user.UserNew
 		if err := web.Decode(r, &u); err != nil {
-			return fmt.Errorf("unable to decode payload: %w", err)
-			// TODO: Use significative request errors.
-			// return weberr.NewError(err, http.StatusInternalServerError, weberr.WithMsg("we couldn't decode your payload!"))
+			err = fmt.Errorf("unable to decode payload: %w", err)
+			return weberr.NewError(err, err.Error(), http.StatusBadRequest)
 		}
 
 		if err := validate.Check(u); err != nil {
 			return fmt.Errorf("validating data: %w", err)
-		}
-
-		if u.Role != claims.RoleUser && !claims.IsAdmin(ctx) {
-			return weberr.NotAuthorized(errors.New("only admin can create other admins"))
 		}
 
 		hash, err := bcrypt.GenerateFromPassword([]byte(u.Password), bcrypt.DefaultCost)
@@ -76,7 +71,7 @@ func HandleSignup(db *sqlx.DB) web.Handler {
 			ID:           validate.GenerateID(),
 			Name:         u.Name,
 			Email:        u.Email,
-			Role:         u.Role,
+			Role:         claims.RoleUser,
 			PasswordHash: hash,
 			CreatedAt:    now,
 			UpdatedAt:    now,
