@@ -25,19 +25,18 @@ func TestUser(t *testing.T) {
 	usr := ut.getUserOK(t)
 	ut.adminGetUserOK(t, usr.ID)
 	ut.getUserUnauth(t, usr.ID)
-	ut.adminCreateUserOK(t)
+	ut.createAdminOK(t)
+	ut.createUserOK(t)
 	ut.createUserUnauth(t)
 	ut.createUserExistent(t)
-	ut.createUserDefaultRole(t)
 }
 
 func (ut *userTest) getUserOK(t *testing.T) user.User {
-	usr, err := Signup(ut.Server, user.UserNew{
+	usr, err := Signup(ut.Server, user.UserSignup{
 		Name:            "Paolo Calao",
 		Email:           "polldo@test.com",
 		Password:        "pass",
 		PasswordConfirm: "pass",
-		Role:            "USER",
 	})
 
 	if err != nil {
@@ -125,7 +124,7 @@ func (ut *userTest) getUserUnauth(t *testing.T, id string) {
 	}
 }
 
-func (ut *userTest) adminCreateUserOK(t *testing.T) {
+func (ut *userTest) createAdminOK(t *testing.T) {
 	if err := Login(ut.Server, ut.AdminEmail, ut.AdminPass); err != nil {
 		t.Fatalf("login failed: %v", err)
 	}
@@ -241,7 +240,7 @@ func (ut *userTest) createUserExistent(t *testing.T) {
 	}
 }
 
-func (ut *userTest) createUserDefaultRole(t *testing.T) {
+func (ut *userTest) createUserOK(t *testing.T) {
 	if err := Login(ut.Server, ut.AdminEmail, ut.AdminPass); err != nil {
 		t.Fatalf("login failed: %v", err)
 	}
@@ -249,6 +248,7 @@ func (ut *userTest) createUserDefaultRole(t *testing.T) {
 	usr := user.UserNew{
 		Name:            "Third User",
 		Email:           "third@test.com",
+		Role:            "USER",
 		Password:        "testpass",
 		PasswordConfirm: "testpass",
 	}

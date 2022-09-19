@@ -17,7 +17,14 @@ type User struct {
 type UserNew struct {
 	Name            string `json:"name" validate:"required"`
 	Email           string `json:"email" validate:"required,email"`
-	Role            string `json:"role" validate:""`
+	Role            string `json:"role" validate:"required"`
+	Password        string `json:"password" validate:"required"`
+	PasswordConfirm string `json:"password_confirm" validate:"eqfield=Password"`
+}
+
+type UserSignup struct {
+	Name            string `json:"name" validate:"required"`
+	Email           string `json:"email" validate:"required,email"`
 	Password        string `json:"password" validate:"required"`
 	PasswordConfirm string `json:"password_confirm" validate:"eqfield=Password"`
 }

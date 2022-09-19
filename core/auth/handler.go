@@ -50,7 +50,7 @@ func HandleLogin(db *sqlx.DB, session *scs.SessionManager) web.Handler {
 
 func HandleSignup(db *sqlx.DB) web.Handler {
 	return func(ctx context.Context, w http.ResponseWriter, r *http.Request) error {
-		var u user.UserNew
+		var u user.UserSignup
 		if err := web.Decode(r, &u); err != nil {
 			err = fmt.Errorf("unable to decode payload: %w", err)
 			return weberr.NewError(err, err.Error(), http.StatusBadRequest)

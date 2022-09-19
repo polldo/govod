@@ -12,7 +12,7 @@ import (
 	"github.com/polldo/govod/core/user"
 )
 
-func Signup(srv *httptest.Server, usr user.UserNew) (user.User, error) {
+func Signup(srv *httptest.Server, usr user.UserSignup) (user.User, error) {
 	body, err := json.Marshal(&usr)
 	if err != nil {
 		return user.User{}, err
@@ -82,10 +82,9 @@ func TestAuth(t *testing.T) {
 }
 
 func (at *authTest) signupOK(t *testing.T) {
-	usr := user.UserNew{
+	usr := user.UserSignup{
 		Name:            "Paolo Calao",
 		Email:           "polldo@test.com",
-		Role:            "USER",
 		Password:        "testpass",
 		PasswordConfirm: "testpass",
 	}
@@ -106,10 +105,9 @@ func (at *authTest) signupOK(t *testing.T) {
 }
 
 func (at *authTest) signupUnauth(t *testing.T) {
-	usr := user.UserNew{
+	usr := user.UserSignup{
 		Name:            "Paolo Calao",
 		Email:           "polldo@test.com",
-		Role:            "ADMIN",
 		Password:        "testpass",
 		PasswordConfirm: "testpass",
 	}
@@ -121,10 +119,9 @@ func (at *authTest) signupUnauth(t *testing.T) {
 }
 
 func (at *authTest) signupAlreadyExistent(t *testing.T) {
-	usr := user.UserNew{
+	usr := user.UserSignup{
 		Name:            "Paolo Calao",
 		Email:           at.UserEmail,
-		Role:            "ADMIN",
 		Password:        "testpass",
 		PasswordConfirm: "testpass",
 	}

@@ -39,10 +39,6 @@ func HandleCreate(db *sqlx.DB) web.Handler {
 
 		now := time.Now().UTC()
 
-		if u.Role == "" {
-			u.Role = claims.RoleUser
-		}
-
 		usr := User{
 			ID:           validate.GenerateID(),
 			Name:         u.Name,
