@@ -22,6 +22,26 @@ func Create(ctx context.Context, db sqlx.ExtContext, user User) error {
 	return nil
 }
 
+func Update(ctx context.Context, db sqlx.ExtContext, user User) error {
+	const q = `
+	UPDATE users
+	SET
+		name = :name,
+		email = :email,
+		role = :role,
+		active = :active,
+		password_hash = :password_hash,
+		updated_at = :updated_at
+	WHERE
+		id = :id`
+
+	if err := database.NamedExecContext(ctx, db, q, user); err != nil {
+		return fmt.Errorf("updating user[%s]: %w", user.ID, err)
+	}
+
+	return nil
+}
+
 func Fetch(ctx context.Context, db sqlx.ExtContext, id string) (User, error) {
 	in := struct {
 		ID string `db:"id"`
