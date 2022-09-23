@@ -43,6 +43,10 @@ func (ut *userTest) getUserOK(t *testing.T) user.User {
 		t.Fatal(err)
 	}
 
+	if err := Activate(ut.Server, usr.Email, ut.Mailer); err != nil {
+		t.Fatal(err)
+	}
+
 	if err := Login(ut.Server, "polldo@test.com", "pass"); err != nil {
 		t.Fatal(err)
 	}
