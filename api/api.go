@@ -11,6 +11,7 @@ import (
 	"github.com/polldo/govod/api/middleware"
 	"github.com/polldo/govod/api/web"
 	"github.com/polldo/govod/core/auth"
+	"github.com/polldo/govod/core/token"
 	"github.com/polldo/govod/core/user"
 	"github.com/sirupsen/logrus"
 )
@@ -20,6 +21,7 @@ type APIConfig struct {
 	Log     logrus.FieldLogger
 	DB      *sqlx.DB
 	Session *scs.SessionManager
+	Mailer  token.Mailer
 }
 
 // api represents our server api.
@@ -48,6 +50,10 @@ func APIMux(cfg APIConfig) http.Handler {
 	// Setup the handlers.
 	a.Handle(http.MethodPost, "/auth/signup", auth.HandleSignup(cfg.DB))
 	a.Handle(http.MethodPost, "/auth/login", auth.HandleLogin(cfg.DB, cfg.Session))
+
+	a.Handle(http.MethodPost, "/tokens", token.HandleToken(cfg.DB, cfg.Mailer))
+	a.Handle(http.MethodPost, "/tokens/activate", token.HandleActivation(cfg.DB))
+	a.Handle(http.MethodPost, "/tokens/recover", token.HandleRecovery(cfg.DB))
 
 	a.Handle(http.MethodGet, "/users/{id}", user.HandleShow(cfg.DB), authen)
 	a.Handle(http.MethodPost, "/users", user.HandleCreate(cfg.DB), authen)

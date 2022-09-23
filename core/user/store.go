@@ -3,6 +3,7 @@ package user
 import (
 	"context"
 	"fmt"
+	"time"
 
 	"github.com/jmoiron/sqlx"
 	"github.com/polldo/govod/database"
@@ -83,6 +84,35 @@ func FetchByEmail(ctx context.Context, db sqlx.ExtContext, email string) (User, 
 	var user User
 	if err := database.NamedQueryStruct(ctx, db, q, in, &user); err != nil {
 		return User{}, fmt.Errorf("selecting user email[%q]: %w", email, err)
+	}
+
+	return user, nil
+}
+
+func FetchByToken(ctx context.Context, db sqlx.ExtContext, tokenHash []byte, tokenScope string) (User, error) {
+	in := struct {
+		Hash  []byte    `db:"hash"`
+		Scope string    `db:"scope"`
+		Time  time.Time `db:"time"`
+	}{
+		Hash:  tokenHash,
+		Scope: tokenScope,
+		Time:  time.Now().UTC(),
+	}
+
+	const q = `
+	SELECT
+		u.*
+	FROM
+		users AS u
+	LEFT JOIN
+		tokens AS t ON t.user_id = u.id
+	WHERE 
+		t.hash = :hash AND t.scope = :scope  AND t.expiry > :time`
+
+	var user User
+	if err := database.NamedQueryStruct(ctx, db, q, in, &user); err != nil {
+		return User{}, fmt.Errorf("selecting user by token: %w", err)
 	}
 
 	return user, nil
