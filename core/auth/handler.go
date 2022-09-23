@@ -31,6 +31,11 @@ func HandleLogin(db *sqlx.DB, session *scs.SessionManager) web.Handler {
 			return weberr.NotAuthorized(err)
 		}
 
+		if !u.Active {
+			err := fmt.Errorf("user %s is not active yet", u.Email)
+			return weberr.NewError(err, err.Error(), http.StatusForbidden)
+		}
+
 		err = bcrypt.CompareHashAndPassword(u.PasswordHash, []byte(pass))
 		if err != nil {
 			return weberr.NotAuthorized(err)
@@ -75,6 +80,7 @@ func HandleSignup(db *sqlx.DB) web.Handler {
 			PasswordHash: hash,
 			CreatedAt:    now,
 			UpdatedAt:    now,
+			Active:       false,
 		}
 
 		if err := user.Create(ctx, db, usr); err != nil {

@@ -47,6 +47,7 @@ func HandleCreate(db *sqlx.DB) web.Handler {
 			PasswordHash: hash,
 			CreatedAt:    now,
 			UpdatedAt:    now,
+			Active:       true,
 		}
 
 		if err := Create(ctx, db, usr); err != nil {

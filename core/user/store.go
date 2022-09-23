@@ -11,9 +11,9 @@ import (
 func Create(ctx context.Context, db sqlx.ExtContext, user User) error {
 	const q = `
 	INSERT INTO users
-		(id, name, email, password_hash, role, created_at, updated_at)
+		(id, name, email, password_hash, role, active, created_at, updated_at)
 	VALUES
-		(:id, :name, :email, :password_hash, :role, :created_at, :updated_at)`
+	(:id, :name, :email, :password_hash, :role, :active, :created_at, :updated_at)`
 
 	if err := database.NamedExecContext(ctx, db, q, user); err != nil {
 		return fmt.Errorf("inserting user: %w", err)

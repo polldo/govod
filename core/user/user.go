@@ -9,6 +9,7 @@ type User struct {
 	Name         string    `json:"name" db:"name"`
 	Email        string    `json:"email" db:"email"`
 	Role         string    `json:"role" db:"role"`
+	Active       bool      `json:"active" db:"active"`
 	PasswordHash []byte    `json:"-" db:"password_hash"`
 	CreatedAt    time.Time `json:"created_at" db:"created_at"`
 	UpdatedAt    time.Time `json:"updated_at" db:"updated_at"`
