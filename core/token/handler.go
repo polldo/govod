@@ -18,7 +18,7 @@ import (
 )
 
 type Mailer interface {
-	Send(dest string, tmplName string, token string) error
+	SendToken(scope string, token string, to string) error
 }
 
 func HandleToken(db *sqlx.DB, mailer Mailer) web.Handler {
@@ -80,7 +80,7 @@ func HandleToken(db *sqlx.DB, mailer Mailer) web.Handler {
 		}
 
 		// In a goroutine with multiple tries ??
-		if err := mailer.Send(usr.Email, scope, text); err != nil {
+		if err := mailer.SendToken(scope, text, usr.Email); err != nil {
 			return err
 		}
 

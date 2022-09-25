@@ -15,6 +15,7 @@ import (
 	"github.com/polldo/govod/api"
 	"github.com/polldo/govod/config"
 	"github.com/polldo/govod/database"
+	"github.com/polldo/govod/email"
 	"github.com/sirupsen/logrus"
 )
 
@@ -55,11 +56,15 @@ func Run(logger *logrus.Logger) error {
 	sessionManager := scs.New()
 	sessionManager.Lifetime = 24 * time.Hour
 
+	// Build a mailer.
+	mail := email.New(cfg.Email.Address, cfg.Email.Password, cfg.Email.Host, cfg.Email.Port)
+
 	// Construct the mux for the API calls.
 	mux := api.APIMux(api.APIConfig{
 		Log:     logger,
 		DB:      db,
 		Session: sessionManager,
+		Mailer:  mail,
 	})
 
 	// Construct a server to service the requests against the mux.

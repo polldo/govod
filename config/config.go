@@ -5,8 +5,9 @@ import (
 )
 
 type Config struct {
-	Web Web
-	DB  DB
+	Web   Web
+	DB    DB
+	Email Email
 }
 
 type Web struct {
@@ -25,4 +26,11 @@ type DB struct {
 	MaxIdleConns int    `conf:"default:0"`
 	MaxOpenConns int    `conf:"default:0"`
 	DisableTLS   bool   `conf:"default:true"`
+}
+
+type Email struct {
+	Host     string
+	Port     string
+	Address  string
+	Password string
 }

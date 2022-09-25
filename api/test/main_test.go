@@ -114,7 +114,7 @@ type mockMailer struct {
 	token string
 }
 
-func (m *mockMailer) Send(dest string, tmplName string, token string) error {
+func (m *mockMailer) SendToken(scope string, token string, dst string) error {
 	m.token = token
 	return nil
 }
