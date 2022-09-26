@@ -17,6 +17,7 @@ import (
 	"github.com/ory/dockertest/v3"
 	"github.com/ory/dockertest/v3/docker"
 	"github.com/polldo/govod/api"
+	"github.com/polldo/govod/api/background"
 	"github.com/polldo/govod/config"
 	"github.com/polldo/govod/database"
 	"github.com/sirupsen/logrus"
@@ -223,11 +224,15 @@ func NewTestEnv(t *testing.T, dbname string) (*TestEnv, error) {
 	mail := &mockMailer{}
 	te.Mailer = mail
 
+	// Init a background manager to safely spawn go-routines.
+	bg := background.New(log)
+
 	api := api.APIMux(api.APIConfig{
-		Log:     log,
-		DB:      dbEnv,
-		Session: sess,
-		Mailer:  mail,
+		Log:        log,
+		DB:         dbEnv,
+		Session:    sess,
+		Mailer:     mail,
+		Background: bg,
 	})
 
 	jar, err := cookiejar.New(nil)

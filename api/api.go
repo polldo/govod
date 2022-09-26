@@ -8,6 +8,7 @@ import (
 	"github.com/alexedwards/scs/v2"
 	"github.com/gorilla/mux"
 	"github.com/jmoiron/sqlx"
+	"github.com/polldo/govod/api/background"
 	"github.com/polldo/govod/api/middleware"
 	"github.com/polldo/govod/api/web"
 	"github.com/polldo/govod/core/auth"
@@ -18,10 +19,11 @@ import (
 
 // APIConfig contains all the mandatory dependencies required by handlers.
 type APIConfig struct {
-	Log     logrus.FieldLogger
-	DB      *sqlx.DB
-	Session *scs.SessionManager
-	Mailer  token.Mailer
+	Log        logrus.FieldLogger
+	DB         *sqlx.DB
+	Session    *scs.SessionManager
+	Mailer     token.Mailer
+	Background *background.Background
 }
 
 // api represents our server api.

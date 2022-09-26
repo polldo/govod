@@ -15,7 +15,7 @@ type Web struct {
 	ReadTimeout     time.Duration `conf:"default:5s"`
 	WriteTimeout    time.Duration `conf:"default:10s"`
 	IdleTimeout     time.Duration `conf:"default:120s"`
-	ShutdownTimeout time.Duration `conf:"default:20s"`
+	ShutdownTimeout time.Duration `conf:"default:120s"`
 }
 
 type DB struct {

@@ -21,7 +21,6 @@ func TestToken(t *testing.T) {
 	}
 
 	tt := &tokenTest{env}
-	_ = tt
 
 	au := tt.signupTestUser(t, "mary.lu@activation.com")
 	tt.notActiveOK(t, au)

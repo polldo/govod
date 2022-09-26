@@ -13,6 +13,7 @@ import (
 	"github.com/alexedwards/scs/v2"
 	"github.com/ardanlabs/conf/v3"
 	"github.com/polldo/govod/api"
+	"github.com/polldo/govod/api/background"
 	"github.com/polldo/govod/config"
 	"github.com/polldo/govod/database"
 	"github.com/polldo/govod/email"
@@ -59,12 +60,16 @@ func Run(logger *logrus.Logger) error {
 	// Build a mailer.
 	mail := email.New(cfg.Email.Address, cfg.Email.Password, cfg.Email.Host, cfg.Email.Port)
 
+	// Init a background manager to safely spawn go-routines.
+	bg := background.New(logger)
+
 	// Construct the mux for the API calls.
 	mux := api.APIMux(api.APIConfig{
-		Log:     logger,
-		DB:      db,
-		Session: sessionManager,
-		Mailer:  mail,
+		Log:        logger,
+		DB:         db,
+		Session:    sessionManager,
+		Mailer:     mail,
+		Background: bg,
 	})
 
 	// Construct a server to service the requests against the mux.
@@ -103,6 +108,10 @@ func Run(logger *logrus.Logger) error {
 		if err := api.Shutdown(ctx); err != nil {
 			api.Close()
 			return fmt.Errorf("could not stop server gracefully: %w", err)
+		}
+
+		if err := bg.Shutdown(ctx); err != nil {
+			return fmt.Errorf("could not complete all background tasks: %w", err)
 		}
 	}
 	return nil
