@@ -10,6 +10,7 @@ import (
 
 	"github.com/ardanlabs/service/business/sys/validate"
 	"github.com/jmoiron/sqlx"
+	"github.com/polldo/govod/api/background"
 	"github.com/polldo/govod/api/web"
 	"github.com/polldo/govod/api/weberr"
 	"github.com/polldo/govod/core/user"
@@ -21,7 +22,7 @@ type Mailer interface {
 	SendToken(scope string, token string, to string) error
 }
 
-func HandleToken(db *sqlx.DB, mailer Mailer) web.Handler {
+func HandleToken(db *sqlx.DB, mailer Mailer, bg *background.Background) web.Handler {
 	return func(ctx context.Context, w http.ResponseWriter, r *http.Request) error {
 		var in struct {
 			Email string `json:"email" validate:"required"`
@@ -79,10 +80,13 @@ func HandleToken(db *sqlx.DB, mailer Mailer) web.Handler {
 			return err
 		}
 
-		// In a goroutine with multiple tries ??
-		if err := mailer.SendToken(scope, text, usr.Email); err != nil {
-			return err
-		}
+		bg.Add(func() error {
+			// Add multiple tries ??
+			if err := mailer.SendToken(scope, text, usr.Email); err != nil {
+				return fmt.Errorf("failed to send token %s to %s: %w", scope, usr.Email, err)
+			}
+			return nil
+		})
 
 		return nil
 	}
