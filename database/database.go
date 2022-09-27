@@ -6,6 +6,7 @@ import (
 	"context"
 	"embed"
 	"errors"
+	"fmt"
 	"net/url"
 	"time"
 
@@ -65,6 +66,26 @@ func Seed(db *sqlx.DB, seed string) error {
 	}
 
 	return tx.Commit()
+}
+
+func Transaction(db *sqlx.DB, f func(db sqlx.ExtContext) error) error {
+	tx, err := db.Beginx()
+	if err != nil {
+		return fmt.Errorf("cannot begin the transaction: %w", err)
+	}
+
+	if err := f(tx); err != nil {
+		if terr := tx.Rollback(); terr != nil {
+			return fmt.Errorf("transaction failed but could not rollback: %v: %w", terr, err)
+		}
+		return fmt.Errorf("transaction failed and rolled back: %w", err)
+	}
+
+	if err := tx.Commit(); err != nil {
+		return fmt.Errorf("cannot commit the transaction: %w", err)
+	}
+
+	return nil
 }
 
 // Open knows how to open a database connection based on the configuration.
