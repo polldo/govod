@@ -53,6 +53,19 @@ func HandleLogin(db *sqlx.DB, session *scs.SessionManager) web.Handler {
 	}
 }
 
+func HandleLogout(db *sqlx.DB, session *scs.SessionManager) web.Handler {
+	return func(ctx context.Context, w http.ResponseWriter, r *http.Request) error {
+		session.Remove(ctx, userKey)
+		session.Remove(ctx, roleKey)
+
+		if err := session.RenewToken(ctx); err != nil {
+			return err
+		}
+
+		return nil
+	}
+}
+
 func HandleSignup(db *sqlx.DB) web.Handler {
 	return func(ctx context.Context, w http.ResponseWriter, r *http.Request) error {
 		var u user.UserSignup

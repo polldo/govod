@@ -115,6 +115,25 @@ func Login(srv *httptest.Server, email string, pass string) error {
 	return nil
 }
 
+func Logout(srv *httptest.Server) error {
+	r, err := http.NewRequest(http.MethodPost, srv.URL+"/auth/logout", nil)
+	if err != nil {
+		return err
+	}
+
+	w, err := srv.Client().Do(r)
+	if err != nil {
+		return err
+	}
+	defer w.Body.Close()
+
+	if w.StatusCode != http.StatusOK {
+		return fmt.Errorf("can't logout: status code %s", w.Status)
+	}
+
+	return nil
+}
+
 type authTest struct {
 	*TestEnv
 }
@@ -130,6 +149,7 @@ func TestAuth(t *testing.T) {
 	at.signupOK(t)
 	at.signupAlreadyExistent(t)
 	at.signupNoPasswordConfirm(t)
+
 	at.loginOK(t)
 	at.loginWrongPass(t)
 	at.loginNotActive(t)

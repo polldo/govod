@@ -24,7 +24,9 @@ func TestUser(t *testing.T) {
 
 	usr := ut.getUserOK(t)
 	ut.adminGetUserOK(t, usr.ID)
+	ut.getUserAfterLogout(t, usr.ID)
 	ut.getUserUnauth(t, usr.ID)
+
 	ut.createAdminOK(t)
 	ut.createUserOK(t)
 	ut.createUserUnauth(t)
@@ -106,6 +108,50 @@ func (ut *userTest) adminGetUserOK(t *testing.T, id string) {
 	if diff := cmp.Diff(got, exp); diff != "" {
 		t.Fatalf("wrong user payload. Diff: \n%s", diff)
 	}
+}
+
+// getUserAfterLogout also checks that auth logout is working.
+// That would be more difficult to be checked in `auth_test.go`.
+func (ut *userTest) getUserAfterLogout(t *testing.T, id string) {
+
+	// Login as admin, which should be able to fetch any user.
+	if err := Login(ut.Server, ut.AdminEmail, ut.AdminPass); err != nil {
+		t.Fatal(err)
+	}
+
+	r, err := http.NewRequest(http.MethodGet, ut.Server.URL+"/users/"+id, nil)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	w, err := ut.Server.Client().Do(r)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	if w.StatusCode != 200 {
+		t.Fatalf("admin should be able to fetch user details")
+	}
+
+	// Now logout and fetch the user again, this time an error should be returned.
+	if err := Logout(ut.Server); err != nil {
+		t.Fatal(err)
+	}
+
+	r, err = http.NewRequest(http.MethodGet, ut.Server.URL+"/users/"+id, nil)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	w, err = ut.Server.Client().Do(r)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	if w.StatusCode == 200 {
+		t.Fatalf("logged out admin should not be able to fetch user details")
+	}
+
 }
 
 func (ut *userTest) getUserUnauth(t *testing.T, id string) {
