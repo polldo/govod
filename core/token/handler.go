@@ -64,20 +64,26 @@ func HandleToken(db *sqlx.DB, mailer Mailer, bg *background.Background) web.Hand
 			return weberr.NewError(err, err.Error(), http.StatusBadRequest)
 		}
 
-		// Wrap in a transaction the following 2 db queries.
-
-		// Delete pending tokens.
-		if err := DeleteByUser(ctx, db, usr.ID, scope); err != nil {
-			return err
-		}
-
 		text, token, err := GenToken(usr.ID, 6*time.Hour, scope)
 		if err != nil {
 			return err
 		}
 
-		if err := Create(ctx, db, token); err != nil {
-			return err
+		// Delete pending tokens only if the new token is actually stored.
+		err = database.Transaction(db, func(tx sqlx.ExtContext) error {
+			if err := DeleteByUser(ctx, tx, usr.ID, scope); err != nil {
+				return err
+			}
+
+			if err := Create(ctx, tx, token); err != nil {
+				return err
+			}
+
+			return nil
+		})
+
+		if err != nil {
+			return weberr.InternalError(err)
 		}
 
 		bg.Add(func() error {
@@ -109,20 +115,31 @@ func HandleActivation(db *sqlx.DB) web.Handler {
 
 		hash := sha256.Sum256([]byte(in.Token))
 
-		// Probably a transaction here -> update the user only if the token gets deleted.
 		usr, err := user.FetchByToken(ctx, db, hash[:], ActivationToken)
 		if err != nil {
-			return err
+			if errors.Is(err, database.ErrDBNotFound) {
+				return weberr.NewError(err, err.Error(), http.StatusBadRequest)
+			}
+			return weberr.InternalError(err)
 		}
 
-		usr.Active = true
-		usr.UpdatedAt = time.Now().UTC()
-		if err := user.Update(ctx, db, usr); err != nil {
-			return err
-		}
+		// Delete the token only if the user gets updated correctly (and viceversa).
+		err = database.Transaction(db, func(tx sqlx.ExtContext) error {
+			if err := DeleteByUser(ctx, tx, usr.ID, ActivationToken); err != nil {
+				return err
+			}
 
-		if err := DeleteByUser(ctx, db, usr.ID, ActivationToken); err != nil {
-			return err
+			usr.Active = true
+			usr.UpdatedAt = time.Now().UTC()
+			if err := user.Update(ctx, tx, usr); err != nil {
+				return err
+			}
+
+			return nil
+		})
+
+		if err != nil {
+			return weberr.InternalError(err)
 		}
 
 		return nil
@@ -148,10 +165,12 @@ func HandleRecovery(db *sqlx.DB) web.Handler {
 
 		tokh := sha256.Sum256([]byte(in.Token))
 
-		// Probably a transaction here -> update the user only if the token gets deleted.
 		usr, err := user.FetchByToken(ctx, db, tokh[:], RecoveryToken)
 		if err != nil {
-			return err
+			if errors.Is(err, database.ErrDBNotFound) {
+				return weberr.NewError(err, err.Error(), http.StatusBadRequest)
+			}
+			return weberr.InternalError(err)
 		}
 
 		passh, err := bcrypt.GenerateFromPassword([]byte(in.Password), bcrypt.DefaultCost)
@@ -159,14 +178,23 @@ func HandleRecovery(db *sqlx.DB) web.Handler {
 			return fmt.Errorf("generating password hash: %w", err)
 		}
 
-		usr.PasswordHash = passh
-		usr.UpdatedAt = time.Now().UTC()
-		if err := user.Update(ctx, db, usr); err != nil {
-			return err
-		}
+		// Delete the token only if the user gets updated correctly (and viceversa).
+		err = database.Transaction(db, func(tx sqlx.ExtContext) error {
+			if err := DeleteByUser(ctx, tx, usr.ID, RecoveryToken); err != nil {
+				return err
+			}
 
-		if err := DeleteByUser(ctx, db, usr.ID, RecoveryToken); err != nil {
-			return err
+			usr.PasswordHash = passh
+			usr.UpdatedAt = time.Now().UTC()
+			if err := user.Update(ctx, tx, usr); err != nil {
+				return err
+			}
+
+			return nil
+		})
+
+		if err != nil {
+			return weberr.InternalError(err)
 		}
 
 		return nil

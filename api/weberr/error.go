@@ -60,3 +60,13 @@ func NotAuthorized(err error, opts ...Opt) error {
 		opts...,
 	)
 }
+
+// InternalError returns a new `Internal Server Error` request error.
+func InternalError(err error, opts ...Opt) error {
+	return NewError(
+		err,
+		"the server encountered a problem and could not process your request",
+		http.StatusInternalServerError,
+		opts...,
+	)
+}
