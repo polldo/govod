@@ -12,9 +12,9 @@ import (
 func Create(ctx context.Context, db sqlx.ExtContext, user User) error {
 	const q = `
 	INSERT INTO users
-		(id, name, email, password_hash, role, active, created_at, updated_at)
+		(user_id, name, email, password_hash, role, active, created_at, updated_at)
 	VALUES
-	(:id, :name, :email, :password_hash, :role, :active, :created_at, :updated_at)`
+	(:user_id, :name, :email, :password_hash, :role, :active, :created_at, :updated_at)`
 
 	if err := database.NamedExecContext(ctx, db, q, user); err != nil {
 		return fmt.Errorf("inserting user: %w", err)
@@ -34,7 +34,7 @@ func Update(ctx context.Context, db sqlx.ExtContext, user User) error {
 		password_hash = :password_hash,
 		updated_at = :updated_at
 	WHERE
-		id = :id`
+		user_id = :user_id`
 
 	if err := database.NamedExecContext(ctx, db, q, user); err != nil {
 		return fmt.Errorf("updating user[%s]: %w", user.ID, err)
@@ -45,7 +45,7 @@ func Update(ctx context.Context, db sqlx.ExtContext, user User) error {
 
 func Fetch(ctx context.Context, db sqlx.ExtContext, id string) (User, error) {
 	in := struct {
-		ID string `db:"id"`
+		ID string `db:"user_id"`
 	}{
 		ID: id,
 	}
@@ -56,7 +56,7 @@ func Fetch(ctx context.Context, db sqlx.ExtContext, id string) (User, error) {
 	FROM
 		users
 	WHERE 
-		id = :id`
+		user_id = :user_id`
 
 	var user User
 	if err := database.NamedQueryStruct(ctx, db, q, in, &user); err != nil {
@@ -106,7 +106,7 @@ func FetchByToken(ctx context.Context, db sqlx.ExtContext, tokenHash []byte, tok
 	FROM
 		users AS u
 	LEFT JOIN
-		tokens AS t ON t.user_id = u.id
+		tokens AS t ON t.user_id = u.user_id
 	WHERE 
 		t.hash = :hash AND t.scope = :scope  AND t.expiry > :time`
 

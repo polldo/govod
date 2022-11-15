@@ -105,7 +105,7 @@ func startDB(user string, pass string, dbname string) (*dockertest.Resource, fun
 }
 
 const seedTest = `
-INSERT INTO users (id, name, email, role, active, password_hash, created_at, updated_at) VALUES
+INSERT INTO users (user_id, name, email, role, active, password_hash, created_at, updated_at) VALUES
 	('ae127240-ce13-4789-aafd-d2f31e7ee487', 'Admin', '{{ .AdminEmail}}', 'ADMIN', TRUE, '{{ .AdminPassHash}}', '2022-09-16 00:00:00', '2022-09-16 00:00:00'),
 	('45b5fbd3-755f-4379-8f07-a58d4a30fa2f', 'User Test', '{{ .UserEmail}}', 'USER', TRUE, '{{ .UserPassHash}}', '2019-03-24 00:00:00', '2019-03-24 00:00:00')
 	ON CONFLICT DO NOTHING;
