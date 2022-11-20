@@ -10,3 +10,16 @@ type Course struct {
 	CreatedAt   time.Time `json:"created_at" db:"created_at"`
 	UpdatedAt   time.Time `json:"updated_at" db:"updated_at"`
 }
+
+type CourseNew struct {
+	Name        string  `json:"name" validate:"required"`
+	Email       string  `json:"email" validate:"required,email"`
+	Description string  `json:"description" validate:"required"`
+	Price       float64 `json:"price" validate:"required,gte=0"`
+}
+
+type CourseUp struct {
+	Name        *string  `json:"name"`
+	Description *string  `json:"description"`
+	Price       *float64 `json:"price" validate:"omitempty,gte=0"`
+}
