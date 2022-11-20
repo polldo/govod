@@ -64,6 +64,11 @@ func HandleCreate(db *sqlx.DB) web.Handler {
 func HandleShow(db *sqlx.DB) web.Handler {
 	return func(ctx context.Context, w http.ResponseWriter, r *http.Request) error {
 		userID := web.Param(r, "id")
+		if err := validate.CheckID(userID); err != nil {
+			err = fmt.Errorf("passed id is not valid: %w", err)
+			return weberr.NewError(err, err.Error(), http.StatusBadRequest)
+		}
+
 		if !claims.IsUser(ctx, userID) && !claims.IsAdmin(ctx) {
 			return weberr.NotAuthorized(errors.New("user trying to fetch another user"))
 		}
