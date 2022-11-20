@@ -3,6 +3,7 @@ package video
 import "time"
 
 type Video struct {
+	ID          string    `json:"id" db:"video_id"`
 	CourseID    string    `json:"course_id" db:"course_id"`
 	Index       int       `json:"index" db:"index"`
 	Name        string    `json:"name" db:"name"`
@@ -13,8 +14,7 @@ type Video struct {
 }
 
 type URL struct {
-	CourseID  string    `json:"course_id" db:"course_id"`
-	Index     int       `json:"index" db:"index"`
+	VideoID   string    `json:"video_id" db:"video_id"`
 	URL       string    `json:"url" db:"url"`
 	CreatedAt time.Time `json:"created_at" db:"created_at"`
 	UpdatedAt time.Time `json:"updated_at" db:"updated_at"`
