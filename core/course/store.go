@@ -8,9 +8,6 @@ import (
 	"github.com/polldo/govod/database"
 )
 
-// Admin should be able to create and updated courses.
-// Users should be able to list all the courses and to fetch specific ones.
-
 func Create(ctx context.Context, db sqlx.ExtContext, course Course) error {
 	const q = `
 	INSERT INTO courses
@@ -60,7 +57,7 @@ func Fetch(ctx context.Context, db sqlx.ExtContext, id string) (Course, error) {
 
 	var course Course
 	if err := database.NamedQueryStruct(ctx, db, q, in, &course); err != nil {
-		return Course{}, fmt.Errorf("updating course[%s]: %w", course.ID, err)
+		return Course{}, fmt.Errorf("selecting course[%s]: %w", course.ID, err)
 	}
 
 	return course, nil
@@ -77,7 +74,7 @@ func FetchAll(ctx context.Context, db sqlx.ExtContext) ([]Course, error) {
 
 	var cs []Course
 	if err := database.NamedQuerySlice(ctx, db, q, nil, &cs); err != nil {
-		return nil, fmt.Errorf("selecting courses: %w", err)
+		return nil, fmt.Errorf("selecting all courses: %w", err)
 	}
 
 	return cs, nil
