@@ -25,17 +25,20 @@ func TestCourse(t *testing.T) {
 	}
 
 	ct := &courseTest{env}
+	ct.createCourseUnauth(t)
 	c1 := ct.createCourseOK(t)
 	c2 := ct.createCourseOK(t)
-	c2 = ct.updateCourseOK(t, c2)
-	cs := []course.Course{c1, c2}
 
-	ct.createCourseUnauth(t)
+	ct.updateCourseConcurrent(t, c2)
+	ct.updateCourseInexistent(t, c2)
 	ct.updateCourseUnauth(t, c2)
+	c2 = ct.updateCourseOK(t, c2)
 
 	ct.showCourseOK(t, c1)
 	ct.showCourseInvalid(t)
 	ct.showCourseNotFound(t)
+
+	cs := []course.Course{c1, c2}
 	ct.listCoursesOK(t, cs)
 }
 
@@ -171,6 +174,96 @@ func (ct *courseTest) updateCourseOK(t *testing.T, crs course.Course) course.Cou
 		t.Fatalf("wrong course payload. Diff: \n%s", diff)
 	}
 	return got
+}
+
+// updateCourseConcurrent tests the optimistic lock implemented
+// on courses. It tries to concurrently perform multiple partial updates
+// on the same resource multiple times.
+// It then checks that only one update has been correctly completed,
+// while the other should have resulted in errors.
+func (ct *courseTest) updateCourseConcurrent(t *testing.T, crs course.Course) {
+	if err := Login(ct.Server, ct.AdminEmail, ct.AdminPass); err != nil {
+		t.Fatal(err)
+	}
+	defer Logout(ct.Server)
+
+	const num = 3
+	rsp := make(chan int, num)
+	req := func() {
+		c := course.CourseUp{
+			Name:        ptr("Updated Test"),
+			Description: ptr("This is an updated test course"),
+			Price:       ptr(500.0),
+		}
+
+		body, err := json.Marshal(&c)
+		if err != nil {
+			panic(err)
+		}
+
+		r, err := http.NewRequest(http.MethodPut, ct.URL+"/courses/"+crs.ID, bytes.NewBuffer(body))
+		if err != nil {
+			panic(err)
+		}
+
+		w, err := ct.Client().Do(r)
+		if err != nil {
+			panic(err)
+		}
+		defer w.Body.Close()
+
+		rsp <- w.StatusCode
+	}
+
+	// Execute the partial updates concurrently.
+	for i := 0; i < num; i++ {
+		go req()
+	}
+
+	// Collect responses' OK status code.
+	ok := 0
+	for i := 0; i < num; i++ {
+		if s := <-rsp; s == http.StatusOK {
+			ok++
+		}
+	}
+
+	if ok != 1 {
+		t.Fatalf("only one update should have been completed, got %d", ok)
+	}
+}
+
+func (ct *courseTest) updateCourseInexistent(t *testing.T, crs course.Course) {
+	if err := Login(ct.Server, ct.AdminEmail, ct.AdminPass); err != nil {
+		t.Fatal(err)
+	}
+	defer Logout(ct.Server)
+
+	c := course.CourseUp{
+		Name:        ptr("Updated Test Course Not Existent"),
+		Description: ptr("This is an updated test course - not exist"),
+		Price:       ptr(300.0),
+	}
+
+	body, err := json.Marshal(&c)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	r, err := http.NewRequest(http.MethodPut, ct.URL+"/courses/"+validate.GenerateID(), bytes.NewBuffer(body))
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	w, err := ct.Client().Do(r)
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer w.Body.Close()
+
+	if w.StatusCode != http.StatusBadRequest {
+		t.Fatalf("users should not be able to update not existing courses: status code %s", w.Status)
+	}
 }
 
 func (ct *courseTest) updateCourseUnauth(t *testing.T, crs course.Course) {

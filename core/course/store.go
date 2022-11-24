@@ -2,6 +2,7 @@ package course
 
 import (
 	"context"
+	"errors"
 	"fmt"
 
 	"github.com/jmoiron/sqlx"
@@ -29,11 +30,21 @@ func Update(ctx context.Context, db sqlx.ExtContext, course Course) error {
 		name = :name,
 		description = :description,
 		price = :price,
-		updated_at = :updated_at
+		updated_at = :updated_at,
+		version = version + 1
 	WHERE
-		course_id = :course_id`
+		course_id = :course_id AND
+		version = :version
+	RETURNING version`
 
-	if err := database.NamedExecContext(ctx, db, q, course); err != nil {
+	v := struct {
+		Version int `db:"version"`
+	}{}
+
+	if err := database.NamedQueryStruct(ctx, db, q, course, &v); err != nil {
+		if errors.Is(err, database.ErrDBNotFound) {
+			return fmt.Errorf("updating course[%s]: version conflict", course.ID)
+		}
 		return fmt.Errorf("updating course[%s]: %w", course.ID, err)
 	}
 

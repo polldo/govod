@@ -6,6 +6,7 @@ CREATE TABLE IF NOT EXISTS courses
 	price         FLOAT                       NOT NULL,
 	created_at    TIMESTAMP                   NOT NULL DEFAULT NOW(),
 	updated_at    TIMESTAMP                   NOT NULL DEFAULT NOW(),
+	version       INT                         NOT NULL DEFAULT 1,
 
 	PRIMARY KEY (course_id)
 );
