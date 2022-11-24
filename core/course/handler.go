@@ -24,10 +24,6 @@ func HandleCreate(db *sqlx.DB) web.Handler {
 			return weberr.NewError(err, err.Error(), http.StatusBadRequest)
 		}
 
-		if !claims.IsAdmin(ctx) {
-			return weberr.NotAuthorized(errors.New("only admin can create courses"))
-		}
-
 		if err := validate.Check(c); err != nil {
 			return fmt.Errorf("validating data: %w", err)
 		}
