@@ -2,6 +2,7 @@ package video
 
 import (
 	"context"
+	"errors"
 	"fmt"
 
 	"github.com/jmoiron/sqlx"
@@ -11,26 +12,12 @@ import (
 func Create(ctx context.Context, db sqlx.ExtContext, video Video) error {
 	const q = `
 	INSERT INTO videos
-		(video_id, course_id, index, name, description, free, created_at, updated_at)
+		(video_id, course_id, index, name, description, free, url, created_at, updated_at)
 	VALUES
-	(:video_id, :course_id, :index, :name, :description, :free, :created_at, :updated_at)`
+	(:video_id, :course_id, :index, :name, :description, :free, :url, :created_at, :updated_at)`
 
 	if err := database.NamedExecContext(ctx, db, q, video); err != nil {
 		return fmt.Errorf("inserting video: %w", err)
-	}
-
-	return nil
-}
-
-func CreateURL(ctx context.Context, db sqlx.ExtContext, url URL) error {
-	const q = `
-	INSERT INTO videos_url
-		(video_id, url, created_at, updated_at)
-	VALUES
-	(:video_id, :url, :created_at, :updated_at)`
-
-	if err := database.NamedExecContext(ctx, db, q, url); err != nil {
-		return fmt.Errorf("inserting video url: %w", err)
 	}
 
 	return nil
@@ -45,28 +32,22 @@ func Update(ctx context.Context, db sqlx.ExtContext, video Video) error {
 		name = :name,
 		description = :description,
 		free = :free,
-		updated_at = :updated_at
+		updated_at = :updated_at,
+		version = version + 1
 	WHERE
-		video_id = :video_id`
+		video_id = :video_id AND
+		version = :version
+	RETURNING version`
 
-	if err := database.NamedExecContext(ctx, db, q, video); err != nil {
+	v := struct {
+		Version int `db:"version"`
+	}{}
+
+	if err := database.NamedQueryStruct(ctx, db, q, video, &v); err != nil {
+		if errors.Is(err, database.ErrDBNotFound) {
+			return fmt.Errorf("updating video[%s]: version conflict", video.ID)
+		}
 		return fmt.Errorf("updating video[%s]: %w", video.ID, err)
-	}
-
-	return nil
-}
-
-func UpdateURL(ctx context.Context, db sqlx.ExtContext, url URL) error {
-	const q = `
-	UPDATE videos_url
-	SET
-		url = :url,
-		updated_at = :updated_at
-	WHERE
-		video_id = :video_id`
-
-	if err := database.NamedExecContext(ctx, db, q, url); err != nil {
-		return fmt.Errorf("updating url of video[%s]: %w", url.VideoID, err)
 	}
 
 	return nil
@@ -89,33 +70,10 @@ func Fetch(ctx context.Context, db sqlx.ExtContext, id string) (Video, error) {
 
 	var video Video
 	if err := database.NamedQueryStruct(ctx, db, q, in, &video); err != nil {
-		return Video{}, fmt.Errorf("updating video[%s]: %w", id, err)
+		return Video{}, fmt.Errorf("fetching video[%s]: %w", id, err)
 	}
 
 	return video, nil
-}
-
-func FetchURL(ctx context.Context, db sqlx.ExtContext, id string) (URL, error) {
-	in := struct {
-		ID string `db:"video_id"`
-	}{
-		ID: id,
-	}
-
-	const q = `
-	SELECT 
-		*
-	FROM
-		videos_url
-	WHERE
-		video_id = :video_id`
-
-	var url URL
-	if err := database.NamedQueryStruct(ctx, db, q, in, &url); err != nil {
-		return URL{}, fmt.Errorf("updating url of video[%s]: %w", id, err)
-	}
-
-	return url, nil
 }
 
 func FetchAll(ctx context.Context, db sqlx.ExtContext) ([]Video, error) {
