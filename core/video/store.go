@@ -89,7 +89,7 @@ func Fetch(ctx context.Context, db sqlx.ExtContext, id string) (Video, error) {
 
 	var video Video
 	if err := database.NamedQueryStruct(ctx, db, q, in, &video); err != nil {
-		return Video{}, fmt.Errorf("updating video[%s]: %w", video.ID, err)
+		return Video{}, fmt.Errorf("updating video[%s]: %w", id, err)
 	}
 
 	return video, nil
@@ -112,7 +112,7 @@ func FetchURL(ctx context.Context, db sqlx.ExtContext, id string) (URL, error) {
 
 	var url URL
 	if err := database.NamedQueryStruct(ctx, db, q, in, &url); err != nil {
-		return URL{}, fmt.Errorf("updating url of video[%s]: %w", url.VideoID, err)
+		return URL{}, fmt.Errorf("updating url of video[%s]: %w", id, err)
 	}
 
 	return url, nil
@@ -128,7 +128,7 @@ func FetchAll(ctx context.Context, db sqlx.ExtContext) ([]Video, error) {
 		video_id`
 
 	var videos []Video
-	if err := database.NamedQuerySlice(ctx, db, q, nil, &videos); err != nil {
+	if err := database.NamedQuerySlice(ctx, db, q, struct{}{}, &videos); err != nil {
 		return nil, fmt.Errorf("selecting videos: %w", err)
 	}
 
