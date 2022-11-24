@@ -73,7 +73,7 @@ func FetchAll(ctx context.Context, db sqlx.ExtContext) ([]Course, error) {
 		course_id`
 
 	var cs []Course
-	if err := database.NamedQuerySlice(ctx, db, q, nil, &cs); err != nil {
+	if err := database.NamedQuerySlice(ctx, db, q, struct{}{}, &cs); err != nil {
 		return nil, fmt.Errorf("selecting all courses: %w", err)
 	}
 
