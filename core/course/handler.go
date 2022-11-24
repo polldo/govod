@@ -11,7 +11,6 @@ import (
 	"github.com/jmoiron/sqlx"
 	"github.com/polldo/govod/api/web"
 	"github.com/polldo/govod/api/weberr"
-	"github.com/polldo/govod/core/claims"
 	"github.com/polldo/govod/database"
 )
 
@@ -63,10 +62,6 @@ func HandleUpdate(db *sqlx.DB) web.Handler {
 		if err := web.Decode(r, &cup); err != nil {
 			err = fmt.Errorf("unable to decode payload: %w", err)
 			return weberr.NewError(err, err.Error(), http.StatusBadRequest)
-		}
-
-		if !claims.IsAdmin(ctx) {
-			return weberr.NotAuthorized(errors.New("only admin can update courses"))
 		}
 
 		if err := validate.Check(cup); err != nil {
