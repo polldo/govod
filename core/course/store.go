@@ -57,7 +57,7 @@ func Fetch(ctx context.Context, db sqlx.ExtContext, id string) (Course, error) {
 
 	var course Course
 	if err := database.NamedQueryStruct(ctx, db, q, in, &course); err != nil {
-		return Course{}, fmt.Errorf("selecting course[%s]: %w", course.ID, err)
+		return Course{}, fmt.Errorf("selecting course[%s]: %w", id, err)
 	}
 
 	return course, nil
