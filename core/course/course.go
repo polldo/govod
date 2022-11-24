@@ -13,7 +13,6 @@ type Course struct {
 
 type CourseNew struct {
 	Name        string  `json:"name" validate:"required"`
-	Email       string  `json:"email" validate:"required,email"`
 	Description string  `json:"description" validate:"required"`
 	Price       float64 `json:"price" validate:"required,gte=0"`
 }
