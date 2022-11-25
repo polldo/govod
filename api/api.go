@@ -15,6 +15,7 @@ import (
 	"github.com/polldo/govod/core/course"
 	"github.com/polldo/govod/core/token"
 	"github.com/polldo/govod/core/user"
+	"github.com/polldo/govod/core/video"
 	"github.com/sirupsen/logrus"
 )
 
@@ -67,6 +68,11 @@ func APIMux(cfg APIConfig) http.Handler {
 	a.Handle(http.MethodGet, "/courses", course.HandleList(cfg.DB))
 	a.Handle(http.MethodPost, "/courses", course.HandleCreate(cfg.DB), admin)
 	a.Handle(http.MethodPut, "/courses/{id}", course.HandleUpdate(cfg.DB), admin)
+
+	a.Handle(http.MethodGet, "/videos/{id}", video.HandleShow(cfg.DB))
+	a.Handle(http.MethodGet, "/videos", video.HandleList(cfg.DB))
+	a.Handle(http.MethodPost, "/videos", video.HandleCreate(cfg.DB), admin)
+	a.Handle(http.MethodPut, "/videos/{id}", video.HandleUpdate(cfg.DB), admin)
 
 	return a.Router
 }

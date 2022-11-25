@@ -26,7 +26,7 @@ type VideoNew struct {
 	Name        string `json:"name" validate:"required"`
 	Description string `json:"description" validate:"required"`
 	Free        bool   `json:"free" validate:"required"`
-	URL         string `json:"url" validate:"required,url"`
+	URL         string `json:"url" validate:"omitempty,url"`
 }
 
 type VideoUp struct {
