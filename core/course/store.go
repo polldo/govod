@@ -23,7 +23,7 @@ func Create(ctx context.Context, db sqlx.ExtContext, course Course) error {
 	return nil
 }
 
-func Update(ctx context.Context, db sqlx.ExtContext, course Course) error {
+func Update(ctx context.Context, db sqlx.ExtContext, course Course) (Course, error) {
 	const q = `
 	UPDATE courses
 	SET
@@ -43,12 +43,14 @@ func Update(ctx context.Context, db sqlx.ExtContext, course Course) error {
 
 	if err := database.NamedQueryStruct(ctx, db, q, course, &v); err != nil {
 		if errors.Is(err, database.ErrDBNotFound) {
-			return fmt.Errorf("updating course[%s]: version conflict", course.ID)
+			return Course{}, fmt.Errorf("updating course[%s]: version conflict", course.ID)
 		}
-		return fmt.Errorf("updating course[%s]: %w", course.ID, err)
+		return Course{}, fmt.Errorf("updating course[%s]: %w", course.ID, err)
 	}
 
-	return nil
+	course.Version = v.Version
+
+	return course, nil
 }
 
 func Fetch(ctx context.Context, db sqlx.ExtContext, id string) (Course, error) {

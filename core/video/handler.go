@@ -100,7 +100,7 @@ func HandleUpdate(db *sqlx.DB) web.Handler {
 		}
 		video.UpdatedAt = time.Now().UTC()
 
-		if err := Update(ctx, db, video); err != nil {
+		if video, err = Update(ctx, db, video); err != nil {
 			return weberr.InternalError(err)
 		}
 

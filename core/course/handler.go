@@ -87,7 +87,7 @@ func HandleUpdate(db *sqlx.DB) web.Handler {
 		}
 		course.UpdatedAt = time.Now().UTC()
 
-		if err := Update(ctx, db, course); err != nil {
+		if course, err = Update(ctx, db, course); err != nil {
 			return weberr.InternalError(err)
 		}
 
