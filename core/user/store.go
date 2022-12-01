@@ -2,6 +2,7 @@ package user
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"time"
 
@@ -23,7 +24,7 @@ func Create(ctx context.Context, db sqlx.ExtContext, user User) error {
 	return nil
 }
 
-func Update(ctx context.Context, db sqlx.ExtContext, user User) error {
+func Update(ctx context.Context, db sqlx.ExtContext, user User) (User, error) {
 	const q = `
 	UPDATE users
 	SET
@@ -32,15 +33,27 @@ func Update(ctx context.Context, db sqlx.ExtContext, user User) error {
 		role = :role,
 		active = :active,
 		password_hash = :password_hash,
-		updated_at = :updated_at
+		updated_at = :updated_at,
+		version = version + 1
 	WHERE
-		user_id = :user_id`
+		user_id = :user_id AND
+		version = :version
+	RETURNING version`
 
-	if err := database.NamedExecContext(ctx, db, q, user); err != nil {
-		return fmt.Errorf("updating user[%s]: %w", user.ID, err)
+	v := struct {
+		Version int `db:"version"`
+	}{}
+
+	if err := database.NamedQueryStruct(ctx, db, q, user, &v); err != nil {
+		if errors.Is(err, database.ErrDBNotFound) {
+			return User{}, fmt.Errorf("updating user[%s]: version conflict", user.ID)
+		}
+		return User{}, fmt.Errorf("updating course[%s]: %w", user.ID, err)
 	}
 
-	return nil
+	user.Version = v.Version
+
+	return user, nil
 }
 
 func Fetch(ctx context.Context, db sqlx.ExtContext, id string) (User, error) {

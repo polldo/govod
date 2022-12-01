@@ -8,6 +8,7 @@ CREATE TABLE IF NOT EXISTS users
 	password_hash TEXT                        NOT NULL,
 	created_at    TIMESTAMP                   NOT NULL DEFAULT NOW(),
 	updated_at    TIMESTAMP                   NOT NULL DEFAULT NOW(),
+	version       INT                         NOT NULL DEFAULT 1,
 
 	PRIMARY KEY (user_id)
 );

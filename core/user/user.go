@@ -13,6 +13,7 @@ type User struct {
 	PasswordHash []byte    `json:"-" db:"password_hash"`
 	CreatedAt    time.Time `json:"created_at" db:"created_at"`
 	UpdatedAt    time.Time `json:"updated_at" db:"updated_at"`
+	Version      int       `json:"-" db:"version"`
 }
 
 type UserNew struct {

@@ -131,7 +131,7 @@ func HandleActivation(db *sqlx.DB) web.Handler {
 
 			usr.Active = true
 			usr.UpdatedAt = time.Now().UTC()
-			if err := user.Update(ctx, tx, usr); err != nil {
+			if _, err := user.Update(ctx, tx, usr); err != nil {
 				return err
 			}
 
@@ -186,7 +186,7 @@ func HandleRecovery(db *sqlx.DB) web.Handler {
 
 			usr.PasswordHash = passh
 			usr.UpdatedAt = time.Now().UTC()
-			if err := user.Update(ctx, tx, usr); err != nil {
+			if _, err := user.Update(ctx, tx, usr); err != nil {
 				return err
 			}
 
