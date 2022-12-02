@@ -47,7 +47,6 @@ func Create(ctx context.Context, db sqlx.ExtContext, cart Cart) error {
 	return nil
 }
 
-// TODO: Check that all the items get deleted recursively.
 func Delete(ctx context.Context, db sqlx.ExtContext, userID string) error {
 	in := struct {
 		UserID string `db:"user_id"`

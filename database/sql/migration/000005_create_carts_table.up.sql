@@ -17,7 +17,6 @@ CREATE TABLE IF NOT EXISTS cart_items
 	updated_at    TIMESTAMP                   NOT NULL DEFAULT NOW(),
 
 	PRIMARY KEY (user_id, course_id),
-	/* TODO: Check if this reference to a foreign key of other table is working as expected. */
 	FOREIGN KEY (user_id) REFERENCES carts(user_id) ON DELETE CASCADE,
 	FOREIGN KEY (course_id) REFERENCES courses(course_id) ON DELETE CASCADE
 );
