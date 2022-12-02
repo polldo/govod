@@ -12,6 +12,7 @@ import (
 	"github.com/polldo/govod/api/middleware"
 	"github.com/polldo/govod/api/web"
 	"github.com/polldo/govod/core/auth"
+	"github.com/polldo/govod/core/cart"
 	"github.com/polldo/govod/core/course"
 	"github.com/polldo/govod/core/token"
 	"github.com/polldo/govod/core/user"
@@ -73,6 +74,11 @@ func APIMux(cfg APIConfig) http.Handler {
 	a.Handle(http.MethodGet, "/videos", video.HandleList(cfg.DB))
 	a.Handle(http.MethodPost, "/videos", video.HandleCreate(cfg.DB), admin)
 	a.Handle(http.MethodPut, "/videos/{id}", video.HandleUpdate(cfg.DB), admin)
+
+	a.Handle(http.MethodGet, "/cart", cart.HandleShow(cfg.DB), authen)
+	a.Handle(http.MethodDelete, "/cart", cart.HandleDelete(cfg.DB), authen)
+	a.Handle(http.MethodPut, "/cart/items", cart.HandleCreateItem(cfg.DB), authen)
+	a.Handle(http.MethodDelete, "/cart/items/{course_id}", cart.HandleDeleteItem(cfg.DB), authen)
 
 	return a.Router
 }
