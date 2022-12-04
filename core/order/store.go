@@ -9,19 +9,36 @@ import (
 )
 
 // Create order during checkout -> create also items with the current price.
-// Let's assume that orders cannot be modified at the moment. This simplifies a lot. Otherwise
+// Let's assume that order items cannot be modified at the moment. This simplifies a lot. Otherwise
 // we need to be extremely careful when a user checkouts but then go back and modifies the order.
 // Orders are then fetched to assess if a user owns a course -> join order item + order + payment.
 
 func Create(ctx context.Context, db sqlx.ExtContext, order Order) error {
 	const q = `
 	INSERT INTO orders
-		(order_id, user_id, created_at)
+		(order_id, user_id, provider_id, status, amount, created_at, updated_at)
 	VALUES
-		(:order_id, :user_id, :created_at)`
+		(:order_id, :user_id, :provider_id, :status, :amount, :created_at, :updated_at)`
 
 	if err := database.NamedExecContext(ctx, db, q, order); err != nil {
 		return fmt.Errorf("inserting order: %w", err)
+	}
+
+	return nil
+}
+
+// UpdateStatus updates only the status and the date of an order.
+func UpdateStatus(ctx context.Context, db sqlx.ExtContext, up StatusUp) error {
+	const q = `
+	UPDATE orders
+	SET
+		status = :status,
+		updated_at = :updated_at
+	WHERE
+		order_id = :order_id`
+
+	if err := database.NamedExecContext(ctx, db, q, up); err != nil {
+		return fmt.Errorf("updating state of order[%s]: %w", up.ID, err)
 	}
 
 	return nil

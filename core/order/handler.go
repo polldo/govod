@@ -1,4 +1,4 @@
-package payment
+package order
 
 import (
 	"context"
@@ -13,10 +13,10 @@ import (
 	"github.com/polldo/govod/core/cart"
 	"github.com/polldo/govod/core/claims"
 	"github.com/polldo/govod/core/course"
-	"github.com/polldo/govod/core/order"
 	"github.com/polldo/govod/database"
 )
 
+// Check if the user has already bought a course in the order?
 func HandleCheckout(db *sqlx.DB) web.Handler {
 	return func(ctx context.Context, w http.ResponseWriter, r *http.Request) error {
 		clm, err := claims.Get(ctx)
@@ -30,15 +30,16 @@ func HandleCheckout(db *sqlx.DB) web.Handler {
 		}
 
 		now := time.Now().UTC()
-		ord := order.Order{
+		ord := Order{
 			ID:        validate.GenerateID(),
 			UserID:    clm.UserID,
 			CreatedAt: now,
+			UpdatedAt: now,
 		}
 
 		var tot float64
 		err = database.Transaction(db, func(tx sqlx.ExtContext) error {
-			if err := order.Create(ctx, db, ord); err != nil {
+			if err := Create(ctx, db, ord); err != nil {
 				return err
 			}
 
@@ -48,7 +49,7 @@ func HandleCheckout(db *sqlx.DB) web.Handler {
 					return err
 				}
 
-				order.CreateItem(ctx, db, order.Item{
+				CreateItem(ctx, db, Item{
 					OrderID:   ord.ID,
 					CourseID:  c.ID,
 					Price:     c.Price,
@@ -58,19 +59,6 @@ func HandleCheckout(db *sqlx.DB) web.Handler {
 				tot += c.Price
 			}
 
-			pay := Payment{
-				ID:         validate.GenerateID(),
-				OrderID:    ord.ID,
-				ProviderID: "",
-				Amount:     tot,
-				CreatedAt:  now,
-				UpdatedAt:  now,
-			}
-
-			if err := Create(ctx, db, pay); err != nil {
-				return err
-			}
-
 			return nil
 		})
 
@@ -78,6 +66,7 @@ func HandleCheckout(db *sqlx.DB) web.Handler {
 	}
 }
 
+// Remember to clean the cart after a successful payment.
 func HandleWebhook(db *sqlx.DB) web.Handler {
 	return func(ctx context.Context, w http.ResponseWriter, r *http.Request) error {
 		return web.Respond(ctx, w, nil, http.StatusOK)
