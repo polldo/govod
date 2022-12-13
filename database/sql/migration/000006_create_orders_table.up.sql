@@ -5,8 +5,6 @@ CREATE TABLE IF NOT EXISTS orders
 	provider_id   TEXT                        NOT NULL,
 	/* TODO: Can possible status values be modeled? */
 	status        TEXT                        NOT NULL,
-	/* Amount is kinda redundant (it's a derived data) but not a problem since order items cannot be modified. */
-	amount        FLOAT                       NOT NULL,
 	created_at    TIMESTAMP                   NOT NULL DEFAULT NOW(),
 	updated_at    TIMESTAMP                   NOT NULL DEFAULT NOW(),
 
