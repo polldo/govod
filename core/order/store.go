@@ -16,9 +16,9 @@ import (
 func Create(ctx context.Context, db sqlx.ExtContext, order Order) error {
 	const q = `
 	INSERT INTO orders
-		(order_id, user_id, provider_id, status, amount, created_at, updated_at)
+		(order_id, user_id, provider_id, status, created_at, updated_at)
 	VALUES
-		(:order_id, :user_id, :provider_id, :status, :amount, :created_at, :updated_at)`
+		(:order_id, :user_id, :provider_id, :status, :created_at, :updated_at)`
 
 	if err := database.NamedExecContext(ctx, db, q, order); err != nil {
 		return fmt.Errorf("inserting order: %w", err)
