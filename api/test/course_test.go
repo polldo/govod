@@ -389,3 +389,35 @@ func (ct *courseTest) listCoursesOK(t *testing.T, crs []course.Course) {
 		t.Fatalf("wrong courses payload. Diff: \n%s", diff)
 	}
 }
+
+func (ct *courseTest) listCoursesOwnedOK(t *testing.T, crs []course.Course) {
+	if err := Login(ct.Server, ct.UserEmail, ct.UserPass); err != nil {
+		t.Fatal(err)
+	}
+	defer Logout(ct.Server)
+
+	r, err := http.NewRequest(http.MethodGet, ct.URL+"/mycourses", nil)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	w, err := ct.Client().Do(r)
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer w.Body.Close()
+
+	if w.StatusCode != http.StatusOK {
+		t.Fatalf("can't fetch course: status code %s", w.Status)
+	}
+
+	var got []course.Course
+	if err := json.NewDecoder(w.Body).Decode(&got); err != nil {
+		t.Fatalf("cannot unmarshal fetched courses: %v", err)
+	}
+
+	less := func(a, b course.Course) bool { return a.ID < b.ID }
+	if diff := cmp.Diff(got, crs, cmpopts.SortSlices(less)); diff != "" {
+		t.Fatalf("wrong courses payload. Diff: \n%s", diff)
+	}
+}
