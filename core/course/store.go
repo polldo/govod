@@ -92,3 +92,39 @@ func FetchAll(ctx context.Context, db sqlx.ExtContext) ([]Course, error) {
 
 	return cs, nil
 }
+
+func FetchByOwner(ctx context.Context, db sqlx.ExtContext, userID string) ([]Course, error) {
+	in := struct {
+		ID     string `db:"user_id"`
+		Status string `db:"status"`
+	}{
+		ID: userID,
+
+		// WARNING: This magic string is tech debt.
+		// TODO: Use a const instead of this magic value.
+		// This seems a good reason to move all the handlers in the api package.
+		Status: "success",
+	}
+
+	const q = `
+	SELECT
+		c.*
+	FROM
+		orders AS o
+	INNER JOIN
+		order_items AS i ON i.order_id = o.order_id
+	INNER JOIN
+		courses AS c ON i.course_id = c.course_id
+	WHERE
+		o.status = :status AND
+		o.user_id = :user_id
+	ORDER BY
+		c.course_id`
+
+	var cs []Course
+	if err := database.NamedQuerySlice(ctx, db, q, in, &cs); err != nil {
+		return nil, fmt.Errorf("selecting all courses: %w", err)
+	}
+
+	return cs, nil
+}

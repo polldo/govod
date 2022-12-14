@@ -11,6 +11,7 @@ import (
 	"github.com/jmoiron/sqlx"
 	"github.com/polldo/govod/api/web"
 	"github.com/polldo/govod/api/weberr"
+	"github.com/polldo/govod/core/claims"
 	"github.com/polldo/govod/database"
 )
 
@@ -99,6 +100,22 @@ func HandleUpdate(db *sqlx.DB) web.Handler {
 func HandleList(db *sqlx.DB) web.Handler {
 	return func(ctx context.Context, w http.ResponseWriter, r *http.Request) error {
 		courses, err := FetchAll(ctx, db)
+		if err != nil {
+			return weberr.InternalError(err)
+		}
+
+		return web.Respond(ctx, w, courses, http.StatusOK)
+	}
+}
+
+func HandleListOwned(db *sqlx.DB) web.Handler {
+	return func(ctx context.Context, w http.ResponseWriter, r *http.Request) error {
+		clm, err := claims.Get(ctx)
+		if err != nil {
+			return weberr.NotAuthorized(errors.New("user not authenticated"))
+		}
+
+		courses, err := FetchByOwner(ctx, db, clm.UserID)
 		if err != nil {
 			return weberr.InternalError(err)
 		}
