@@ -2,7 +2,7 @@ CREATE TABLE IF NOT EXISTS orders
 (
 	order_id      UUID                        NOT NULL,
 	user_id       UUID                        NOT NULL,
-	provider_id   TEXT                        NOT NULL,
+	provider_id   TEXT UNIQUE                 NOT NULL,
 	/* TODO: Can possible status values be modeled? */
 	status        TEXT                        NOT NULL,
 	created_at    TIMESTAMP                   NOT NULL DEFAULT NOW(),
