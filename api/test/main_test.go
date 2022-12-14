@@ -31,8 +31,6 @@ import (
 var dbTest config.DB
 
 func TestMain(m *testing.M) {
-	rand.Seed(time.Now().UTC().UnixNano())
-
 	dbTest = config.DB{
 		User:       "test_user",
 		Password:   "test_pass",
@@ -47,6 +45,10 @@ func TestMain(m *testing.M) {
 	}
 
 	dbTest.Host = c.GetHostPort("5432/tcp")
+
+	// rand is used to generate random IDs and names in tests.
+	// Let's use a different random seed for each test execution.
+	rand.Seed(time.Now().UTC().UnixNano())
 
 	code := m.Run()
 
@@ -137,6 +139,8 @@ type TestEnv struct {
 	UserEmail string
 	UserPass  string
 
+	// Collect mocked dependencies here to make them
+	// available to all tests.
 	Mailer        *mockMailer
 	Paypal        *mockPaypal
 	Stripe        *mockStripe
@@ -237,20 +241,19 @@ func NewTestEnv(t *testing.T, dbname string) (*TestEnv, error) {
 	bg := background.New(log)
 
 	// Setup the mock for paypal payments.
-	mpp := &mockPaypal{}
-	te.Paypal = mpp
-	ppserver := httptest.NewServer(mpp.handle())
+	te.Paypal = &mockPaypal{}
+	ppserver := httptest.NewServer(te.Paypal.handle())
 
-	// Build the paypal client to allow payments.
+	// Build the paypal client to allow payments and make it pointing to the mocked server.
+	// No need to generate a token since the server is mocked.
 	pp, err := paypal.NewClient("test", "test", ppserver.URL)
 	if err != nil {
 		return nil, fmt.Errorf("failed to build the paypal client: %w", err)
 	}
 
 	// Setup the mock for stripe payments.
-	mstrp := &mockStripe{}
-	te.Stripe = mstrp
-	strpserver := httptest.NewServer(mstrp.handle())
+	te.Stripe = &mockStripe{}
+	strpserver := httptest.NewServer(te.Stripe.handle())
 
 	// Build the stripe client to allow payments.
 	strpcfg := config.Stripe{
@@ -262,7 +265,7 @@ func NewTestEnv(t *testing.T, dbname string) (*TestEnv, error) {
 	te.WebhookSecret = strpcfg.WebhookSecret
 	strp := &stripecl.API{}
 
-	// Point to the stripe mocked server.
+	// Point to the mocked stripe server.
 	strp.Init(strpcfg.APISecret, &stripe.Backends{
 		API:     stripe.GetBackendWithConfig(stripe.APIBackend, &stripe.BackendConfig{URL: &strpserver.URL}),
 		Connect: stripe.GetBackend(stripe.ConnectBackend),

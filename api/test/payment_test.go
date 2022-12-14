@@ -93,7 +93,6 @@ func (m *mockStripe) handle() http.Handler {
 			}
 
 			pd := it["price_data"].(map[string]any)
-			// Stripe expresses prices in cents.
 			s := pd["unit_amount"].(string)
 			amount, err := strconv.ParseInt(s, 10, 0)
 			if err != nil {
@@ -101,8 +100,9 @@ func (m *mockStripe) handle() http.Handler {
 				return
 			}
 
-			n += 1
+			// Stripe prices are expressed in cents.
 			tot += int(amount / 100)
+			n += 1
 		}
 
 		// Check the number of items against the cart.

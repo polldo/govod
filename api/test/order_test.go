@@ -90,6 +90,8 @@ func (ot *orderTest) testPaypal(t *testing.T) {
 	}
 
 	// Capture the paypal order.
+	// We are using a mocked paypal server that returns OK on captures
+	// to simulate the user payment happy path.
 	r, err = http.NewRequest(http.MethodPost, ot.URL+"/orders/paypal/"+ord.ID+"/capture", nil)
 	if err != nil {
 		t.Fatal(err)
@@ -130,8 +132,7 @@ func (ot *orderTest) testStripe(t *testing.T) {
 
 	// Now simulate the payment by triggering a stripe webhook.
 	//
-	// Extract the checkout session id from the location returned
-	// by the mock.
+	// Extract the checkout session id from the location returned by the mock.
 	u, err := w.Location()
 	if err != nil {
 		t.Fatal(err)
@@ -141,8 +142,7 @@ func (ot *orderTest) testStripe(t *testing.T) {
 	//
 	// Set the same checkout id previously obtained.
 	obj := map[string]any{
-
-		// Stripe mock returns the id in the URL.
+		// Mocked stripe returns the id in the URL.
 		"id": path.Base(u.Path),
 	}
 
@@ -167,7 +167,7 @@ func (ot *orderTest) testStripe(t *testing.T) {
 	}
 
 	// Sign the payload with the appropriate secret.
-	pload := webhook.GenerateTestSignedPayload(&webhook.UnsignedPayload{
+	signed := webhook.GenerateTestSignedPayload(&webhook.UnsignedPayload{
 		Payload:   b,
 		Secret:    ot.WebhookSecret,
 		Timestamp: time.Now(),
@@ -178,7 +178,7 @@ func (ot *orderTest) testStripe(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	r.Header.Set("Stripe-Signature", pload.Header)
+	r.Header.Set("Stripe-Signature", signed.Header)
 
 	w, err = ot.Client().Do(r)
 	if err != nil {
