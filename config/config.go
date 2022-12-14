@@ -5,9 +5,11 @@ import (
 )
 
 type Config struct {
-	Web   Web
-	DB    DB
-	Email Email
+	Web    Web
+	DB     DB
+	Email  Email
+	Paypal Paypal
+	Stripe Stripe
 }
 
 type Web struct {
@@ -33,4 +35,17 @@ type Email struct {
 	Port     string
 	Address  string
 	Password string
+}
+
+type Stripe struct {
+	APISecret     string
+	WebhookSecret string
+	SuccessURL    string
+	CancelURL     string
+}
+
+type Paypal struct {
+	ClientID string
+	Secret   string
+	URL      string `conf:"default:https://api.sandbox.paypal.com"`
 }

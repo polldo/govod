@@ -12,12 +12,14 @@ import (
 
 	"github.com/alexedwards/scs/v2"
 	"github.com/ardanlabs/conf/v3"
+	"github.com/plutov/paypal/v4"
 	"github.com/polldo/govod/api"
 	"github.com/polldo/govod/api/background"
 	"github.com/polldo/govod/config"
 	"github.com/polldo/govod/database"
 	"github.com/polldo/govod/email"
 	"github.com/sirupsen/logrus"
+	stripecl "github.com/stripe/stripe-go/v74/client"
 )
 
 func main() {
@@ -63,6 +65,23 @@ func Run(logger *logrus.Logger) error {
 	// Init a background manager to safely spawn go-routines.
 	bg := background.New(logger)
 
+	// Build the paypal client to allow payments.
+	pp, err := paypal.NewClient(
+		cfg.Paypal.ClientID,
+		cfg.Paypal.Secret,
+		cfg.Paypal.URL,
+	)
+	if err != nil {
+		return fmt.Errorf("failed to build the paypal client: %w", err)
+	}
+	if _, err = pp.GetAccessToken(context.TODO()); err != nil {
+		return fmt.Errorf("failed to get the first paypal access token: %w", err)
+	}
+
+	// Build the stripe client to allow payments.
+	strp := &stripecl.API{}
+	strp.Init(cfg.Stripe.APISecret, nil)
+
 	// Construct the mux for the API calls.
 	mux := api.APIMux(api.APIConfig{
 		Log:        logger,
@@ -70,6 +89,9 @@ func Run(logger *logrus.Logger) error {
 		Session:    sessionManager,
 		Mailer:     mail,
 		Background: bg,
+		Paypal:     pp,
+		Stripe:     strp,
+		StripeCfg:  cfg.Stripe,
 	})
 
 	// Construct a server to service the requests against the mux.

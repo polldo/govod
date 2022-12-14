@@ -8,16 +8,20 @@ import (
 	"github.com/alexedwards/scs/v2"
 	"github.com/gorilla/mux"
 	"github.com/jmoiron/sqlx"
+	"github.com/plutov/paypal/v4"
 	"github.com/polldo/govod/api/background"
 	"github.com/polldo/govod/api/middleware"
 	"github.com/polldo/govod/api/web"
+	"github.com/polldo/govod/config"
 	"github.com/polldo/govod/core/auth"
 	"github.com/polldo/govod/core/cart"
 	"github.com/polldo/govod/core/course"
+	"github.com/polldo/govod/core/order"
 	"github.com/polldo/govod/core/token"
 	"github.com/polldo/govod/core/user"
 	"github.com/polldo/govod/core/video"
 	"github.com/sirupsen/logrus"
+	stripecl "github.com/stripe/stripe-go/v74/client"
 )
 
 // APIConfig contains all the mandatory dependencies required by handlers.
@@ -27,6 +31,9 @@ type APIConfig struct {
 	Session    *scs.SessionManager
 	Mailer     token.Mailer
 	Background *background.Background
+	Paypal     *paypal.Client
+	Stripe     *stripecl.API
+	StripeCfg  config.Stripe
 }
 
 // api represents our server api.
@@ -80,6 +87,11 @@ func APIMux(cfg APIConfig) http.Handler {
 	a.Handle(http.MethodDelete, "/cart", cart.HandleDelete(cfg.DB), authen)
 	a.Handle(http.MethodPut, "/cart/items", cart.HandleCreateItem(cfg.DB), authen)
 	a.Handle(http.MethodDelete, "/cart/items/{course_id}", cart.HandleDeleteItem(cfg.DB), authen)
+
+	a.Handle(http.MethodPost, "/orders/paypal", order.HandlePaypalCheckout(cfg.DB, cfg.Paypal), authen)
+	a.Handle(http.MethodPost, "/orders/paypal/{id}/capture", order.HandlePaypalCapture(cfg.DB, cfg.Paypal), authen)
+	a.Handle(http.MethodPost, "/orders/stripe", order.HandleStripeCheckout(cfg.DB, cfg.Stripe, cfg.StripeCfg), authen)
+	a.Handle(http.MethodPost, "/orders/stripe/capture", order.HandleStripeCapture(cfg.DB, cfg.StripeCfg))
 
 	return a.Router
 }
