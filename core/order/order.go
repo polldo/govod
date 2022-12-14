@@ -21,13 +21,13 @@ type Order struct {
 
 type StatusUp struct {
 	ID        string    `db:"order_id"`
-	Status    string    `db:"status"`
+	Status    Status    `db:"status"`
 	UpdatedAt time.Time `db:"updated_at"`
 }
 
 type Item struct {
 	OrderID   string    `json:"order_id" db:"order_id"`
 	CourseID  string    `json:"course_id" db:"course_id"`
-	Price     float64   `json:"price" db:"price"`
+	Price     int       `json:"price" db:"price"`
 	CreatedAt time.Time `json:"created_at" db:"created_at"`
 }

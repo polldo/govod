@@ -44,6 +44,29 @@ func UpdateStatus(ctx context.Context, db sqlx.ExtContext, up StatusUp) error {
 	return nil
 }
 
+func FetchByProviderID(ctx context.Context, db sqlx.ExtContext, provID string) (Order, error) {
+	in := struct {
+		ProviderID string `db:"provider_id"`
+	}{
+		ProviderID: provID,
+	}
+
+	const q = `
+	SELECT
+		*
+	FROM
+		orders
+	WHERE 
+		provider_id = :provider_id`
+
+	var order Order
+	if err := database.NamedQueryStruct(ctx, db, q, in, &order); err != nil {
+		return Order{}, fmt.Errorf("selecting order by provider_id[%s]: %w", provID, err)
+	}
+
+	return order, nil
+}
+
 func CreateItem(ctx context.Context, db sqlx.ExtContext, item Item) error {
 	const q = `
 	INSERT INTO order_items
