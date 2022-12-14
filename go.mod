@@ -15,6 +15,7 @@ require (
 	github.com/plutov/paypal/v4 v4.7.0
 	github.com/sirupsen/logrus v1.9.0
 	github.com/stripe/stripe-go/v74 v74.2.0
+	github.com/stripe/stripe-mock v0.148.0
 	github.com/zenazn/goji v1.0.1
 	golang.org/x/crypto v0.0.0-20220829220503-c86fa9a7ed90
 )

@@ -5,6 +5,7 @@ import (
 	"context"
 	"fmt"
 	"html/template"
+	"math/rand"
 	"net/http"
 	"net/http/cookiejar"
 	"net/http/httptest"
@@ -16,11 +17,14 @@ import (
 	"github.com/jmoiron/sqlx"
 	"github.com/ory/dockertest/v3"
 	"github.com/ory/dockertest/v3/docker"
+	"github.com/plutov/paypal/v4"
 	"github.com/polldo/govod/api"
 	"github.com/polldo/govod/api/background"
 	"github.com/polldo/govod/config"
 	"github.com/polldo/govod/database"
 	"github.com/sirupsen/logrus"
+	"github.com/stripe/stripe-go/v74"
+	stripecl "github.com/stripe/stripe-go/v74/client"
 	"golang.org/x/crypto/bcrypt"
 )
 
@@ -41,6 +45,10 @@ func TestMain(m *testing.M) {
 	}
 
 	dbTest.Host = c.GetHostPort("5432/tcp")
+
+	// rand is used to generate random IDs and names in tests.
+	// Let's use a different random seed for each test execution.
+	rand.Seed(time.Now().UTC().UnixNano())
 
 	code := m.Run()
 
@@ -75,10 +83,10 @@ func startDB(user string, pass string, dbname string) (*dockertest.Resource, fun
 		return nil, nil, fmt.Errorf("could not start db container: %w", err)
 	}
 
-	container.Expire(60)
+	container.Expire(120)
 
 	var db *sqlx.DB
-	pool.MaxWait = 60 * time.Second
+	pool.MaxWait = 120 * time.Second
 	err = pool.Retry(func() error {
 		db, err = database.Open(config.DB{
 			User:       "test_user",
@@ -104,13 +112,6 @@ func startDB(user string, pass string, dbname string) (*dockertest.Resource, fun
 	return container, purge, nil
 }
 
-const seedTest = `
-INSERT INTO users (user_id, name, email, role, active, password_hash, created_at, updated_at) VALUES
-	('ae127240-ce13-4789-aafd-d2f31e7ee487', 'Admin', '{{ .AdminEmail}}', 'ADMIN', TRUE, '{{ .AdminPassHash}}', '2022-09-16 00:00:00', '2022-09-16 00:00:00'),
-	('45b5fbd3-755f-4379-8f07-a58d4a30fa2f', 'User Test', '{{ .UserEmail}}', 'USER', TRUE, '{{ .UserPassHash}}', '2019-03-24 00:00:00', '2019-03-24 00:00:00')
-	ON CONFLICT DO NOTHING;
-`
-
 type mockMailer struct {
 	token string
 }
@@ -119,6 +120,13 @@ func (m *mockMailer) SendToken(scope string, token string, dst string) error {
 	m.token = token
 	return nil
 }
+
+const seedTest = `
+INSERT INTO users (user_id, name, email, role, active, password_hash, created_at, updated_at) VALUES
+	('ae127240-ce13-4789-aafd-d2f31e7ee487', 'Admin', '{{ .AdminEmail}}', 'ADMIN', TRUE, '{{ .AdminPassHash}}', '2022-09-16 00:00:00', '2022-09-16 00:00:00'),
+	('45b5fbd3-755f-4379-8f07-a58d4a30fa2f', 'User Test', '{{ .UserEmail}}', 'USER', TRUE, '{{ .UserPassHash}}', '2019-03-24 00:00:00', '2019-03-24 00:00:00')
+	ON CONFLICT DO NOTHING;
+`
 
 type TestEnv struct {
 	*httptest.Server
@@ -131,7 +139,12 @@ type TestEnv struct {
 	UserEmail string
 	UserPass  string
 
-	Mailer *mockMailer
+	// Collect mocked dependencies here to make them
+	// available to all tests.
+	Mailer        *mockMailer
+	Paypal        *mockPaypal
+	Stripe        *mockStripe
+	WebhookSecret string
 }
 
 func (te *TestEnv) parseSeed() (string, error) {
@@ -227,12 +240,47 @@ func NewTestEnv(t *testing.T, dbname string) (*TestEnv, error) {
 	// Init a background manager to safely spawn go-routines.
 	bg := background.New(log)
 
+	// Setup the mock for paypal payments.
+	te.Paypal = &mockPaypal{}
+	ppserver := httptest.NewServer(te.Paypal.handle())
+
+	// Build the paypal client to allow payments and make it pointing to the mocked server.
+	// No need to generate a token since the server is mocked.
+	pp, err := paypal.NewClient("test", "test", ppserver.URL)
+	if err != nil {
+		return nil, fmt.Errorf("failed to build the paypal client: %w", err)
+	}
+
+	// Setup the mock for stripe payments.
+	te.Stripe = &mockStripe{}
+	strpserver := httptest.NewServer(te.Stripe.handle())
+
+	// Build the stripe client to allow payments.
+	strpcfg := config.Stripe{
+		APISecret:     "random-key",
+		WebhookSecret: "random-test-secret",
+		SuccessURL:    "/success.html",
+		CancelURL:     "/cart.html",
+	}
+	te.WebhookSecret = strpcfg.WebhookSecret
+	strp := &stripecl.API{}
+
+	// Point to the mocked stripe server.
+	strp.Init(strpcfg.APISecret, &stripe.Backends{
+		API:     stripe.GetBackendWithConfig(stripe.APIBackend, &stripe.BackendConfig{URL: &strpserver.URL}),
+		Connect: stripe.GetBackend(stripe.ConnectBackend),
+		Uploads: stripe.GetBackend(stripe.UploadsBackend),
+	})
+
 	api := api.APIMux(api.APIConfig{
 		Log:        log,
 		DB:         dbEnv,
 		Session:    sess,
 		Mailer:     mail,
 		Background: bg,
+		Paypal:     pp,
+		Stripe:     strp,
+		StripeCfg:  strpcfg,
 	})
 
 	jar, err := cookiejar.New(nil)
