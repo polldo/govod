@@ -193,6 +193,8 @@ func HandlePaypalCapture(db *sqlx.DB, pp *paypal.Client) web.Handler {
 			return fmt.Errorf("captured order[%s] with status[%s] different from 'COMPLETED'", providerID, resp.Status)
 		}
 
+		// WARNING: This is a critical error. The user has payed but he won't have the bought courses.
+		// Take this issue in mind, manual recovery is needed at the moment.
 		if err := fulfill(ctx, db, providerID); err != nil {
 			return fmt.Errorf("the order was payed but its fulfillment failed: %w", err)
 		}
