@@ -51,7 +51,7 @@ func (ct *courseTest) createCourseOK(t *testing.T) course.Course {
 	c := course.CourseNew{
 		Name:        "Test" + strconv.Itoa(rand.Intn(1000)),
 		Description: "This is a test course",
-		Price:       rand.Float64() * 100,
+		Price:       rand.Intn(1000),
 	}
 
 	body, err := json.Marshal(&c)
@@ -137,7 +137,7 @@ func (ct *courseTest) updateCourseOK(t *testing.T, crs course.Course) course.Cou
 	c := course.CourseUp{
 		Name:        ptr("Updated Test"),
 		Description: ptr("This is an updated test course"),
-		Price:       ptr(500.0),
+		Price:       ptr(500),
 	}
 
 	body, err := json.Marshal(&c)
@@ -193,7 +193,7 @@ func (ct *courseTest) updateCourseConcurrent(t *testing.T, crs course.Course) {
 		c := course.CourseUp{
 			Name:        ptr("Updated Test"),
 			Description: ptr("This is an updated test course"),
-			Price:       ptr(500.0),
+			Price:       ptr(500),
 		}
 
 		body, err := json.Marshal(&c)
@@ -242,7 +242,7 @@ func (ct *courseTest) updateCourseInexistent(t *testing.T, crs course.Course) {
 	c := course.CourseUp{
 		Name:        ptr("Updated Test Course Not Existent"),
 		Description: ptr("This is an updated test course - not exist"),
-		Price:       ptr(300.0),
+		Price:       ptr(300),
 	}
 
 	body, err := json.Marshal(&c)
@@ -275,7 +275,7 @@ func (ct *courseTest) updateCourseUnauth(t *testing.T, crs course.Course) {
 	c := course.CourseUp{
 		Name:        ptr("Updated Test Unauth"),
 		Description: ptr("This is an updated test course - unauth"),
-		Price:       ptr(300.0),
+		Price:       ptr(300),
 	}
 
 	body, err := json.Marshal(&c)

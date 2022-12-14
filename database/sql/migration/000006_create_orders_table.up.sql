@@ -16,7 +16,7 @@ CREATE TABLE IF NOT EXISTS order_items
 (
 	order_id      UUID                        NOT NULL,
 	course_id     UUID                        NOT NULL,
-	price         FLOAT                       NOT NULL,
+	price         INT                         NOT NULL,
 	created_at    TIMESTAMP                   NOT NULL DEFAULT NOW(),
 
 	PRIMARY KEY (order_id, course_id),
