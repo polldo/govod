@@ -161,6 +161,7 @@ func HandlePaypalCheckout(db *sqlx.DB, pp *paypal.Client) web.Handler {
 			},
 		}}
 
+		// TODO: Extract these params from the configuration.
 		app := &paypal.ApplicationContext{
 			// ReturnURL: "/success.html",
 			// CancelURL: "/canceled.html",
