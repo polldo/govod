@@ -168,7 +168,7 @@ func HandlePaypalCheckout(db *sqlx.DB, pp *paypal.Client) web.Handler {
 
 		ord, err := pp.CreateOrder(ctx, "CAPTURE", units, nil, app)
 		if err != nil {
-			return fmt.Errorf("paypal error: %w", err)
+			return fmt.Errorf("creating paypal order: %w", err)
 		}
 
 		if err := prepare(ctx, db, clm.UserID, ord.ID, courses); err != nil {
