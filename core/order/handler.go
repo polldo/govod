@@ -203,7 +203,6 @@ func HandlePaypalCapture(db *sqlx.DB, pp *paypal.Client) web.Handler {
 	}
 }
 
-// Check if the user has already bought a course in the order?
 func HandleStripeCheckout(db *sqlx.DB, strp *stripecl.API, cfg config.Stripe) web.Handler {
 	return func(ctx context.Context, w http.ResponseWriter, r *http.Request) error {
 		clm, err := claims.Get(ctx)
@@ -216,7 +215,7 @@ func HandleStripeCheckout(db *sqlx.DB, strp *stripecl.API, cfg config.Stripe) we
 			return fmt.Errorf("fetching details of cart items: %w", err)
 		}
 
-		li := []*stripe.CheckoutSessionLineItemParams{}
+		li := make([]*stripe.CheckoutSessionLineItemParams, 0, len(courses))
 		for _, c := range courses {
 			li = append(li, &stripe.CheckoutSessionLineItemParams{
 				Quantity: stripe.Int64(1),
@@ -257,7 +256,7 @@ func HandleStripeCheckout(db *sqlx.DB, strp *stripecl.API, cfg config.Stripe) we
 }
 
 // https://stripe.com/docs/payments/checkout/fulfill-orders#delayed-notification .
-// Remember to disable async payments.
+// WARNING: Remember to disable async payments.
 func HandleStripeCapture(db *sqlx.DB, cfg config.Stripe) web.Handler {
 	return func(ctx context.Context, w http.ResponseWriter, r *http.Request) error {
 		b, err := ioutil.ReadAll(r.Body)
@@ -278,6 +277,7 @@ func HandleStripeCapture(db *sqlx.DB, cfg config.Stripe) web.Handler {
 			return weberr.NewError(err, err.Error(), http.StatusBadRequest)
 		}
 
+		// Filter all the events but the checkout completion one.
 		if event.Type != "checkout.session.completed" {
 			return web.Respond(ctx, w, nil, http.StatusOK)
 		}
@@ -289,7 +289,7 @@ func HandleStripeCapture(db *sqlx.DB, cfg config.Stripe) web.Handler {
 		}
 
 		if err := fulfill(ctx, db, session.ID); err != nil {
-			return err
+			return fmt.Errorf("the order was payed but its fulfillment failed: %w", err)
 		}
 
 		return web.Respond(ctx, w, nil, http.StatusOK)
