@@ -74,6 +74,8 @@ func Run(logger *logrus.Logger) error {
 	if err != nil {
 		return fmt.Errorf("failed to build the paypal client: %w", err)
 	}
+
+	// The paypal token must be retrieved manually only the first time.
 	if _, err = pp.GetAccessToken(context.TODO()); err != nil {
 		return fmt.Errorf("failed to get the first paypal access token: %w", err)
 	}
