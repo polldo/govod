@@ -103,6 +103,7 @@ func FetchByOwner(ctx context.Context, db sqlx.ExtContext, userID string) ([]Cou
 		// WARNING: This magic string is tech debt.
 		// TODO: Use a const instead of this magic value.
 		// This seems a good reason to move all the handlers in the api package.
+		// Or just create a models package with all the struct and const.
 		Status: "success",
 	}
 
