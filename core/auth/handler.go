@@ -2,6 +2,7 @@ package auth
 
 import (
 	"context"
+	"encoding/json"
 	"errors"
 	"fmt"
 	"net/http"
@@ -14,7 +15,10 @@ import (
 	"github.com/polldo/govod/api/weberr"
 	"github.com/polldo/govod/core/claims"
 	"github.com/polldo/govod/core/user"
+	"github.com/polldo/govod/database"
 	"golang.org/x/crypto/bcrypt"
+	"golang.org/x/oauth2"
+	"golang.org/x/oauth2/google"
 )
 
 func HandleLogin(db *sqlx.DB, session *scs.SessionManager) web.Handler {
@@ -43,6 +47,84 @@ func HandleLogin(db *sqlx.DB, session *scs.SessionManager) web.Handler {
 
 		// TODO: Save the entire user struct in the session
 		// or just some info?
+		session.Put(ctx, userKey, u.ID)
+		session.Put(ctx, roleKey, u.Role)
+		if err := session.RenewToken(ctx); err != nil {
+			return err
+		}
+
+		return web.Respond(ctx, w, nil, http.StatusOK)
+	}
+}
+
+func HandleOauthLogin(db *sqlx.DB, session *scs.SessionManager) web.Handler {
+	return func(ctx context.Context, w http.ResponseWriter, r *http.Request) error {
+		prov := web.Param(r, "provider")
+		if prov != "google" {
+			return weberr.NotFound(fmt.Errorf("provider %s not found", prov))
+		}
+
+		conf := &oauth2.Config{
+			RedirectURL:  "http://mylocal.com:8000/auth/oauth-callback",
+			ClientID:     "785050419234-c7ao87rji0crqpkfsu4sr8m77asp4umu.apps.googleusercontent.com",
+			ClientSecret: "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",
+			Scopes:       []string{"https://www.googleapis.com/auth/userinfo.email"},
+			Endpoint:     google.Endpoint,
+		}
+
+		state := "private-state-here"
+		url := conf.AuthCodeURL(state) //, oauth2.AccessTypeOffline)
+
+		http.Redirect(w, r, url, http.StatusSeeOther)
+		return nil
+	}
+}
+
+func HandleOauthCallback(db *sqlx.DB, session *scs.SessionManager) web.Handler {
+	return func(ctx context.Context, w http.ResponseWriter, r *http.Request) error {
+		state, code := r.FormValue("state"), r.FormValue("code")
+		if state != "private-state-here" {
+			return weberr.NotAuthorized(errors.New("wrong state"))
+		}
+
+		conf := &oauth2.Config{
+			RedirectURL:  "http://mylocal.com:8000/auth/oauth-callback",
+			ClientID:     "785050419234-c7ao87rji0crqpkfsu4sr8m77asp4umu.apps.googleusercontent.com",
+			ClientSecret: "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",
+			Scopes:       []string{"https://www.googleapis.com/auth/userinfo.email"},
+			Endpoint:     google.Endpoint,
+		}
+
+		tok, err := conf.Exchange(ctx, code)
+		if err != nil {
+			return weberr.NotAuthorized(err)
+		}
+		resp, err := http.Get("https://www.googleapis.com/oauth2/v2/userinfo?access_token=" + tok.AccessToken)
+		if err != nil {
+			return weberr.NotAuthorized(err)
+		}
+		defer resp.Body.Close()
+
+		var info struct {
+			Email         string `json:"email"`
+			EmailVerified bool   `json:"verified_email"`
+		}
+
+		if err := json.NewDecoder(resp.Body).Decode(&info); err != nil {
+			return weberr.NotAuthorized(err)
+		}
+
+		u, err := user.FetchByEmail(ctx, db, info.Email)
+		if err != nil {
+			if errors.Is(err, database.ErrDBNotFound) {
+				fmt.Println("must register user")
+			}
+			err := fmt.Errorf("fetching user by email %s: %w", info.Email, err)
+			return weberr.NotAuthorized(err)
+		}
+
+		// // TODO: Save the entire user struct in the session
+		// // or just some info?
 		session.Put(ctx, userKey, u.ID)
 		session.Put(ctx, roleKey, u.Role)
 		if err := session.RenewToken(ctx); err != nil {
