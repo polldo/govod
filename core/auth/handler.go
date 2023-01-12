@@ -68,12 +68,15 @@ func HandleOauthLogin(db *sqlx.DB, session *scs.SessionManager) web.Handler {
 			RedirectURL:  "http://mylocal.com:8000/auth/oauth-callback",
 			ClientID:     "785050419234-c7ao87rji0crqpkfsu4sr8m77asp4umu.apps.googleusercontent.com",
 			ClientSecret: "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",
-			Scopes:       []string{"https://www.googleapis.com/auth/userinfo.email"},
 			Endpoint:     google.Endpoint,
+			Scopes: []string{
+				"https://www.googleapis.com/auth/userinfo.profile",
+				"https://www.googleapis.com/auth/userinfo.email",
+			},
 		}
 
 		state := "private-state-here"
-		url := conf.AuthCodeURL(state) //, oauth2.AccessTypeOffline)
+		url := conf.AuthCodeURL(state)
 
 		http.Redirect(w, r, url, http.StatusSeeOther)
 		return nil
@@ -91,8 +94,11 @@ func HandleOauthCallback(db *sqlx.DB, session *scs.SessionManager) web.Handler {
 			RedirectURL:  "http://mylocal.com:8000/auth/oauth-callback",
 			ClientID:     "785050419234-c7ao87rji0crqpkfsu4sr8m77asp4umu.apps.googleusercontent.com",
 			ClientSecret: "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",
-			Scopes:       []string{"https://www.googleapis.com/auth/userinfo.email"},
 			Endpoint:     google.Endpoint,
+			Scopes: []string{
+				"https://www.googleapis.com/auth/userinfo.profile",
+				"https://www.googleapis.com/auth/userinfo.email",
+			},
 		}
 
 		tok, err := conf.Exchange(ctx, code)
@@ -106,6 +112,7 @@ func HandleOauthCallback(db *sqlx.DB, session *scs.SessionManager) web.Handler {
 		defer resp.Body.Close()
 
 		var info struct {
+			Name          string `json:"name"`
 			Email         string `json:"email"`
 			EmailVerified bool   `json:"verified_email"`
 		}
