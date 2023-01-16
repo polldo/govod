@@ -16,9 +16,14 @@ import (
 	"github.com/polldo/govod/core/claims"
 	"github.com/polldo/govod/core/user"
 	"github.com/polldo/govod/database"
+	"github.com/polldo/govod/random"
 	"golang.org/x/crypto/bcrypt"
 	"golang.org/x/oauth2"
 	"golang.org/x/oauth2/google"
+)
+
+const (
+	oauthCookie = "oauthstate"
 )
 
 func HandleLogin(db *sqlx.DB, session *scs.SessionManager) web.Handler {
@@ -75,8 +80,22 @@ func HandleOauthLogin(db *sqlx.DB, session *scs.SessionManager) web.Handler {
 			},
 		}
 
-		state := "private-state-here"
+		state, err := random.StringSecure(32)
+		if err != nil {
+			return weberr.InternalError(err)
+		}
+
 		url := conf.AuthCodeURL(state)
+
+		cookie := &http.Cookie{
+			Name:     oauthCookie,
+			Value:    state,
+			HttpOnly: true,
+			SameSite: http.SameSiteStrictMode,
+			Expires:  time.Now().Add(time.Minute * 10),
+		}
+		w.Header().Add(oauthCookie, cookie.String())
+		w.Header().Add("Cache-Control", `no-cache="`+oauthCookie+`"`)
 
 		http.Redirect(w, r, url, http.StatusSeeOther)
 		return nil
@@ -87,6 +106,15 @@ func HandleOauthCallback(db *sqlx.DB, session *scs.SessionManager) web.Handler {
 	return func(ctx context.Context, w http.ResponseWriter, r *http.Request) error {
 		state, code := r.FormValue("state"), r.FormValue("code")
 		if state != "private-state-here" {
+			return weberr.NotAuthorized(errors.New("wrong state"))
+		}
+
+		cookie, err := r.Cookie(oauthCookie)
+		if err != nil {
+			return weberr.NotAuthorized(errors.New("wrong state"))
+		}
+
+		if cookie.Value != state {
 			return weberr.NotAuthorized(errors.New("wrong state"))
 		}
 
