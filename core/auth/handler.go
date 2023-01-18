@@ -105,16 +105,8 @@ func HandleOauthLogin(db *sqlx.DB, session *scs.SessionManager) web.Handler {
 func HandleOauthCallback(db *sqlx.DB, session *scs.SessionManager) web.Handler {
 	return func(ctx context.Context, w http.ResponseWriter, r *http.Request) error {
 		state, code := r.FormValue("state"), r.FormValue("code")
-		if state != "private-state-here" {
-			return weberr.NotAuthorized(errors.New("wrong state"))
-		}
-
 		cookie, err := r.Cookie(oauthCookie)
-		if err != nil {
-			return weberr.NotAuthorized(errors.New("wrong state"))
-		}
-
-		if cookie.Value != state {
+		if err != nil || cookie.Value != state {
 			return weberr.NotAuthorized(errors.New("wrong state"))
 		}
 
@@ -152,14 +144,34 @@ func HandleOauthCallback(db *sqlx.DB, session *scs.SessionManager) web.Handler {
 		u, err := user.FetchByEmail(ctx, db, info.Email)
 		if err != nil {
 			if errors.Is(err, database.ErrDBNotFound) {
-				fmt.Println("must register user")
+
+				// Register the new user.
+				now := time.Now().UTC()
+				pass, err := random.StringSecure(16)
+				if err != nil {
+					return weberr.InternalError(err)
+				}
+
+				u = user.User{
+					ID:           validate.GenerateID(),
+					Name:         info.Name,
+					Email:        info.Email,
+					Role:         claims.RoleUser,
+					PasswordHash: []byte(pass),
+					CreatedAt:    now,
+					UpdatedAt:    now,
+					Active:       true,
+				}
+
+				if err := user.Create(ctx, db, u); err != nil {
+					return weberr.InternalError(err)
+				}
 			}
 			err := fmt.Errorf("fetching user by email %s: %w", info.Email, err)
 			return weberr.NotAuthorized(err)
 		}
 
-		// // TODO: Save the entire user struct in the session
-		// // or just some info?
+		// Create a session for the user.
 		session.Put(ctx, userKey, u.ID)
 		session.Put(ctx, roleKey, u.Role)
 		if err := session.RenewToken(ctx); err != nil {
