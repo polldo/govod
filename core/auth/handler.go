@@ -9,6 +9,7 @@ import (
 
 	"github.com/alexedwards/scs/v2"
 	"github.com/ardanlabs/service/business/sys/validate"
+	"github.com/coreos/go-oidc/v3/oidc"
 	"github.com/jmoiron/sqlx"
 	"github.com/polldo/govod/api/web"
 	"github.com/polldo/govod/api/weberr"
@@ -17,7 +18,6 @@ import (
 	"github.com/polldo/govod/database"
 	"github.com/polldo/govod/random"
 	"golang.org/x/crypto/bcrypt"
-	"golang.org/x/oauth2"
 )
 
 const (
@@ -109,15 +109,26 @@ func HandleOauthCallback(db *sqlx.DB, session *scs.SessionManager, provs map[str
 			return weberr.NotAuthorized(err)
 		}
 
-		info, err := prov.UserInfo(ctx, oauth2.StaticTokenSource(tok))
+		rawIDTok, ok := tok.Extra("id_token").(string)
 		if err != nil {
-			return weberr.InternalError(fmt.Errorf("cannot get user info: %w", err))
+			return weberr.NotAuthorized(errors.New("id token not present"))
+		}
+
+		verifier := prov.Verifier(&oidc.Config{ClientID: prov.ClientID})
+		idTok, err := verifier.Verify(ctx, rawIDTok)
+		if err != nil {
+			return weberr.NotAuthorized(errors.New("id token not valid"))
+		}
+
+		info := UserInfo{}
+		if err := idTok.Claims(&info); err != nil {
+			return weberr.InternalError(fmt.Errorf("extracting info from oauth claims: %w", err))
 		}
 
 		u, err := user.FetchByEmail(ctx, db, info.Email)
 		if err != nil {
 
-			// If user not found, register him as a new user with an unguessable password.
+			// If user not found, create a new user with an unguessable password.
 			// The password can be recovered later on with the dedicated handler.
 			if errors.Is(err, database.ErrDBNotFound) {
 				now := time.Now().UTC()
@@ -128,7 +139,7 @@ func HandleOauthCallback(db *sqlx.DB, session *scs.SessionManager, provs map[str
 
 				u = user.User{
 					ID:           validate.GenerateID(),
-					Name:         info.Profile,
+					Name:         info.Name,
 					Email:        info.Email,
 					Role:         claims.RoleUser,
 					PasswordHash: []byte(pass),
@@ -140,10 +151,12 @@ func HandleOauthCallback(db *sqlx.DB, session *scs.SessionManager, provs map[str
 				if err := user.Create(ctx, db, u); err != nil {
 					return weberr.InternalError(err)
 				}
-			}
 
-			err := fmt.Errorf("fetching user by email %s: %w", info.Email, err)
-			return weberr.InternalError(err)
+			} else {
+				// Just fail and return on any other unexpected error.
+				err := fmt.Errorf("fetching user by email %s: %w", info.Email, err)
+				return weberr.InternalError(err)
+			}
 		}
 
 		// Create a session for the user.
