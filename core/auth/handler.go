@@ -2,7 +2,6 @@ package auth
 
 import (
 	"context"
-	"encoding/json"
 	"errors"
 	"fmt"
 	"net/http"
@@ -19,7 +18,6 @@ import (
 	"github.com/polldo/govod/random"
 	"golang.org/x/crypto/bcrypt"
 	"golang.org/x/oauth2"
-	"golang.org/x/oauth2/google"
 )
 
 const (
@@ -62,22 +60,12 @@ func HandleLogin(db *sqlx.DB, session *scs.SessionManager) web.Handler {
 	}
 }
 
-func HandleOauthLogin(db *sqlx.DB, session *scs.SessionManager) web.Handler {
+func HandleOauthLogin(db *sqlx.DB, session *scs.SessionManager, provs map[string]Provider) web.Handler {
 	return func(ctx context.Context, w http.ResponseWriter, r *http.Request) error {
-		prov := web.Param(r, "provider")
-		if prov != "google" {
-			return weberr.NotFound(fmt.Errorf("provider %s not found", prov))
-		}
-
-		conf := &oauth2.Config{
-			RedirectURL:  "http://mylocal.com:8000/auth/oauth-callback",
-			ClientID:     "785050419234-c7ao87rji0crqpkfsu4sr8m77asp4umu.apps.googleusercontent.com",
-			ClientSecret: "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",
-			Endpoint:     google.Endpoint,
-			Scopes: []string{
-				"https://www.googleapis.com/auth/userinfo.profile",
-				"https://www.googleapis.com/auth/userinfo.email",
-			},
+		p := web.Param(r, "provider")
+		prov, ok := provs[p]
+		if !ok {
+			return weberr.NotFound(fmt.Errorf("provider %s not found", p))
 		}
 
 		state, err := random.StringSecure(32)
@@ -85,7 +73,7 @@ func HandleOauthLogin(db *sqlx.DB, session *scs.SessionManager) web.Handler {
 			return weberr.InternalError(err)
 		}
 
-		url := conf.AuthCodeURL(state)
+		url := prov.AuthCodeURL(state)
 
 		cookie := &http.Cookie{
 			Name:     oauthCookie,
@@ -102,50 +90,36 @@ func HandleOauthLogin(db *sqlx.DB, session *scs.SessionManager) web.Handler {
 	}
 }
 
-func HandleOauthCallback(db *sqlx.DB, session *scs.SessionManager) web.Handler {
+func HandleOauthCallback(db *sqlx.DB, session *scs.SessionManager, provs map[string]Provider) web.Handler {
 	return func(ctx context.Context, w http.ResponseWriter, r *http.Request) error {
+		p := web.Param(r, "provider")
+		prov, ok := provs[p]
+		if !ok {
+			return weberr.NotFound(fmt.Errorf("provider %s not found", p))
+		}
+
 		state, code := r.FormValue("state"), r.FormValue("code")
 		cookie, err := r.Cookie(oauthCookie)
 		if err != nil || cookie.Value != state {
 			return weberr.NotAuthorized(errors.New("wrong state"))
 		}
 
-		conf := &oauth2.Config{
-			RedirectURL:  "http://mylocal.com:8000/auth/oauth-callback",
-			ClientID:     "785050419234-c7ao87rji0crqpkfsu4sr8m77asp4umu.apps.googleusercontent.com",
-			ClientSecret: "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",
-			Endpoint:     google.Endpoint,
-			Scopes: []string{
-				"https://www.googleapis.com/auth/userinfo.profile",
-				"https://www.googleapis.com/auth/userinfo.email",
-			},
-		}
-
-		tok, err := conf.Exchange(ctx, code)
+		tok, err := prov.Exchange(ctx, code)
 		if err != nil {
 			return weberr.NotAuthorized(err)
 		}
-		resp, err := http.Get("https://www.googleapis.com/oauth2/v2/userinfo?access_token=" + tok.AccessToken)
+
+		info, err := prov.UserInfo(ctx, oauth2.StaticTokenSource(tok))
 		if err != nil {
-			return weberr.NotAuthorized(err)
-		}
-		defer resp.Body.Close()
-
-		var info struct {
-			Name          string `json:"name"`
-			Email         string `json:"email"`
-			EmailVerified bool   `json:"verified_email"`
-		}
-
-		if err := json.NewDecoder(resp.Body).Decode(&info); err != nil {
-			return weberr.NotAuthorized(err)
+			return weberr.InternalError(fmt.Errorf("cannot get user info: %w", err))
 		}
 
 		u, err := user.FetchByEmail(ctx, db, info.Email)
 		if err != nil {
-			if errors.Is(err, database.ErrDBNotFound) {
 
-				// Register the new user.
+			// If user not found, register him as a new user with an unguessable password.
+			// The password can be recovered later on with the dedicated handler.
+			if errors.Is(err, database.ErrDBNotFound) {
 				now := time.Now().UTC()
 				pass, err := random.StringSecure(16)
 				if err != nil {
@@ -154,7 +128,7 @@ func HandleOauthCallback(db *sqlx.DB, session *scs.SessionManager) web.Handler {
 
 				u = user.User{
 					ID:           validate.GenerateID(),
-					Name:         info.Name,
+					Name:         info.Profile,
 					Email:        info.Email,
 					Role:         claims.RoleUser,
 					PasswordHash: []byte(pass),
@@ -167,8 +141,9 @@ func HandleOauthCallback(db *sqlx.DB, session *scs.SessionManager) web.Handler {
 					return weberr.InternalError(err)
 				}
 			}
+
 			err := fmt.Errorf("fetching user by email %s: %w", info.Email, err)
-			return weberr.NotAuthorized(err)
+			return weberr.InternalError(err)
 		}
 
 		// Create a session for the user.

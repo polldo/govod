@@ -6,6 +6,7 @@ require (
 	github.com/alexedwards/scs/v2 v2.5.0
 	github.com/ardanlabs/conf/v3 v3.1.2
 	github.com/ardanlabs/service v0.0.0-20220906174316-293c0b4d1dc2
+	github.com/coreos/go-oidc/v3 v3.5.0
 	github.com/golang-migrate/migrate/v4 v4.15.2
 	github.com/google/go-cmp v0.5.9
 	github.com/gorilla/mux v1.8.0
@@ -33,6 +34,7 @@ require (
 	github.com/docker/docker v20.10.13+incompatible // indirect
 	github.com/docker/go-connections v0.4.0 // indirect
 	github.com/docker/go-units v0.5.0 // indirect
+	github.com/go-jose/go-jose/v3 v3.0.0 // indirect
 	github.com/go-playground/locales v0.14.0 // indirect
 	github.com/go-playground/universal-translator v0.18.0 // indirect
 	github.com/go-playground/validator/v10 v10.11.0 // indirect
