@@ -127,34 +127,32 @@ func HandleOauthCallback(db *sqlx.DB, session *scs.SessionManager, provs map[str
 
 		u, err := user.FetchByEmail(ctx, db, info.Email)
 		if err != nil {
-
-			// If user not found, create a new user with an unguessable password.
-			// The password can be recovered later on with the dedicated handler.
-			if errors.Is(err, database.ErrDBNotFound) {
-				now := time.Now().UTC()
-				pass, err := random.StringSecure(16)
-				if err != nil {
-					return weberr.InternalError(err)
-				}
-
-				u = user.User{
-					ID:           validate.GenerateID(),
-					Name:         info.Name,
-					Email:        info.Email,
-					Role:         claims.RoleUser,
-					PasswordHash: []byte(pass),
-					CreatedAt:    now,
-					UpdatedAt:    now,
-					Active:       true,
-				}
-
-				if err := user.Create(ctx, db, u); err != nil {
-					return weberr.InternalError(err)
-				}
-
-			} else {
-				// Just fail and return on any other unexpected error.
+			// Just fail and return on any unexpected error.
+			if !errors.Is(err, database.ErrDBNotFound) {
 				err := fmt.Errorf("fetching user by email %s: %w", info.Email, err)
+				return weberr.InternalError(err)
+			}
+
+			// If user not found instead, create a new user with an unguessable password.
+			// The password can be recovered later on with the dedicated handler.
+			now := time.Now().UTC()
+			pass, err := random.StringSecure(16)
+			if err != nil {
+				return weberr.InternalError(err)
+			}
+
+			u = user.User{
+				ID:           validate.GenerateID(),
+				Name:         info.Name,
+				Email:        info.Email,
+				Role:         claims.RoleUser,
+				PasswordHash: []byte(pass),
+				CreatedAt:    now,
+				UpdatedAt:    now,
+				Active:       true,
+			}
+
+			if err := user.Create(ctx, db, u); err != nil {
 				return weberr.InternalError(err)
 			}
 		}
