@@ -20,9 +20,7 @@ import (
 	"golang.org/x/crypto/bcrypt"
 )
 
-const (
-	oauthCookie = "oauthstate"
-)
+const oauthKey = "oauthstate"
 
 func HandleLogin(db *sqlx.DB, session *scs.SessionManager) web.Handler {
 	return func(ctx context.Context, w http.ResponseWriter, r *http.Request) error {
@@ -75,16 +73,7 @@ func HandleOauthLogin(db *sqlx.DB, session *scs.SessionManager, provs map[string
 
 		url := prov.AuthCodeURL(state)
 
-		cookie := &http.Cookie{
-			Name:     oauthCookie,
-			Value:    state,
-			HttpOnly: true,
-			SameSite: http.SameSiteStrictMode,
-			Expires:  time.Now().Add(time.Minute * 10),
-		}
-		w.Header().Add(oauthCookie, cookie.String())
-		w.Header().Add("Cache-Control", `no-cache="`+oauthCookie+`"`)
-
+		session.Put(ctx, oauthKey, state)
 		http.Redirect(w, r, url, http.StatusSeeOther)
 		return nil
 	}
@@ -98,9 +87,13 @@ func HandleOauthCallback(db *sqlx.DB, session *scs.SessionManager, provs map[str
 			return weberr.NotFound(fmt.Errorf("provider %s not found", p))
 		}
 
+		scstate, ok := session.Get(ctx, oauthKey).(string)
+		if !ok {
+			return weberr.NotAuthorized(fmt.Errorf("invalid state found in session: %+v", scstate))
+		}
+
 		state, code := r.FormValue("state"), r.FormValue("code")
-		cookie, err := r.Cookie(oauthCookie)
-		if err != nil || cookie.Value != state {
+		if scstate != state {
 			return weberr.NotAuthorized(errors.New("wrong state"))
 		}
 
