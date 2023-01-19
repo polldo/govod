@@ -8,17 +8,6 @@ import (
 	"golang.org/x/oauth2"
 )
 
-// 		conf := &oauth2.Config{
-// 			RedirectURL:  "http://mylocal.com:8000/auth/oauth-callback/google",
-// 			ClientID:     "785050419234-c7ao87rji0crqpkfsu4sr8m77asp4umu.apps.googleusercontent.com",
-// 			ClientSecret: "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",
-// 			Endpoint:     google.Endpoint,
-// 			Scopes: []string{
-// 				"https://www.googleapis.com/auth/userinfo.profile",
-// 				"https://www.googleapis.com/auth/userinfo.email",
-// 			},
-// 		}
-
 type UserInfo struct {
 	Name  string `json:"name"`
 	Email string `json:"email"`
@@ -53,8 +42,7 @@ func MakeProviders(ctx context.Context, cfg []ProviderConfig) (map[string]Provid
 				ClientSecret: c.Secret,
 				Endpoint:     p.Endpoint(),
 				RedirectURL:  c.RedirectURL,
-				Scopes:       []string{oidc.ScopeOpenID},
-				// Scopes:       []string{oidc.ScopeOpenID, "profile", "email"},
+				Scopes:       []string{oidc.ScopeOpenID, "profile", "email"},
 			},
 		}
 	}

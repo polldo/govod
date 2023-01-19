@@ -125,6 +125,10 @@ func HandleOauthCallback(db *sqlx.DB, session *scs.SessionManager, provs map[str
 			return weberr.InternalError(fmt.Errorf("extracting info from oauth claims: %w", err))
 		}
 
+		if info.Name == "" || info.Email == "" {
+			return weberr.InternalError(fmt.Errorf("name or email not found in idToken claims: %+v", info))
+		}
+
 		u, err := user.FetchByEmail(ctx, db, info.Email)
 		if err != nil {
 			// Just fail and return on any unexpected error.
