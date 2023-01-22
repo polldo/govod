@@ -16,6 +16,7 @@ import (
 	"github.com/polldo/govod/api"
 	"github.com/polldo/govod/api/background"
 	"github.com/polldo/govod/config"
+	"github.com/polldo/govod/core/auth"
 	"github.com/polldo/govod/database"
 	"github.com/polldo/govod/email"
 	"github.com/sirupsen/logrus"
@@ -84,6 +85,17 @@ func Run(logger *logrus.Logger) error {
 	strp := &stripecl.API{}
 	strp.Init(cfg.Stripe.APISecret, nil)
 
+	// Instantiate known oauth providers.
+	ctx, cancel := context.WithTimeout(context.Background(), cfg.Oauth.DiscoveryTimeout)
+	defer cancel()
+	google := cfg.Oauth.Google
+	oauthProvs, err := auth.MakeProviders(ctx, []auth.ProviderConfig{
+		{Name: "google", Client: google.Client, Secret: google.Secret, URL: google.URL, RedirectURL: google.RedirectURL},
+	})
+	if err != nil {
+		return fmt.Errorf("failed to discover oauth providers: %w", err)
+	}
+
 	// Construct the mux for the API calls.
 	mux := api.APIMux(api.APIConfig{
 		Log:        logger,
@@ -94,6 +106,7 @@ func Run(logger *logrus.Logger) error {
 		Paypal:     pp,
 		Stripe:     strp,
 		StripeCfg:  cfg.Stripe,
+		Providers:  oauthProvs,
 	})
 
 	// Construct a server to service the requests against the mux.
