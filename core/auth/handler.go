@@ -58,7 +58,7 @@ func HandleLogin(db *sqlx.DB, session *scs.SessionManager) web.Handler {
 	}
 }
 
-func HandleOauthLogin(db *sqlx.DB, session *scs.SessionManager, provs map[string]Provider) web.Handler {
+func HandleOauthLogin(session *scs.SessionManager, provs map[string]Provider) web.Handler {
 	return func(ctx context.Context, w http.ResponseWriter, r *http.Request) error {
 		p := web.Param(r, "provider")
 		prov, ok := provs[p]
@@ -165,7 +165,7 @@ func HandleOauthCallback(db *sqlx.DB, session *scs.SessionManager, provs map[str
 	}
 }
 
-func HandleLogout(db *sqlx.DB, session *scs.SessionManager) web.Handler {
+func HandleLogout(session *scs.SessionManager) web.Handler {
 	return func(ctx context.Context, w http.ResponseWriter, r *http.Request) error {
 		session.Remove(ctx, userKey)
 		session.Remove(ctx, roleKey)

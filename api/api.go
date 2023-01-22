@@ -64,8 +64,8 @@ func APIMux(cfg APIConfig) http.Handler {
 	// Setup the handlers.
 	a.Handle(http.MethodPost, "/auth/signup", auth.HandleSignup(cfg.DB))
 	a.Handle(http.MethodPost, "/auth/login", auth.HandleLogin(cfg.DB, cfg.Session))
-	a.Handle(http.MethodPost, "/auth/logout", auth.HandleLogout(cfg.DB, cfg.Session))
-	a.Handle(http.MethodGet, "/auth/oauth-login/{provider}", auth.HandleOauthLogin(cfg.DB, cfg.Session, cfg.Providers))
+	a.Handle(http.MethodPost, "/auth/logout", auth.HandleLogout(cfg.Session))
+	a.Handle(http.MethodGet, "/auth/oauth-login/{provider}", auth.HandleOauthLogin(cfg.Session, cfg.Providers))
 	a.Handle(http.MethodGet, "/auth/oauth-callback/{provider}", auth.HandleOauthCallback(cfg.DB, cfg.Session, cfg.Providers))
 
 	a.Handle(http.MethodPost, "/tokens", token.HandleToken(cfg.DB, cfg.Mailer, cfg.Background))
