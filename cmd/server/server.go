@@ -86,9 +86,9 @@ func Run(logger *logrus.Logger) error {
 	strp.Init(cfg.Stripe.APISecret, nil)
 
 	// Instantiate known oauth providers.
-	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	ctx, cancel := context.WithTimeout(context.Background(), cfg.Oauth.DiscoveryTimeout)
 	defer cancel()
-	google := cfg.GoogleOauth
+	google := cfg.Oauth.Google
 	oauthProvs, err := auth.MakeProviders(ctx, []auth.ProviderConfig{
 		{Name: "google", Client: google.Client, Secret: google.Secret, URL: google.URL, RedirectURL: google.RedirectURL},
 	})

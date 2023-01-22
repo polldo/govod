@@ -5,12 +5,12 @@ import (
 )
 
 type Config struct {
-	Web         Web
-	DB          DB
-	Email       Email
-	Paypal      Paypal
-	Stripe      Stripe
-	GoogleOauth GoogleOauth
+	Web    Web
+	DB     DB
+	Email  Email
+	Paypal Paypal
+	Stripe Stripe
+	Oauth  Oauth
 }
 
 type Web struct {
@@ -51,9 +51,12 @@ type Paypal struct {
 	URL      string `conf:"default:https://api.sandbox.paypal.com"`
 }
 
-type GoogleOauth struct {
-	Client      string
-	Secret      string
-	URL         string `conf:"default:https://accounts.google.com"`
-	RedirectURL string `conf:"default:http://mylocal.com:8000/auth/oauth-callback/google"`
+type Oauth struct {
+	DiscoveryTimeout time.Duration `conf:"default:30s"`
+	Google           struct {
+		Client      string
+		Secret      string
+		URL         string `conf:"default:https://accounts.google.com"`
+		RedirectURL string `conf:"default:http://mylocal.com:8000/auth/oauth-callback/google"`
+	}
 }
