@@ -1,6 +1,8 @@
 CREATE TABLE IF NOT EXISTS subscription_plans
 (
 	plan_id              UUID                        NOT NULL,
+	stripe_id            UUID                        NOT NULL,
+	paypal_id            UUID                        NOT NULL,
 	name                 TEXT                        NOT NULL,
 	price                INT                         NOT NULL,
 	months_recurrence    INT                         NOT NULL,

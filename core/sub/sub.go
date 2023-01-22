@@ -14,12 +14,14 @@ const (
 type Provider string
 
 const (
-	Paypal Status = "paypal"
-	Stripe Status = "stripe"
+	Paypal Provider = "paypal"
+	Stripe Provider = "stripe"
 )
 
 type Plan struct {
 	ID               string    `json:"id" db:"plan_id"`
+	StripeID         string    `json:"stripe_id" db:"stripe_id"`
+	PaypalID         string    `json:"paypal_id" db:"paypal_id"`
 	Name             string    `json:"name" db:"name"`
 	Price            int       `json:"price" db:"price"`
 	MonthsRecurrence int       `json:"months_recurrence" db:"months_recurrence"`
@@ -43,4 +45,8 @@ type StatusUp struct {
 	Status    Status    `db:"status"`
 	Expiry    time.Time `db:"expiry"`
 	UpdatedAt time.Time `db:"updated_at"`
+}
+
+type SubNew struct {
+	PlanID string `json:"plan_id" validate:"required"`
 }

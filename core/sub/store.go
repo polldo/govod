@@ -12,15 +12,38 @@ import (
 func CreatePlan(ctx context.Context, db sqlx.ExtContext, plan Plan) error {
 	const q = `
 	INSERT INTO subscription_plans
-		(plan_id, name, price, months_recurrence, created_at, updated_at)
+		(plan_id, stripe_id, paypal_id, name, price, months_recurrence, created_at, updated_at)
 	VALUES
-		(:plan_id, :name, :price, :months_recurrence, :created_at, :updated_at)`
+		(:plan_id, :stripe_id, :paypal_id, :name, :price, :months_recurrence, :created_at, :updated_at)`
 
 	if err := database.NamedExecContext(ctx, db, q, plan); err != nil {
 		return fmt.Errorf("inserting subscription plan: %w", err)
 	}
 
 	return nil
+}
+
+func FetchPlan(ctx context.Context, db sqlx.ExtContext, id string) (Plan, error) {
+	in := struct {
+		ID string `db:"plan_id"`
+	}{
+		ID: id,
+	}
+
+	const q = `
+	SELECT 
+		*
+	FROM
+		subscription_plans
+	WHERE
+		plan_id = :plan_id`
+
+	var plan Plan
+	if err := database.NamedQueryStruct(ctx, db, q, in, &plan); err != nil {
+		return Plan{}, fmt.Errorf("selecting plan[%s]: %w", id, err)
+	}
+
+	return plan, nil
 }
 
 func FetchAllPlans(ctx context.Context, db sqlx.ExtContext) ([]Plan, error) {
