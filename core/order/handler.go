@@ -195,7 +195,21 @@ func HandlePaypalCapture(db *sqlx.DB, pp *paypal.Client) web.Handler {
 
 		// WARNING: This is a critical error. The user has payed but he won't have the bought courses.
 		// Take this issue in mind, manual recovery is needed at the moment.
+		//
+		// Putting an alarm here is a good compromise; so we don't need to use an external service
+		// like redis or google pub-sub to enqueue the fulfillment request.
+		// Then if this issue happens regularly we're going to solve it in a proper way.
 		if err := fulfill(ctx, db, providerID); err != nil {
+			// Try to refund the capture.
+			// pp.RefundCapture(ctx, providerID, paypal.RefundCaptureRequest{})
+
+			// Alternative: Use webhooks even for paypal capture.
+			// https://developer.paypal.com/api/rest/webhooks/
+			// PAYMENT.CAPTURE.COMPLETED https://developer.paypal.com/beta/apm-beta/additional-information/subscribe-to-webhooks/
+			// However, this is in BETA...
+			//
+			// We could also try order webhooks but it says: `Orders webhooks are for use by Partners only`
+
 			return fmt.Errorf("the order was payed but its fulfillment failed: %w", err)
 		}
 
@@ -257,6 +271,7 @@ func HandleStripeCheckout(db *sqlx.DB, strp *stripecl.API, cfg config.Stripe) we
 
 // https://stripe.com/docs/payments/checkout/fulfill-orders#delayed-notification .
 // WARNING: Remember to disable async payments.
+// TODO: rename in HandleStripeWebhooks.
 func HandleStripeCapture(db *sqlx.DB, cfg config.Stripe) web.Handler {
 	return func(ctx context.Context, w http.ResponseWriter, r *http.Request) error {
 		b, err := ioutil.ReadAll(r.Body)
@@ -286,6 +301,11 @@ func HandleStripeCapture(db *sqlx.DB, cfg config.Stripe) web.Handler {
 		if err = json.Unmarshal(event.Data.Raw, &session); err != nil {
 			err = fmt.Errorf("unable to decode stripe event: %w", err)
 			return weberr.NewError(err, err.Error(), http.StatusBadRequest)
+		}
+
+		// Filter out checkouts that are not for one-time payments.
+		if session.Mode != stripe.CheckoutSessionModePayment {
+			return web.Respond(ctx, w, nil, http.StatusOK)
 		}
 
 		if err := fulfill(ctx, db, session.ID); err != nil {
