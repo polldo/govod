@@ -30,21 +30,22 @@ type Plan struct {
 }
 
 type Sub struct {
-	ID        string    `json:"id" db:"subscription_id"`
-	PlanID    string    `json:"plan_id" db:"plan_id"`
-	UserID    string    `json:"user_id" db:"user_id"`
-	Provider  Provider  `json:"provider" db:"provider"`
-	Status    Status    `json:"status" db:"status"`
-	CreatedAt time.Time `json:"created_at" db:"created_at"`
-	UpdatedAt time.Time `json:"updated_at" db:"updated_at"`
-	Expiry    time.Time `json:"expiry" db:"expiry"`
+	ID         string    `json:"id" db:"subscription_id"`
+	PlanID     string    `json:"plan_id" db:"plan_id"`
+	UserID     string    `json:"user_id" db:"user_id"`
+	Provider   Provider  `json:"provider" db:"provider"`
+	ProviderID string    `json:"provider_id" db:"provider_id"`
+	Status     Status    `json:"status" db:"status"`
+	CreatedAt  time.Time `json:"created_at" db:"created_at"`
+	UpdatedAt  time.Time `json:"updated_at" db:"updated_at"`
+	Expiry     time.Time `json:"expiry" db:"expiry"`
 }
 
 type StatusUp struct {
-	ID        string    `db:"subscription_id"`
-	Status    Status    `db:"status"`
-	Expiry    time.Time `db:"expiry"`
-	UpdatedAt time.Time `db:"updated_at"`
+	ProviderID string    `db:"provider_id"`
+	Status     Status    `db:"status"`
+	Expiry     time.Time `db:"expiry"`
+	UpdatedAt  time.Time `db:"updated_at"`
 }
 
 type SubNew struct {
