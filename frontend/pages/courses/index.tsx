@@ -2,15 +2,15 @@ import Image from 'next/image'
 import { useEffect, useState } from 'react'
 
 type Course = {
-    title: string
+    name: string
     description: string
     image: string
 }
 
 const data = [
-    { title: 'ok', description: 'full description', image: '/random.jpeg' },
-    { title: 'second', description: 'second description', image: '/random.jpeg' },
-    { title: 'third', description: 'third description', image: '/random.jpeg' },
+    { name: 'ok', description: 'full description', image: '/random.jpeg' },
+    { name: 'second', description: 'second description', image: '/random.jpeg' },
+    { name: 'third', description: 'third description', image: '/random.jpeg' },
 ]
 
 function Card(props: Course) {
@@ -28,7 +28,7 @@ function Card(props: Course) {
             />
 
             <div className="flex flex-col justify-between p-4 leading-normal">
-                <h5 className="mb-2 text-2xl font-bold tracking-tight text-gray-900 dark:text-white">{props.title}</h5>
+                <h5 className="mb-2 text-2xl font-bold tracking-tight text-gray-900 dark:text-white">{props.name}</h5>
                 <p className="mb-3 font-normal text-gray-700 dark:text-gray-400">{props.description}</p>
             </div>
         </a>
@@ -51,7 +51,7 @@ export default function Courses() {
     return (
         <div className="flex flex-col items-center space-y-5 pt-6 pb-6">
             {courses.map((course) => (
-                <Card {...course} key={course.title} />
+                <Card {...course} key={course.name} />
             ))}
         </div>
     )
