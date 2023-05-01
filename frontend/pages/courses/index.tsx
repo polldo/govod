@@ -1,4 +1,5 @@
 import Image from 'next/image'
+import { useEffect, useState } from 'react'
 
 type Course = {
     title: string
@@ -7,9 +8,9 @@ type Course = {
 }
 
 const data = [
-    { title: 'ok', description: 'full description', image: '/francesca1.png' },
-    { title: 'second', description: 'second description', image: '/francesca1.png' },
-    { title: 'third', description: 'third description', image: '/francesca1.png' },
+    { title: 'ok', description: 'full description', image: '/random.jpeg' },
+    { title: 'second', description: 'second description', image: '/random.jpeg' },
+    { title: 'third', description: 'third description', image: '/random.jpeg' },
 ]
 
 function Card(props: Course) {
@@ -20,7 +21,6 @@ function Card(props: Course) {
         >
             <Image
                 className="w-full rounded-t-lg border border-red-800 object-contain md:w-20"
-                // className="h-96 w-full rounded-t-lg object-cover md:h-auto md:w-48 md:rounded-none md:rounded-l-lg"
                 alt=""
                 src={props.image}
                 width={80}
@@ -36,9 +36,15 @@ function Card(props: Course) {
 }
 
 export default function Courses() {
+    const [courses, setCourses] = useState<Course[]>(data)
+
+    if (!courses) {
+        return null
+    }
+
     return (
         <div className="flex flex-col items-center space-y-5 pt-6 pb-6">
-            {data.map((course) => (
+            {courses.map((course) => (
                 <Card {...course} key={course.title} />
             ))}
         </div>
