@@ -38,6 +38,12 @@ function Card(props: Course) {
 export default function Courses() {
     const [courses, setCourses] = useState<Course[]>(data)
 
+    useEffect(() => {
+        fetch('http://127.0.0.1:8080/courses')
+            .then((res) => res.json())
+            .then((data) => setCourses(data))
+    }, [])
+
     if (!courses) {
         return null
     }
