@@ -5,9 +5,7 @@ export default function Layout(props: PropsWithChildren) {
         <>
             <div className="h-screen">
                 <Navbar />
-                <main className="overflow-none flex justify-center">
-                    <div className="flex h-full w-full flex-col md:max-w-2xl">{props.children}</div>
-                </main>
+                <main className="overflow-none flex justify-center">{props.children}</main>
             </div>
         </>
     )

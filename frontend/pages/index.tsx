@@ -16,19 +16,32 @@ export default function Home() {
 
 function Hero() {
     return (
-        <div className="fullHeight scroll-smooth">
-            <div className="bg-cover bg-center py-20" style={{ backgroundImage: 'url("/hero-bg.jpg")' }}>
-                <div className="container mx-auto text-center">
-                    <h1 className="mb-4 text-4xl font-bold text-white">Welcome to My Website</h1>
-                    <p className="mb-8 text-white">
-                        Lorem ipsum dolor sit amet, consectetur adipiscing elit. Phasellus non turpis sed nisi convallis
-                        feugiat.
-                    </p>
-                    <button className="rounded bg-blue-500 py-2 px-4 font-bold text-white hover:bg-blue-700">
-                        Get Started
-                    </button>
+        <>
+            <div className="bg-gray-100 py-16">
+                <div className="mx-auto flex max-w-7xl flex-col px-4 sm:px-6 lg:flex-row lg:px-8">
+                    <div className="flex items-center text-center lg:w-1/2">
+                        <div className="mx-auto w-1/2">
+                            <h1 className="mb-6 text-6xl font-extrabold tracking-tight text-blue-300 ">govod !</h1>
+                            <p className="mb-6 text-lg font-extrabold tracking-tight text-blue-600 ">
+                                WebApp to sell video on demand
+                            </p>
+                            <p className="mb-8 font-serif text-lg text-gray-800">
+                                Start selling courses now. Customize the website with your own style. Make content and
+                                enrich other people&#39;s life with it.
+                            </p>
+                        </div>
+                    </div>
+                    <div className="mx-auto lg:w-1/3">
+                        <iframe
+                            className="h-full w-full rounded-lg object-cover shadow-lg"
+                            src="https://www.youtube.com/embed/446E-r0rXHI"
+                            title="YouTube video player"
+                            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                            allowFullScreen
+                        ></iframe>
+                    </div>
                 </div>
             </div>
-        </div>
+        </>
     )
 }
