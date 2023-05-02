@@ -26,6 +26,7 @@ import (
 
 // APIConfig contains all the mandatory dependencies required by handlers.
 type APIConfig struct {
+	CorsOrigin string
 	Log        logrus.FieldLogger
 	DB         *sqlx.DB
 	Session    *scs.SessionManager
@@ -57,6 +58,10 @@ func APIMux(cfg APIConfig) http.Handler {
 	a.mw = append(a.mw, middleware.Logger(cfg.Log))
 	a.mw = append(a.mw, middleware.Errors(cfg.Log))
 	a.mw = append(a.mw, middleware.Panics())
+
+	if cfg.CorsOrigin != "" {
+		a.mw = append(a.mw, middleware.Cors(cfg.CorsOrigin))
+	}
 
 	authen := auth.Authenticate(cfg.Session)
 	admin := auth.Admin(cfg.Session)

@@ -5,12 +5,17 @@ import (
 )
 
 type Config struct {
+	Cors   Cors
 	Web    Web
 	DB     DB
 	Email  Email
 	Paypal Paypal
 	Stripe Stripe
 	Oauth  Oauth
+}
+
+type Cors struct {
+	Origin string `conf:"default="`
 }
 
 type Web struct {

@@ -273,6 +273,7 @@ func NewTestEnv(t *testing.T, dbname string) (*TestEnv, error) {
 	})
 
 	api := api.APIMux(api.APIConfig{
+		CorsOrigin: "",
 		Log:        log,
 		DB:         dbEnv,
 		Session:    sess,
