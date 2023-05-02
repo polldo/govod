@@ -98,6 +98,7 @@ func Run(logger *logrus.Logger) error {
 
 	// Construct the mux for the API calls.
 	mux := api.APIMux(api.APIConfig{
+		CorsOrigin: cfg.Cors.Origin,
 		Log:        logger,
 		DB:         db,
 		Session:    sessionManager,
