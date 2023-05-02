@@ -16,7 +16,7 @@ function Navbar() {
         <nav className="bg-gray-900 py-4">
             <div className="container mx-auto">
                 <div className="flex justify-between">
-                    <div className="text-xl font-bold text-white">My Website</div>
+                    <div className="text-xl font-bold text-white">Govod</div>
                     <div>
                         <a className="rounded px-3 py-2 text-gray-400 hover:text-white" href="#">
                             Home

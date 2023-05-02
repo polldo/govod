@@ -17,12 +17,12 @@ export default function Home() {
 function Hero() {
     return (
         <>
-            <div className="bg-gray-100 py-16">
-                <div className="mx-auto flex max-w-7xl flex-col px-4 sm:px-6 lg:flex-row lg:px-8">
+            <div className="bg-gray-100 py-32">
+                <div className="mx-auto flex flex-col lg:flex-row">
                     <div className="flex items-center text-center lg:w-1/2">
                         <div className="mx-auto w-1/2">
-                            <h1 className="mb-6 text-6xl font-extrabold tracking-tight text-blue-800 ">
-                                &iexcl; govod !
+                            <h1 className="mb-6 text-3xl font-extrabold tracking-tight text-blue-800 md:text-6xl">
+                                &iexcl; Govod !
                             </h1>
                             <p className="mb-6 text-lg font-extrabold tracking-tight text-gray-600 ">
                                 WebApp to sell video on demand
