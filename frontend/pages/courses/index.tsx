@@ -1,3 +1,5 @@
+import Layout from '@/components/layout'
+import Head from 'next/head'
 import Image from 'next/image'
 import { useEffect, useState } from 'react'
 
@@ -49,10 +51,17 @@ export default function Courses() {
     }
 
     return (
-        <div className="flex flex-col items-center space-y-5 pt-6 pb-6">
-            {courses.map((course) => (
-                <Card {...course} key={course.name} />
-            ))}
-        </div>
+        <>
+            <Layout>
+                <Head>
+                    <title>Courses</title>
+                </Head>
+                <div className="flex flex-col items-center space-y-5 pt-6 pb-6">
+                    {courses.map((course) => (
+                        <Card {...course} key={course.name} />
+                    ))}
+                </div>
+            </Layout>
+        </>
     )
 }
