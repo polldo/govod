@@ -21,13 +21,15 @@ function Hero() {
                 <div className="mx-auto flex max-w-7xl flex-col px-4 sm:px-6 lg:flex-row lg:px-8">
                     <div className="flex items-center text-center lg:w-1/2">
                         <div className="mx-auto w-1/2">
-                            <h1 className="mb-6 text-6xl font-extrabold tracking-tight text-blue-300 ">govod !</h1>
-                            <p className="mb-6 text-lg font-extrabold tracking-tight text-blue-600 ">
+                            <h1 className="mb-6 text-6xl font-extrabold tracking-tight text-blue-800 ">
+                                &iexcl; govod !
+                            </h1>
+                            <p className="mb-6 text-lg font-extrabold tracking-tight text-gray-600 ">
                                 WebApp to sell video on demand
                             </p>
-                            <p className="mb-8 font-serif text-lg text-gray-800">
+                            <p className="mb-8 font-serif text-lg text-gray-600">
                                 Start selling courses now. Customize the website with your own style. Make content and
-                                enrich other people&#39;s life with it.
+                                enrich other people&#39;s life.
                             </p>
                         </div>
                     </div>
