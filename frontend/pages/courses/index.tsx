@@ -52,10 +52,10 @@ export default function Courses() {
 
     return (
         <>
+            <Head>
+                <title>Courses</title>
+            </Head>
             <Layout>
-                <Head>
-                    <title>Courses</title>
-                </Head>
                 <div className="flex flex-col items-center space-y-5 pt-6 pb-6">
                     {courses.map((course) => (
                         <Card {...course} key={course.name} />

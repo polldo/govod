@@ -4,10 +4,10 @@ import Head from 'next/head'
 export default function Home() {
     return (
         <>
+            <Head>
+                <title>Govod</title>
+            </Head>
             <Layout>
-                <Head>
-                    <title>Govod</title>
-                </Head>
                 <Hero />
             </Layout>
         </>
