@@ -3,6 +3,7 @@
 package api
 
 import (
+	"context"
 	"net/http"
 
 	"github.com/alexedwards/scs/v2"
@@ -61,6 +62,14 @@ func APIMux(cfg APIConfig) http.Handler {
 
 	if cfg.CorsOrigin != "" {
 		a.mw = append(a.mw, middleware.Cors(cfg.CorsOrigin))
+
+		h := func(ctx context.Context, w http.ResponseWriter, r *http.Request) error {
+			w.WriteHeader(http.StatusNoContent)
+			return nil
+		}
+
+		// Allow any OPTIONS method when CORS is set.
+		a.Handle(http.MethodOptions, "/{path:.*}", h)
 	}
 
 	authen := auth.Authenticate(cfg.Session)
