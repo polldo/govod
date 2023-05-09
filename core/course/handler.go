@@ -7,7 +7,7 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/ardanlabs/service/business/sys/validate"
+	"github.com/polldo/govod/validate"
 	"github.com/jmoiron/sqlx"
 	"github.com/polldo/govod/api/web"
 	"github.com/polldo/govod/api/weberr"

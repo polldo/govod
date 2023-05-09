@@ -8,7 +8,6 @@ import (
 	"time"
 
 	"github.com/alexedwards/scs/v2"
-	"github.com/ardanlabs/service/business/sys/validate"
 	"github.com/coreos/go-oidc/v3/oidc"
 	"github.com/jmoiron/sqlx"
 	"github.com/polldo/govod/api/web"
@@ -17,6 +16,7 @@ import (
 	"github.com/polldo/govod/core/user"
 	"github.com/polldo/govod/database"
 	"github.com/polldo/govod/random"
+	"github.com/polldo/govod/validate"
 	"golang.org/x/crypto/bcrypt"
 )
 
