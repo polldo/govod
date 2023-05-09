@@ -187,7 +187,7 @@ func HandleSignup(db *sqlx.DB) web.Handler {
 		}
 
 		if err := validate.Check(u); err != nil {
-			return fmt.Errorf("validating data: %w", err)
+			return weberr.NewError(err, err.Error(), http.StatusUnprocessableEntity)
 		}
 
 		hash, err := bcrypt.GenerateFromPassword([]byte(u.Password), bcrypt.DefaultCost)
