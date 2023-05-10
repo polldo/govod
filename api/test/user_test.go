@@ -37,8 +37,8 @@ func (ut *userTest) getUserOK(t *testing.T) user.User {
 	usr, err := Signup(ut.Server, user.UserSignup{
 		Name:            "Paolo Calao",
 		Email:           "polldo@test.com",
-		Password:        "pass",
-		PasswordConfirm: "pass",
+		Password:        "pass12345678",
+		PasswordConfirm: "pass12345678",
 	})
 
 	if err != nil {
@@ -49,7 +49,7 @@ func (ut *userTest) getUserOK(t *testing.T) user.User {
 		t.Fatal(err)
 	}
 
-	if err := Login(ut.Server, "polldo@test.com", "pass"); err != nil {
+	if err := Login(ut.Server, "polldo@test.com", "pass12345678"); err != nil {
 		t.Fatal(err)
 	}
 
@@ -285,7 +285,7 @@ func (ut *userTest) createUserExistent(t *testing.T) {
 	}
 	defer w.Body.Close()
 
-	if w.StatusCode != http.StatusBadRequest {
+	if w.StatusCode != http.StatusConflict {
 		t.Fatal("cannot create already existing user")
 	}
 }
