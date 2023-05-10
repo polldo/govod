@@ -23,9 +23,6 @@ export default function Signup() {
             })
             const data = await res.json()
 
-            if (res.status === 401) {
-                throw new Error('Invalid credentials')
-            }
             if (res.status === 409) {
                 throw new Error('Email already exists')
             }
