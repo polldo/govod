@@ -4,25 +4,40 @@ import { useState } from 'react'
 import { Buffer } from 'buffer'
 
 export default function Login() {
-    const [email, setEmail] = useState('ss@ss')
-    const [password, setPassword] = useState('ss')
+    const [email, setEmail] = useState('')
+    const [password, setPassword] = useState('')
     const [error, setError] = useState('')
 
-    const handleSubmit = (e: React.FormEvent) => {
+    const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault()
         setError('')
 
-        fetch('http://127.0.0.1:8080/auth/login', {
-            method: 'POST',
-            headers: {
-                Authorization: `Basic ${Buffer.from(`${email}:${password}`).toString('base64')}`,
-            },
-        })
-            .then((res) => res.json())
-            .then((data) => console.log(data))
-            .catch((err) => {
-                setError(err.message)
+        try {
+            const res = await fetch('http://127.0.0.1:8080/auth/login', {
+                method: 'POST',
+                headers: {
+                    Authorization: `Basic ${Buffer.from(`${email}:${password}`).toString('base64')}`,
+                },
             })
+
+            if (res.status === 401) {
+                throw new Error('Invalid credentials')
+            }
+            if (res.status === 423) {
+                throw new Error('Activate your account to login')
+            }
+            if (!res.ok) {
+                throw new Error('Something went wrong')
+            }
+
+            const data = await res.json()
+        } catch (err) {
+            if (err instanceof Error) {
+                setError(err.message)
+            } else {
+                setError('Something went wrong')
+            }
+        }
     }
 
     const handleEmailChange = (event: React.ChangeEvent<HTMLInputElement>) => {
