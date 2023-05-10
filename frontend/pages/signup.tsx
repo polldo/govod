@@ -1,11 +1,13 @@
 import Layout from '@/components/layout'
 import Head from 'next/head'
 import { useState } from 'react'
+import { useRouter } from 'next/router'
 
 export default function Signup() {
+    const router = useRouter()
     const [name, setName] = useState('')
-    const [email, setEmail] = useState('test@user.com')
-    const [password, setPassword] = useState('1234')
+    const [email, setEmail] = useState('')
+    const [password, setPassword] = useState('')
     const [error, setError] = useState<string>('')
 
     const handleSubmit = async (e: React.FormEvent) => {
@@ -32,6 +34,8 @@ export default function Signup() {
             if (!res.ok) {
                 throw new Error('Something went wrong')
             }
+
+            router.push({ pathname: '/activate', query: { email } })
         } catch (err) {
             if (err instanceof Error) {
                 setError(err.message)
