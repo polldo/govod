@@ -209,6 +209,9 @@ func HandleSignup(db *sqlx.DB) web.Handler {
 		}
 
 		if err := user.Create(ctx, db, usr); err != nil {
+			if errors.Is(err, user.ErrUniqueEmail) {
+				return weberr.NewError(err, err.Error(), http.StatusConflict)
+			}
 			return err
 		}
 

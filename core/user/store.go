@@ -10,6 +10,10 @@ import (
 	"github.com/polldo/govod/database"
 )
 
+var (
+	ErrUniqueEmail = errors.New("email is not unique")
+)
+
 func Create(ctx context.Context, db sqlx.ExtContext, user User) error {
 	const q = `
 	INSERT INTO users
@@ -18,6 +22,9 @@ func Create(ctx context.Context, db sqlx.ExtContext, user User) error {
 	(:user_id, :name, :email, :password_hash, :role, :active, :created_at, :updated_at)`
 
 	if err := database.NamedExecContext(ctx, db, q, user); err != nil {
+		if errors.Is(err, database.ErrDBDuplicatedEntry) {
+			return ErrUniqueEmail
+		}
 		return fmt.Errorf("inserting user: %w", err)
 	}
 
