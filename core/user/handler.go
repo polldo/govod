@@ -7,12 +7,12 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/polldo/govod/validate"
 	"github.com/jmoiron/sqlx"
 	"github.com/polldo/govod/api/web"
 	"github.com/polldo/govod/api/weberr"
 	"github.com/polldo/govod/core/claims"
 	"github.com/polldo/govod/database"
+	"github.com/polldo/govod/validate"
 	"golang.org/x/crypto/bcrypt"
 )
 
