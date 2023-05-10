@@ -27,7 +27,7 @@ func HandleLogin(db *sqlx.DB, session *scs.SessionManager) web.Handler {
 		email, pass, ok := r.BasicAuth()
 		if !ok {
 			err := errors.New("must provide email and password in Basic auth")
-			return weberr.NewError(err, err.Error(), http.StatusUnauthorized)
+			return weberr.NewError(err, err.Error(), http.StatusBadRequest)
 		}
 
 		u, err := user.FetchByEmail(ctx, db, email)
@@ -36,14 +36,14 @@ func HandleLogin(db *sqlx.DB, session *scs.SessionManager) web.Handler {
 			return weberr.NotAuthorized(err)
 		}
 
-		if !u.Active {
-			err := fmt.Errorf("user %s is not active yet", u.Email)
-			return weberr.NewError(err, err.Error(), http.StatusForbidden)
-		}
-
 		err = bcrypt.CompareHashAndPassword(u.PasswordHash, []byte(pass))
 		if err != nil {
 			return weberr.NotAuthorized(err)
+		}
+
+		if !u.Active {
+			err := fmt.Errorf("user %s is not active yet", u.Email)
+			return weberr.NewError(err, err.Error(), http.StatusLocked)
 		}
 
 		// TODO: Save the entire user struct in the session
