@@ -40,17 +40,42 @@ export default function Login() {
         }
     }
 
+    const handleGoogleLogin = async (e: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
+        e.preventDefault()
+        // console.log(email, password)
+
+        try {
+            const res = await fetch('http://127.0.0.1:8080/auth/oauth-login/google', {
+                method: 'GET',
+            })
+
+            // if (res.status === 401) {
+            //     throw new Error('Invalid credentials')
+            // }
+            // if (res.status === 423) {
+            //     throw new Error('Activate your account to login')
+            // }
+            // if (!res.ok) {
+            //     throw new Error('Something went wrong')
+            // }
+
+            const data = await res.json()
+            console.log(data)
+        } catch (err) {
+            if (err instanceof Error) {
+                setError(err.message)
+            } else {
+                setError('Something went wrong')
+            }
+        }
+    }
+
     const handleEmailChange = (event: React.ChangeEvent<HTMLInputElement>) => {
         setEmail(event.target.value)
     }
 
     const handlePasswordChange = (event: React.ChangeEvent<HTMLInputElement>) => {
         setPassword(event.target.value)
-    }
-
-    const handleGoogleLogin = (e: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
-        e.preventDefault()
-        console.log(email, password)
     }
 
     return (
