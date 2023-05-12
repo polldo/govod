@@ -15,7 +15,7 @@ export default function Signup() {
         setError('')
 
         try {
-            const res = await fetch('http://127.0.0.1:8080/auth/signup', {
+            const res = await fetch('http://mylocal.com:8000/auth/signup', {
                 method: 'POST',
                 body: JSON.stringify({
                     email: email,

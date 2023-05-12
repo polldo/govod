@@ -41,7 +41,7 @@ export default function Courses() {
     const [courses, setCourses] = useState<Course[]>(data)
 
     useEffect(() => {
-        fetch('http://127.0.0.1:8080/courses')
+        fetch('http://mylocal.com:8000/courses')
             .then((res) => res.json())
             .then((data) => setCourses(data))
     }, [])

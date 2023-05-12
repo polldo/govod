@@ -2,8 +2,10 @@ import Layout from '@/components/layout'
 import Head from 'next/head'
 import { useState } from 'react'
 import { Buffer } from 'buffer'
+import { useRouter } from 'next/router'
 
 export default function Login() {
+    const router = useRouter()
     const [email, setEmail] = useState('')
     const [password, setPassword] = useState('')
     const [error, setError] = useState('')
@@ -13,7 +15,7 @@ export default function Login() {
         setError('')
 
         try {
-            const res = await fetch('http://127.0.0.1:8080/auth/login', {
+            const res = await fetch('http://mylocal.com:8000/auth/login', {
                 method: 'POST',
                 headers: {
                     Authorization: `Basic ${Buffer.from(`${email}:${password}`).toString('base64')}`,
@@ -45,8 +47,10 @@ export default function Login() {
         // console.log(email, password)
 
         try {
-            const res = await fetch('http://127.0.0.1:8080/auth/oauth-login/google', {
+            const res = await fetch('http://mylocal.com:8000/auth/oauth-login/google', {
                 method: 'GET',
+                // TODO: understand if this credentials include is normal for frontend that use session for authentication.
+                credentials: 'include',
             })
 
             // if (res.status === 401) {
@@ -61,6 +65,7 @@ export default function Login() {
 
             const data = await res.json()
             console.log(data)
+            window.location.href = data
         } catch (err) {
             if (err instanceof Error) {
                 setError(err.message)

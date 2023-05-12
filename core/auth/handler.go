@@ -74,8 +74,7 @@ func HandleOauthLogin(session *scs.SessionManager, provs map[string]Provider) we
 		url := prov.AuthCodeURL(state)
 
 		session.Put(ctx, oauthKey, state)
-		http.Redirect(w, r, url, http.StatusSeeOther)
-		return nil
+		return web.Respond(ctx, w, url, http.StatusOK)
 	}
 }
 
