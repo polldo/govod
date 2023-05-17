@@ -2,41 +2,59 @@ import { useState } from 'react'
 import { ReactNode } from 'react'
 import { useEffect } from 'react'
 import { createContext } from 'react'
+import { useContext } from 'react'
 import Cookies from 'js-cookie'
 
 type Session = {
     isLoggedIn: boolean
+    isLoading: boolean
     login: () => void
     logout: () => void
 }
 
-// export const SessionContext = createContext<Session | undefined>(undefined)
-export const SessionContext = createContext<Session>({ isLoggedIn: false, login: () => {}, logout: () => {} })
+export const SessionContext = createContext<Session>({
+    isLoggedIn: false,
+    isLoading: true,
+    login: () => {},
+    logout: () => {},
+})
+
+export function useSession() {
+    return useContext(SessionContext)
+}
 
 export function SessionProvider(props: { children: ReactNode }) {
     const [isLoggedIn, setIsLoggedIn] = useState<boolean>(false)
-
-    // At startup check if there is a session cookie.
-    // If it is, then let's consider the user logged in.
-    useEffect(() => {
-        const session = Cookies.get('session')
-        setIsLoggedIn(!!session)
-    }, [])
+    const [isLoading, setIsLoading] = useState<boolean>(true)
 
     // When the user wants to logout or the session expires, this function must be called.
-    const logout = () => {
+    function logout() {
         Cookies.remove('session')
         setIsLoggedIn(false)
     }
 
     // Upon login, the state is automatically added in cookies,
     // so we only need to set the session state to true.
-    const login = () => {
+    function login() {
         setIsLoggedIn(true)
     }
 
+    useEffect(() => {
+        const user = async () => {
+            const response = await fetch('http://mylocal.com:8000/users', { credentials: 'include' })
+            setIsLoggedIn(response.ok)
+            setIsLoading(false)
+        }
+
+        user().catch(() => {
+            setIsLoggedIn(false)
+            setIsLoading(false)
+        })
+    }, [])
+
     const session: Session = {
         isLoggedIn: isLoggedIn,
+        isLoading: isLoading,
         login: login,
         logout: logout,
     }

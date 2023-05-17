@@ -3,12 +3,17 @@ import Head from 'next/head'
 import { useState } from 'react'
 import { Buffer } from 'buffer'
 import { useRouter } from 'next/router'
+import { useSession } from '@/session/context'
+import { useFetch } from '@/services/fetch'
 
 export default function Login() {
     const router = useRouter()
     const [email, setEmail] = useState('')
     const [password, setPassword] = useState('')
     const [error, setError] = useState('')
+
+    const { isLoggedIn, isLoading, login, logout } = useSession()
+    const fetch = useFetch()
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault()
