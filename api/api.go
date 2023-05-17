@@ -86,6 +86,7 @@ func APIMux(cfg APIConfig) http.Handler {
 	a.Handle(http.MethodPost, "/tokens/activate", token.HandleActivation(cfg.DB))
 	a.Handle(http.MethodPost, "/tokens/recover", token.HandleRecovery(cfg.DB))
 
+	a.Handle(http.MethodGet, "/users/current", user.HandleShowCurrent(cfg.DB), authen)
 	a.Handle(http.MethodGet, "/users/{id}", user.HandleShow(cfg.DB), authen)
 	a.Handle(http.MethodPost, "/users", user.HandleCreate(cfg.DB), authen)
 

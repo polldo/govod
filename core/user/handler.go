@@ -80,3 +80,19 @@ func HandleShow(db *sqlx.DB) web.Handler {
 		return web.Respond(ctx, w, user, http.StatusOK)
 	}
 }
+
+func HandleShowCurrent(db *sqlx.DB) web.Handler {
+	return func(ctx context.Context, w http.ResponseWriter, r *http.Request) error {
+		clm, err := claims.Get(ctx)
+		if err != nil {
+			return weberr.NotAuthorized(errors.New("user not authenticated"))
+		}
+
+		user, err := Fetch(ctx, db, clm.UserID)
+		if err != nil {
+			return fmt.Errorf("ID[%s]: %w", clm.UserID, err)
+		}
+
+		return web.Respond(ctx, w, user, http.StatusOK)
+	}
+}
