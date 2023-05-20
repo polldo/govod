@@ -8,10 +8,10 @@ import (
 	"strconv"
 	"testing"
 
-	"github.com/ardanlabs/service/business/sys/validate"
 	"github.com/google/go-cmp/cmp"
 	"github.com/google/go-cmp/cmp/cmpopts"
 	"github.com/polldo/govod/core/course"
+	"github.com/polldo/govod/validate"
 )
 
 type courseTest struct {

@@ -10,7 +10,6 @@ import (
 	"strconv"
 	"time"
 
-	"github.com/ardanlabs/service/business/sys/validate"
 	"github.com/jmoiron/sqlx"
 	"github.com/polldo/govod/api/web"
 	"github.com/polldo/govod/api/weberr"
@@ -19,6 +18,7 @@ import (
 	"github.com/polldo/govod/core/claims"
 	"github.com/polldo/govod/core/course"
 	"github.com/polldo/govod/database"
+	"github.com/polldo/govod/validate"
 	"github.com/stripe/stripe-go/v74"
 	stripecl "github.com/stripe/stripe-go/v74/client"
 	"github.com/stripe/stripe-go/v74/webhook"
