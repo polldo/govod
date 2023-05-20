@@ -41,7 +41,7 @@ export default function Courses() {
     const [courses, setCourses] = useState<Course[]>(data)
 
     useEffect(() => {
-        fetch('http://127.0.0.1:8080/courses')
+        fetch('http://mylocal.com:8000/courses')
             .then((res) => res.json())
             .then((data) => setCourses(data))
     }, [])
@@ -52,10 +52,10 @@ export default function Courses() {
 
     return (
         <>
+            <Head>
+                <title>Courses</title>
+            </Head>
             <Layout>
-                <Head>
-                    <title>Courses</title>
-                </Head>
                 <div className="flex flex-col items-center space-y-5 pt-6 pb-6">
                     {courses.map((course) => (
                         <Card {...course} key={course.name} />

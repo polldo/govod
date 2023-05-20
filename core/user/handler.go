@@ -11,7 +11,6 @@ import (
 	"github.com/polldo/govod/api/web"
 	"github.com/polldo/govod/api/weberr"
 	"github.com/polldo/govod/core/claims"
-	"github.com/polldo/govod/database"
 	"github.com/polldo/govod/validate"
 	"golang.org/x/crypto/bcrypt"
 )
@@ -51,8 +50,8 @@ func HandleCreate(db *sqlx.DB) web.Handler {
 		}
 
 		if err := Create(ctx, db, usr); err != nil {
-			if errors.Is(err, database.ErrDBDuplicatedEntry) {
-				return weberr.NewError(err, err.Error(), http.StatusBadRequest)
+			if errors.Is(err, ErrUniqueEmail) {
+				return weberr.NewError(err, err.Error(), http.StatusConflict)
 			}
 			return err
 		}
@@ -76,6 +75,22 @@ func HandleShow(db *sqlx.DB) web.Handler {
 		user, err := Fetch(ctx, db, userID)
 		if err != nil {
 			return fmt.Errorf("ID[%s]: %w", userID, err)
+		}
+
+		return web.Respond(ctx, w, user, http.StatusOK)
+	}
+}
+
+func HandleShowCurrent(db *sqlx.DB) web.Handler {
+	return func(ctx context.Context, w http.ResponseWriter, r *http.Request) error {
+		clm, err := claims.Get(ctx)
+		if err != nil {
+			return weberr.NotAuthorized(errors.New("user not authenticated"))
+		}
+
+		user, err := Fetch(ctx, db, clm.UserID)
+		if err != nil {
+			return fmt.Errorf("ID[%s]: %w", clm.UserID, err)
 		}
 
 		return web.Respond(ctx, w, user, http.StatusOK)

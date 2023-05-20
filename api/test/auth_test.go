@@ -204,8 +204,8 @@ func (at *authTest) signupNoPasswordConfirm(t *testing.T) {
 	}
 
 	_, err := Signup(at.Server, usr)
-	if err == nil {
-		t.Fatal("cannot create user without password confirm field")
+	if err != nil {
+		t.Fatal("unexpected error: password confirm field is optional")
 	}
 }
 
