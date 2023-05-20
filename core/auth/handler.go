@@ -78,7 +78,7 @@ func HandleOauthLogin(session *scs.SessionManager, provs map[string]Provider) we
 	}
 }
 
-func HandleOauthCallback(db *sqlx.DB, session *scs.SessionManager, provs map[string]Provider) web.Handler {
+func HandleOauthCallback(db *sqlx.DB, session *scs.SessionManager, provs map[string]Provider, redirect string) web.Handler {
 	return func(ctx context.Context, w http.ResponseWriter, r *http.Request) error {
 		p := web.Param(r, "provider")
 		prov, ok := provs[p]
@@ -160,7 +160,8 @@ func HandleOauthCallback(db *sqlx.DB, session *scs.SessionManager, provs map[str
 			return err
 		}
 
-		return web.Respond(ctx, w, nil, http.StatusNoContent)
+		http.Redirect(w, r, redirect, http.StatusFound)
+		return nil
 	}
 }
 

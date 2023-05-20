@@ -12,8 +12,12 @@ export default function Login() {
     const [password, setPassword] = useState('')
     const [error, setError] = useState('')
 
-    const { isLoggedIn, isLoading, login, logout } = useSession()
+    const { isLoggedIn, isLoading, login } = useSession()
     const fetch = useFetch()
+
+    if (isLoggedIn) {
+        router.push('activate')
+    }
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault()
@@ -31,13 +35,14 @@ export default function Login() {
                 throw new Error('Invalid credentials')
             }
             if (res.status === 423) {
+                router.push({ pathname: '/activate', query: { email } })
                 throw new Error('Activate your account to login')
             }
             if (!res.ok) {
                 throw new Error('Something went wrong')
             }
 
-            const data = await res.json()
+            login()
         } catch (err) {
             if (err instanceof Error) {
                 setError(err.message)
@@ -49,27 +54,13 @@ export default function Login() {
 
     const handleGoogleLogin = async (e: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
         e.preventDefault()
-        // console.log(email, password)
 
         try {
-            const res = await fetch('http://mylocal.com:8000/auth/oauth-login/google', {
-                method: 'GET',
-                // TODO: understand if this credentials include is normal for frontend that use session for authentication.
-                credentials: 'include',
-            })
-
-            // if (res.status === 401) {
-            //     throw new Error('Invalid credentials')
-            // }
-            // if (res.status === 423) {
-            //     throw new Error('Activate your account to login')
-            // }
-            // if (!res.ok) {
-            //     throw new Error('Something went wrong')
-            // }
-
+            const res = await fetch('http://mylocal.com:8000/auth/oauth-login/google', { method: 'GET' })
             const data = await res.json()
-            console.log(data)
+
+            // No need to call 'login', because after the oauth login the user will be
+            // redirected and the whole app will be reloaded.
             window.location.href = data
         } catch (err) {
             if (err instanceof Error) {
@@ -98,6 +89,7 @@ export default function Login() {
                     <form onSubmit={handleSubmit} className="w-full rounded bg-white p-6 shadow-md sm:w-96">
                         <h1 className="mb-4 text-2xl font-semibold">Login</h1>
                         {error && <p className="mb-4 text-sm text-red-500">{error}</p>}
+
                         <input
                             type="email"
                             value={email}
@@ -106,6 +98,7 @@ export default function Login() {
                             placeholder="Email"
                             required
                         />
+
                         <input
                             type="password"
                             value={password}
@@ -114,9 +107,11 @@ export default function Login() {
                             placeholder="Password"
                             required
                         />
+
                         <button type="submit" className="w-full rounded bg-blue-500 p-2 font-semibold text-white">
                             Login
                         </button>
+
                         <button
                             onClick={handleGoogleLogin}
                             className="w-full rounded bg-red-500 p-2 font-semibold text-white"

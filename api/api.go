@@ -27,16 +27,17 @@ import (
 
 // APIConfig contains all the mandatory dependencies required by handlers.
 type APIConfig struct {
-	CorsOrigin string
-	Log        logrus.FieldLogger
-	DB         *sqlx.DB
-	Session    *scs.SessionManager
-	Mailer     token.Mailer
-	Background *background.Background
-	Paypal     *paypal.Client
-	Stripe     *stripecl.API
-	StripeCfg  config.Stripe
-	Providers  map[string]auth.Provider
+	CorsOrigin       string
+	Log              logrus.FieldLogger
+	DB               *sqlx.DB
+	Session          *scs.SessionManager
+	Mailer           token.Mailer
+	Background       *background.Background
+	Paypal           *paypal.Client
+	Stripe           *stripecl.API
+	StripeCfg        config.Stripe
+	Providers        map[string]auth.Provider
+	LoginRedirectURL string
 }
 
 // api represents our server api.
@@ -80,7 +81,7 @@ func APIMux(cfg APIConfig) http.Handler {
 	a.Handle(http.MethodPost, "/auth/login", auth.HandleLogin(cfg.DB, cfg.Session))
 	a.Handle(http.MethodPost, "/auth/logout", auth.HandleLogout(cfg.Session))
 	a.Handle(http.MethodGet, "/auth/oauth-login/{provider}", auth.HandleOauthLogin(cfg.Session, cfg.Providers))
-	a.Handle(http.MethodGet, "/auth/oauth-callback/{provider}", auth.HandleOauthCallback(cfg.DB, cfg.Session, cfg.Providers))
+	a.Handle(http.MethodGet, "/auth/oauth-callback/{provider}", auth.HandleOauthCallback(cfg.DB, cfg.Session, cfg.Providers, cfg.LoginRedirectURL))
 
 	a.Handle(http.MethodPost, "/tokens", token.HandleToken(cfg.DB, cfg.Mailer, cfg.Background))
 	a.Handle(http.MethodPost, "/tokens/activate", token.HandleActivation(cfg.DB))

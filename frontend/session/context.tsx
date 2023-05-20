@@ -41,7 +41,7 @@ export function SessionProvider(props: { children: ReactNode }) {
 
     useEffect(() => {
         const user = async () => {
-            const response = await fetch('http://mylocal.com:8000/users', { credentials: 'include' })
+            const response = await fetch('http://mylocal.com:8000/users/current', { credentials: 'include' })
             setIsLoggedIn(response.ok)
             setIsLoading(false)
         }

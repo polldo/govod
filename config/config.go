@@ -58,6 +58,7 @@ type Paypal struct {
 
 type Oauth struct {
 	DiscoveryTimeout time.Duration `conf:"default:30s"`
+	LoginRedirectURL string        `conf:"default:http://mylocal:3000/dashboard"`
 	Google           struct {
 		Client      string
 		Secret      string
