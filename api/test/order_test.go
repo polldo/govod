@@ -143,7 +143,8 @@ func (ot *orderTest) testStripe(t *testing.T) {
 	// Set the same checkout id previously obtained.
 	obj := map[string]any{
 		// Mocked stripe returns the id in the URL.
-		"id": path.Base(u.Path),
+		"id":   path.Base(u.Path),
+		"mode": stripe.CheckoutSessionModePayment,
 	}
 
 	raw, err := json.Marshal(obj)
