@@ -213,7 +213,7 @@ func HandlePaypalCapture(db *sqlx.DB, pp *paypal.Client) web.Handler {
 			return fmt.Errorf("the order was payed but its fulfillment failed: %w", err)
 		}
 
-		return web.Respond(ctx, w, nil, http.StatusOK)
+		return web.Respond(ctx, w, nil, http.StatusNoContent)
 	}
 }
 
@@ -294,7 +294,7 @@ func HandleStripeCapture(db *sqlx.DB, cfg config.Stripe) web.Handler {
 
 		// Filter all the events but the checkout completion one.
 		if event.Type != "checkout.session.completed" {
-			return web.Respond(ctx, w, nil, http.StatusOK)
+			return web.Respond(ctx, w, nil, http.StatusNoContent)
 		}
 
 		var session stripe.CheckoutSession
@@ -305,13 +305,13 @@ func HandleStripeCapture(db *sqlx.DB, cfg config.Stripe) web.Handler {
 
 		// Filter out checkouts that are not for one-time payments.
 		if session.Mode != stripe.CheckoutSessionModePayment {
-			return web.Respond(ctx, w, nil, http.StatusOK)
+			return web.Respond(ctx, w, nil, http.StatusNoContent)
 		}
 
 		if err := fulfill(ctx, db, session.ID); err != nil {
 			return fmt.Errorf("the order was payed but its fulfillment failed: %w", err)
 		}
 
-		return web.Respond(ctx, w, nil, http.StatusOK)
+		return web.Respond(ctx, w, nil, http.StatusNoContent)
 	}
 }

@@ -54,7 +54,7 @@ func HandleLogin(db *sqlx.DB, session *scs.SessionManager) web.Handler {
 			return err
 		}
 
-		return web.Respond(ctx, w, nil, http.StatusOK)
+		return web.Respond(ctx, w, nil, http.StatusNoContent)
 	}
 }
 
@@ -161,7 +161,7 @@ func HandleOauthCallback(db *sqlx.DB, session *scs.SessionManager, provs map[str
 			return err
 		}
 
-		return web.Respond(ctx, w, nil, http.StatusOK)
+		return web.Respond(ctx, w, nil, http.StatusNoContent)
 	}
 }
 
