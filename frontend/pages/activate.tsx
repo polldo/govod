@@ -1,10 +1,42 @@
 import Layout from '@/components/layout'
 import Head from 'next/head'
 import { useRouter } from 'next/router'
+import { useEffect } from 'react'
+import { useCallback } from 'react'
+
+type ActivateBody = {
+    Email: string
+    Scope: string
+}
 
 export default function Activate() {
     const router = useRouter()
     const { email } = router.query
+
+    const handleEmail = useCallback(() => {
+        const body: ActivateBody = {
+            Email: typeof email === 'string' ? email : '',
+            Scope: 'activation',
+        }
+
+        fetch('http://mylocal.com:8000/tokens', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(body),
+        })
+            .then((response) => {
+                if (!response.ok) {
+                    throw new Error()
+                }
+            })
+            .catch((err) => {
+                console.log(err)
+            })
+    }, [email])
+
+    useEffect(() => {
+        handleEmail()
+    }, [handleEmail])
 
     return (
         <>
@@ -20,6 +52,12 @@ export default function Activate() {
                             <strong className="text-blue-600">{email}</strong>. <br></br>Please check your email to
                             activate your account.
                         </p>
+                        <button
+                            onClick={handleEmail}
+                            className="w-full rounded bg-blue-500 p-2 font-semibold text-white"
+                        >
+                            Send email again
+                        </button>
                     </div>
                 </div>
             </Layout>
