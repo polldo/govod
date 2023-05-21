@@ -1,4 +1,5 @@
 import Layout from '@/components/layout'
+import Logout from '@/components/logout'
 import Head from 'next/head'
 import { useSession } from '@/session/context'
 import { useRouter } from 'next/router'
@@ -24,6 +25,7 @@ export default function Dashboard() {
             <Layout>
                 <div>
                     <p>Hello, this is your dashboard!</p>
+                    <Logout></Logout>
                 </div>
             </Layout>
         </>
