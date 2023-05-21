@@ -4,11 +4,11 @@ import { useState } from 'react'
 import { useRouter } from 'next/router'
 
 export default function Signup() {
-    const router = useRouter()
     const [name, setName] = useState('')
     const [email, setEmail] = useState('')
     const [password, setPassword] = useState('')
     const [error, setError] = useState<string>('')
+    const router = useRouter()
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault()

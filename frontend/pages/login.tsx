@@ -7,16 +7,20 @@ import { useSession } from '@/session/context'
 import { useFetch } from '@/services/fetch'
 
 export default function Login() {
-    const router = useRouter()
     const [email, setEmail] = useState('')
     const [password, setPassword] = useState('')
     const [error, setError] = useState('')
-
-    const { isLoggedIn, isLoading, login } = useSession()
+    const { isLoggedIn, isLoading, updateSession } = useSession()
+    const router = useRouter()
     const fetch = useFetch()
 
+    if (isLoading) {
+        return null
+    }
+
     if (isLoggedIn) {
-        router.push('activate')
+        router.push('dashboard')
+        return null
     }
 
     const handleSubmit = async (e: React.FormEvent) => {
@@ -41,8 +45,7 @@ export default function Login() {
             if (!res.ok) {
                 throw new Error('Something went wrong')
             }
-
-            login()
+            updateSession()
         } catch (err) {
             if (err instanceof Error) {
                 setError(err.message)

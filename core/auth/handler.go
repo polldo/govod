@@ -167,14 +167,11 @@ func HandleOauthCallback(db *sqlx.DB, session *scs.SessionManager, provs map[str
 
 func HandleLogout(session *scs.SessionManager) web.Handler {
 	return func(ctx context.Context, w http.ResponseWriter, r *http.Request) error {
-		session.Remove(ctx, userKey)
-		session.Remove(ctx, roleKey)
-
-		if err := session.RenewToken(ctx); err != nil {
+		if err := session.Destroy(ctx); err != nil {
 			return err
 		}
 
-		return nil
+		return web.Respond(ctx, w, nil, http.StatusNoContent)
 	}
 }
 
