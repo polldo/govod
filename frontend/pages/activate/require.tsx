@@ -9,11 +9,15 @@ type ActivateBody = {
     Scope: string
 }
 
-export default function Activate() {
+export default function Require() {
     const router = useRouter()
     const { email } = router.query
 
     const handleEmail = useCallback(() => {
+        if (!router.isReady) {
+            return
+        }
+        const { email } = router.query
         const body: ActivateBody = {
             Email: typeof email === 'string' ? email : '',
             Scope: 'activation',
@@ -32,7 +36,7 @@ export default function Activate() {
             .catch((err) => {
                 console.log(err)
             })
-    }, [email])
+    }, [router.query, router.isReady])
 
     useEffect(() => {
         handleEmail()
@@ -41,7 +45,7 @@ export default function Activate() {
     return (
         <>
             <Head>
-                <title>Activate</title>
+                <title>Activation required</title>
             </Head>
             <Layout>
                 <div className="flex items-center justify-center py-32">

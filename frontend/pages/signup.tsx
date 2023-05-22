@@ -46,7 +46,7 @@ export default function Signup() {
                 throw new Error('Something went wrong')
             }
 
-            router.push({ pathname: '/activate', query: { email } })
+            router.push({ pathname: '/activate/require', query: { email } })
         } catch (err) {
             if (err instanceof Error) {
                 setError(err.message)
