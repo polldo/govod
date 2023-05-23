@@ -28,7 +28,7 @@ type Mailer interface {
 func HandleToken(db *sqlx.DB, mailer Mailer, bg *background.Background) web.Handler {
 	return func(ctx context.Context, w http.ResponseWriter, r *http.Request) error {
 		var in struct {
-			Email string `json:"email" validate:"required"`
+			Email string `json:"email" validate:"required,email"`
 			Scope string `json:"scope" validate:"required"`
 		}
 
@@ -38,13 +38,13 @@ func HandleToken(db *sqlx.DB, mailer Mailer, bg *background.Background) web.Hand
 		}
 
 		if err := validate.Check(in); err != nil {
-			return fmt.Errorf("validating data: %w", err)
+			return weberr.NewError(err, err.Error(), http.StatusUnprocessableEntity)
 		}
 
 		usr, err := user.FetchByEmail(ctx, db, in.Email)
 		if err != nil {
 			if errors.Is(err, database.ErrDBNotFound) {
-				return weberr.NewError(err, err.Error(), http.StatusBadRequest)
+				return weberr.NewError(err, "Email is not registered", http.StatusUnprocessableEntity)
 			}
 			return err
 		}
@@ -153,7 +153,7 @@ func HandleRecovery(db *sqlx.DB) web.Handler {
 	return func(ctx context.Context, w http.ResponseWriter, r *http.Request) error {
 		var in struct {
 			Token           string `json:"token" validate:"required"`
-			Password        string `json:"password" validate:"required"`
+			Password        string `json:"password" validate:"required,gte=8,lte=50"`
 			PasswordConfirm string `json:"password_confirm" validate:"eqfield=Password"`
 		}
 
@@ -163,7 +163,7 @@ func HandleRecovery(db *sqlx.DB) web.Handler {
 		}
 
 		if err := validate.Check(in); err != nil {
-			return fmt.Errorf("validating data: %w", err)
+			return weberr.NewError(err, err.Error(), http.StatusUnprocessableEntity)
 		}
 
 		tokh := sha256.Sum256([]byte(in.Token))
