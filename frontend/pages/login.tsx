@@ -39,8 +39,8 @@ export default function Login() {
                 throw new Error('Invalid credentials')
             }
             if (res.status === 423) {
-                router.push({ pathname: '/activate', query: { email } })
-                throw new Error('Activate your account to login')
+                router.push({ pathname: '/activate/require', query: { email } })
+                return
             }
             if (!res.ok) {
                 throw new Error('Something went wrong')
