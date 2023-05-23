@@ -22,6 +22,9 @@ type Mailer interface {
 	SendToken(scope string, token string, to string) error
 }
 
+// TODO: Rate-limit or introduce a timeout between several requests.
+// TODO: If there exists a not expired token, return it instead of creating a new one.
+// Or, in alternative, deletes all tokens only when the user is actually activated.
 func HandleToken(db *sqlx.DB, mailer Mailer, bg *background.Background) web.Handler {
 	return func(ctx context.Context, w http.ResponseWriter, r *http.Request) error {
 		var in struct {
@@ -94,7 +97,7 @@ func HandleToken(db *sqlx.DB, mailer Mailer, bg *background.Background) web.Hand
 			return nil
 		})
 
-		return nil
+		return web.Respond(ctx, w, nil, http.StatusNoContent)
 	}
 }
 
@@ -110,7 +113,7 @@ func HandleActivation(db *sqlx.DB) web.Handler {
 		}
 
 		if err := validate.Check(in); err != nil {
-			return fmt.Errorf("validating data: %w", err)
+			return weberr.NewError(err, "not valid", http.StatusUnprocessableEntity)
 		}
 
 		hash := sha256.Sum256([]byte(in.Token))

@@ -2,13 +2,24 @@ import Layout from '@/components/layout'
 import Head from 'next/head'
 import { useState } from 'react'
 import { useRouter } from 'next/router'
+import { useSession } from '@/session/context'
 
 export default function Signup() {
     const [name, setName] = useState('')
     const [email, setEmail] = useState('')
     const [password, setPassword] = useState('')
     const [error, setError] = useState<string>('')
+    const { isLoggedIn, isLoading } = useSession()
     const router = useRouter()
+
+    if (isLoading) {
+        return null
+    }
+
+    if (isLoggedIn) {
+        router.push('dashboard')
+        return null
+    }
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault()
@@ -35,7 +46,7 @@ export default function Signup() {
                 throw new Error('Something went wrong')
             }
 
-            router.push({ pathname: '/activate', query: { email } })
+            router.push({ pathname: '/activate/require', query: { email } })
         } catch (err) {
             if (err instanceof Error) {
                 setError(err.message)
