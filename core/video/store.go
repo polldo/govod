@@ -94,3 +94,28 @@ func FetchAll(ctx context.Context, db sqlx.ExtContext) ([]Video, error) {
 
 	return videos, nil
 }
+
+func FetchAllByCourse(ctx context.Context, db sqlx.ExtContext, courseID string) ([]Video, error) {
+	in := struct {
+		ID string `db:"course_id"`
+	}{
+		ID: courseID,
+	}
+
+	const q = `
+	SELECT
+		*
+	FROM
+		videos
+	WHERE
+		course_id = :course_id
+	ORDER BY
+		index`
+
+	var videos []Video
+	if err := database.NamedQuerySlice(ctx, db, q, in, &videos); err != nil {
+		return nil, fmt.Errorf("selecting videos: %w", err)
+	}
+
+	return videos, nil
+}

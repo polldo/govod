@@ -119,6 +119,24 @@ func HandleList(db *sqlx.DB) web.Handler {
 	}
 }
 
+func HandleListByCourse(db *sqlx.DB) web.Handler {
+	return func(ctx context.Context, w http.ResponseWriter, r *http.Request) error {
+		courseID := web.Param(r, "course_id")
+
+		if err := validate.CheckID(courseID); err != nil {
+			err = fmt.Errorf("passed id is not valid: %w", err)
+			return weberr.NewError(err, err.Error(), http.StatusBadRequest)
+		}
+
+		videos, err := FetchAllByCourse(ctx, db, courseID)
+		if err != nil {
+			return weberr.InternalError(err)
+		}
+
+		return web.Respond(ctx, w, videos, http.StatusOK)
+	}
+}
+
 func HandleShow(db *sqlx.DB) web.Handler {
 	return func(ctx context.Context, w http.ResponseWriter, r *http.Request) error {
 		videoID := web.Param(r, "id")
