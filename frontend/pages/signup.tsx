@@ -17,7 +17,7 @@ export default function Signup() {
     }
 
     if (isLoggedIn) {
-        router.push('dashboard')
+        router.push('/dashboard')
         return null
     }
 
