@@ -65,7 +65,7 @@ func Activate(srv *httptest.Server, email string, mailer *mockMailer) error {
 	}
 	defer w.Body.Close()
 
-	if w.StatusCode != http.StatusOK {
+	if w.StatusCode != http.StatusNoContent {
 		return fmt.Errorf("can't activate user: status code %s", w.Status)
 	}
 
@@ -108,7 +108,7 @@ func Login(srv *httptest.Server, email string, pass string) error {
 	}
 	defer w.Body.Close()
 
-	if w.StatusCode != http.StatusOK {
+	if w.StatusCode != http.StatusNoContent {
 		return fmt.Errorf("can't login: status code %s", w.Status)
 	}
 
@@ -127,7 +127,7 @@ func Logout(srv *httptest.Server) error {
 	}
 	defer w.Body.Close()
 
-	if w.StatusCode != http.StatusOK {
+	if w.StatusCode != http.StatusNoContent {
 		return fmt.Errorf("can't logout: status code %s", w.Status)
 	}
 

@@ -75,7 +75,7 @@ func (tt *tokenTest) requestToken(t *testing.T, email string, scope string) stri
 	}
 	defer w.Body.Close()
 
-	if w.StatusCode != http.StatusOK {
+	if w.StatusCode != http.StatusNoContent {
 		t.Fatalf("can't activate user: status code %s", w.Status)
 	}
 

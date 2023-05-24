@@ -396,7 +396,7 @@ func (ct *courseTest) listCoursesOwnedOK(t *testing.T, crs []course.Course) {
 	}
 	defer Logout(ct.Server)
 
-	r, err := http.NewRequest(http.MethodGet, ct.URL+"/mycourses", nil)
+	r, err := http.NewRequest(http.MethodGet, ct.URL+"/courses/owned", nil)
 	if err != nil {
 		t.Fatal(err)
 	}

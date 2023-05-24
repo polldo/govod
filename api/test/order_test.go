@@ -103,7 +103,7 @@ func (ot *orderTest) testPaypal(t *testing.T) {
 	}
 	defer w.Body.Close()
 
-	if w.StatusCode != http.StatusOK {
+	if w.StatusCode != http.StatusNoContent {
 		t.Fatalf("can't capture paypal order: status code %s", w.Status)
 	}
 }
@@ -187,7 +187,7 @@ func (ot *orderTest) testStripe(t *testing.T) {
 	}
 	defer w.Body.Close()
 
-	if w.StatusCode != http.StatusOK {
+	if w.StatusCode != http.StatusNoContent {
 		t.Fatalf("can't trigger stripe webhook: status code %s", w.Status)
 	}
 }
