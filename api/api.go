@@ -91,9 +91,9 @@ func APIMux(cfg APIConfig) http.Handler {
 	a.Handle(http.MethodGet, "/users/{id}", user.HandleShow(cfg.DB), authen)
 	a.Handle(http.MethodPost, "/users", user.HandleCreate(cfg.DB), authen)
 
+	a.Handle(http.MethodGet, "/courses/owned", course.HandleListOwned(cfg.DB), authen)
 	a.Handle(http.MethodGet, "/courses/{id}", course.HandleShow(cfg.DB))
 	a.Handle(http.MethodGet, "/courses", course.HandleList(cfg.DB))
-	a.Handle(http.MethodGet, "/mycourses", course.HandleListOwned(cfg.DB), authen)
 	a.Handle(http.MethodPost, "/courses", course.HandleCreate(cfg.DB), admin)
 	a.Handle(http.MethodPut, "/courses/{id}", course.HandleUpdate(cfg.DB), admin)
 
