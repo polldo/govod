@@ -8,8 +8,10 @@ import { useRouter } from 'next/router'
 import { useFetch } from '@/services/fetch'
 import Image from 'next/image'
 import { toast } from 'react-hot-toast'
+import Link from 'next/link'
 
 type Course = {
+    id: string
     name: string
     description: string
     image: string
@@ -17,8 +19,8 @@ type Course = {
 
 function Card(props: Course) {
     return (
-        <a
-            href="#"
+        <Link
+            href={`/dashboard/course/${encodeURIComponent(props.id)}`}
             className="flex w-full flex-col items-center rounded-lg border border-gray-200 bg-white shadow hover:bg-gray-100 dark:border-gray-700 dark:bg-gray-800 dark:hover:bg-gray-700 md:max-w-xl md:flex-row"
         >
             <Image
@@ -33,7 +35,7 @@ function Card(props: Course) {
                 <h5 className="mb-2 text-2xl font-bold tracking-tight text-gray-900 dark:text-white">{props.name}</h5>
                 <p className="mb-3 font-normal text-gray-700 dark:text-gray-400">{props.description}</p>
             </div>
-        </a>
+        </Link>
     )
 }
 
@@ -62,7 +64,7 @@ export default function Dashboard() {
     }
 
     if (!isLoggedIn) {
-        router.push('login')
+        router.push('/login')
         return null
     }
 
