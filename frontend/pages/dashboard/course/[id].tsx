@@ -20,7 +20,7 @@ type Video = {
     description: string
 }
 
-export default function Dashboard() {
+export default function DashboardCourse() {
     const [course, setCourse] = useState<Course>()
     const [videos, setVideos] = useState<Video[]>()
     const { isLoggedIn, isLoading } = useSession()
@@ -76,15 +76,15 @@ export default function Dashboard() {
     return (
         <>
             <Head>
-                <title>Dashboard</title>
+                <title>Course - {course?.name}</title>
             </Head>
             <Layout>
                 <div className="flex w-1/2 flex-col">
                     <div>
-                        <p>Hello, this is your dashboard!</p>
                         <Logout></Logout>
                     </div>
 
+                    <p>Enjoy the course</p>
                     <p>{course?.name}</p>
                     <br></br>
                     <p>{course?.description}</p>
