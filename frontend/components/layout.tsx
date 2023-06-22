@@ -1,4 +1,7 @@
 import type { PropsWithChildren } from 'react'
+import Link from 'next/link'
+import { useSession } from '@/session/context'
+import Logout from '@/components/logout'
 
 export default function Layout(props: PropsWithChildren) {
     return (
@@ -12,21 +15,36 @@ export default function Layout(props: PropsWithChildren) {
 }
 
 function Navbar() {
+    const { isLoggedIn, isLoading } = useSession()
     return (
         <nav className="bg-gray-900 py-4">
             <div className="container mx-auto">
-                <div className="flex justify-between">
-                    <div className="text-xl font-bold text-white">Govod</div>
-                    <div>
-                        <a className="rounded px-3 py-2 text-gray-400 hover:text-white" href="#">
-                            Home
-                        </a>
-                        <a className="rounded px-3 py-2 text-gray-400 hover:text-white" href="#">
-                            About
-                        </a>
-                        <a className="rounded px-3 py-2 text-gray-400 hover:text-white" href="#">
-                            Contact
-                        </a>
+                <div className="flex items-center justify-between">
+                    <Link className="text-xl font-bold text-white" href="/">
+                        Govod
+                    </Link>
+                    <div className="flex flex-row items-center">
+                        <Link className="rounded px-3 py-2 text-gray-400 hover:text-white" href="/courses">
+                            Courses
+                        </Link>
+
+                        {isLoggedIn && (
+                            <Link className="rounded px-3 py-2 text-gray-400 hover:text-white" href="/dashboard">
+                                Dashboard
+                            </Link>
+                        )}
+
+                        {isLoggedIn && (
+                            <div className="px-3 py-2 ">
+                                <Logout></Logout>
+                            </div>
+                        )}
+
+                        {!isLoggedIn && (
+                            <Link className="w-full rounded bg-blue-800 p-2 font-semibold text-white" href="/login">
+                                Login
+                            </Link>
+                        )}
                     </div>
                 </div>
             </div>

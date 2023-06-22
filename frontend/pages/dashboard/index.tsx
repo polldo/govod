@@ -1,5 +1,4 @@
 import Layout from '@/components/layout'
-import Logout from '@/components/logout'
 import Head from 'next/head'
 import { useSession } from '@/session/context'
 import { useEffect } from 'react'
@@ -77,7 +76,6 @@ export default function Dashboard() {
                 <div className="flex w-1/2 flex-col">
                     <div>
                         <p>Hello, this is your dashboard!</p>
-                        <Logout></Logout>
                     </div>
 
                     <div className="flex flex-col items-center space-y-5 pt-6 pb-6">

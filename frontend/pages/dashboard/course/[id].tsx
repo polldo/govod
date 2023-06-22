@@ -1,5 +1,4 @@
 import Layout from '@/components/layout'
-import Logout from '@/components/logout'
 import Head from 'next/head'
 import Image from 'next/image'
 import { useSession } from '@/session/context'
@@ -80,10 +79,6 @@ export default function DashboardCourse() {
             </Head>
             <Layout>
                 <div className="flex w-1/2 flex-col">
-                    <div>
-                        <Logout></Logout>
-                    </div>
-
                     <p>Enjoy the course</p>
                     <p>{course?.name}</p>
                     <br></br>

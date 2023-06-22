@@ -1,5 +1,6 @@
 import Layout from '@/components/layout'
 import Head from 'next/head'
+import Link from 'next/link'
 
 export default function Home() {
     return (
@@ -31,6 +32,9 @@ function Hero() {
                                 Start selling courses now. Customize the website with your own style. Make content and
                                 enrich other people&#39;s life.
                             </p>
+                            <Link href="/courses" className="w-full rounded bg-blue-800 p-2 font-semibold text-white">
+                                Go
+                            </Link>
                         </div>
                     </div>
                     <div className="mx-auto lg:w-1/3">
