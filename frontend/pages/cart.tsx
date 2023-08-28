@@ -67,13 +67,23 @@ export default function Cart() {
         }
 
         fetch('http://mylocal.com:8000/cart')
-            .then((res) => res.json())
+            .then((res) => {
+                if (!res.ok) {
+                    throw new Error()
+                }
+                return res.json()
+            })
             .then((data: CartType) => {
                 setCart(data)
 
                 const courseFetches = data.items.map((item) => {
                     return fetch(`http://mylocal.com:8000/courses/${item.course_id}`)
-                        .then((res) => res.json())
+                        .then((res) => {
+                            if (!res.ok) {
+                                throw new Error()
+                            }
+                            return res.json()
+                        })
                         .then((course: Course) => {
                             setCourses((prevCourses) => ({ ...prevCourses, [course.id]: course }))
                         })
@@ -95,6 +105,27 @@ export default function Cart() {
     if (!isLoggedIn) {
         router.push('/login')
         return null
+    }
+
+    const handleDeleteItem = async (id: string) => {
+        try {
+            const res = await fetch(`http://mylocal.com:8000/cart/items/${id}`, {
+                method: 'DELETE',
+            })
+
+            if (!res.ok) {
+                throw new Error()
+            }
+
+            if (cart) {
+                setCart({
+                    ...cart,
+                    items: cart.items.filter((item) => item.course_id !== id),
+                })
+            }
+        } catch (err) {
+            toast.error('Something went wrong')
+        }
     }
 
     return (
@@ -120,10 +151,7 @@ export default function Cart() {
                                             image: '',
                                             price: course.price,
                                         }}
-                                        onDelete={(id) => {
-                                            // Handle deletion logic here
-                                            console.log('Deleting item with Course ID:', id)
-                                        }}
+                                        onDelete={handleDeleteItem}
                                     />
                                 )
                             })}
