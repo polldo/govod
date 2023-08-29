@@ -75,7 +75,7 @@ function Card(props: CardProps) {
                     </button>
                 ) : (
                     <button onClick={handleSubmit} className="w-full rounded bg-green-500 p-2 font-semibold text-white">
-                        {props.isLoggedIn ? 'Add to Cart' : 'Login to Purchase'}
+                        {props.isLoggedIn ? 'Add to Cart' : 'Login to buy'}
                     </button>
                 )}
             </div>
@@ -91,6 +91,13 @@ export default function Courses() {
     const [isLoadingOwned, setIsLoadingOwned] = useState<boolean>(true)
     const { isLoggedIn, isLoading } = useSession()
     const fetch = useFetch()
+
+    useEffect(() => {
+        if (!isLoggedIn) {
+            setCartCourses([])
+            setOwnedCourses([])
+        }
+    }, [isLoggedIn])
 
     useEffect(() => {
         fetch('http://mylocal.com:8000/courses')
