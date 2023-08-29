@@ -49,9 +49,13 @@ function Card(props: CardProps) {
         props.onAddToCart()
     }
 
+    const linkURL: string = props.isOwned
+        ? `/dashboard/course/${encodeURIComponent(props.id)}`
+        : `/courses/${encodeURIComponent(props.id)}`
+
     return (
         <Link
-            href={`/courses/${encodeURIComponent(props.id)}`}
+            href={linkURL}
             className="flex w-1/2 flex-col items-center rounded-lg border border-gray-200 bg-white shadow hover:bg-gray-100 dark:border-gray-700 dark:bg-gray-800 dark:hover:bg-gray-700 md:max-w-xl md:flex-row"
         >
             <Image
