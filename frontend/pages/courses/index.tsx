@@ -26,9 +26,29 @@ type CardProps = Course & {
     isOwned: boolean
     isInCart: boolean
     isLoggedIn: boolean
+    onAddToCart: () => void
 }
 
 function Card(props: CardProps) {
+    const handleSubmit = async (e: React.FormEvent) => {
+        e.preventDefault()
+
+        if (props.isOwned) {
+            window.location.href = `/dashboard/course/${props.id}`
+            return
+        }
+        if (props.isInCart) {
+            // Do nothing.
+            return
+        }
+        if (!props.isLoggedIn) {
+            window.location.href = `/login`
+            return
+        }
+
+        props.onAddToCart()
+    }
+
     return (
         <Link
             href={`/courses/${encodeURIComponent(props.id)}`}
@@ -46,11 +66,17 @@ function Card(props: CardProps) {
                 <h5 className="mb-2 text-2xl font-bold tracking-tight text-gray-900 dark:text-white">{props.name}</h5>
                 <p className="mb-3 font-normal text-gray-700 dark:text-gray-400">{props.description}</p>
                 {props.isOwned ? (
-                    <button onClick={() => (window.location.href = `/courses/${props.id}`)}>Go to Course</button>
+                    <button onClick={handleSubmit} className="w-full rounded bg-blue-500 p-2 font-semibold text-white">
+                        Go to Course
+                    </button>
                 ) : props.isInCart ? (
-                    <button disabled>Already in Cart</button>
+                    <button disabled className="w-full rounded bg-gray-500 p-2 font-semibold text-white">
+                        In Cart
+                    </button>
                 ) : (
-                    <button onClick={() => {}}>{props.isLoggedIn ? 'Add to Cart' : 'Login to Purchase'}</button>
+                    <button onClick={handleSubmit} className="w-full rounded bg-green-500 p-2 font-semibold text-white">
+                        {props.isLoggedIn ? 'Add to Cart' : 'Login to Purchase'}
+                    </button>
                 )}
             </div>
         </Link>
@@ -76,7 +102,6 @@ export default function Courses() {
         if (!isLoggedIn) {
             return
         }
-
         fetch('http://mylocal.com:8000/cart')
             .then((res) => {
                 if (!res.ok) {
@@ -92,7 +117,12 @@ export default function Courses() {
             .catch(() => {
                 toast.error('Something went wrong')
             })
+    }, [fetch, isLoggedIn])
 
+    useEffect(() => {
+        if (!isLoggedIn) {
+            return
+        }
         fetch('http://mylocal.com:8000/courses/owned')
             .then((res) => {
                 if (!res.ok) {
@@ -110,6 +140,22 @@ export default function Courses() {
             })
     }, [fetch, isLoggedIn])
 
+    const handleAddToCart = (courseID: string) => {
+        fetch('http://mylocal.com:8000/cart/items', {
+            method: 'PUT',
+            body: JSON.stringify({ course_id: courseID }),
+        })
+            .then((res) => {
+                if (!res.ok) {
+                    throw new Error()
+                }
+                setCartCourses((prev) => [...prev, courseID])
+            })
+            .catch(() => {
+                toast.error('Something went wrong')
+            })
+    }
+
     if (isLoading) {
         return null
     }
@@ -122,6 +168,20 @@ export default function Courses() {
         return null
     }
 
+    const coursePriority = (course: Course) => {
+        if (ownedCourses.includes(course.id)) {
+            return 2
+        }
+        if (cartCourses.includes(course.id)) {
+            return 1
+        }
+        return 0
+    }
+
+    const sortedCourses = [...courses].sort((a, b) => {
+        return coursePriority(a) - coursePriority(b)
+    })
+
     return (
         <>
             <Head>
@@ -129,12 +189,15 @@ export default function Courses() {
             </Head>
             <Layout>
                 <div className="flex flex-col items-center space-y-5 pt-6 pb-6">
-                    {courses.map((course) => (
+                    {sortedCourses.map((course) => (
                         <Card
                             {...course}
                             isOwned={ownedCourses.includes(course.id)}
                             isInCart={cartCourses.includes(course.id)}
                             isLoggedIn={isLoggedIn}
+                            onAddToCart={() => {
+                                handleAddToCart(course.id)
+                            }}
                             key={course.name}
                         />
                     ))}
