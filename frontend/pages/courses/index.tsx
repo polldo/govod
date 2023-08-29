@@ -149,7 +149,7 @@ export default function Courses() {
                 if (!res.ok) {
                     throw new Error()
                 }
-                setCartCourses((prev) => [...prev, courseID])
+                window.location.href = `/cart`
             })
             .catch(() => {
                 toast.error('Something went wrong')

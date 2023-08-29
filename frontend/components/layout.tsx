@@ -2,6 +2,7 @@ import type { PropsWithChildren } from 'react'
 import Link from 'next/link'
 import { useSession } from '@/session/context'
 import Logout from '@/components/logout'
+import Cart from '@/components/cart'
 
 export default function Layout(props: PropsWithChildren) {
     return (
@@ -32,6 +33,12 @@ function Navbar() {
                             <Link className="rounded px-3 py-2 text-gray-400 hover:text-white" href="/dashboard">
                                 Dashboard
                             </Link>
+                        )}
+
+                        {isLoggedIn && (
+                            <div className="px-3 py-2 ">
+                                <Cart></Cart>
+                            </div>
                         )}
 
                         {isLoggedIn && (
