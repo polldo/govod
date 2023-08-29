@@ -264,8 +264,7 @@ func HandleStripeCheckout(db *sqlx.DB, strp *stripecl.API, cfg config.Stripe) we
 			return fmt.Errorf("creating the order on the database: %w", err)
 		}
 
-		http.Redirect(w, r, s.URL, http.StatusSeeOther)
-		return nil
+		return web.Respond(ctx, w, s.URL, http.StatusOK)
 	}
 }
 

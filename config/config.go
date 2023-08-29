@@ -19,7 +19,7 @@ type Cors struct {
 }
 
 type Web struct {
-	Address         string        `conf:"default:0.0.0.0:3000"`
+	Address         string        `conf:"default:0.0.0.0:8000"`
 	ReadTimeout     time.Duration `conf:"default:5s"`
 	WriteTimeout    time.Duration `conf:"default:10s"`
 	IdleTimeout     time.Duration `conf:"default:120s"`
@@ -46,8 +46,8 @@ type Email struct {
 type Stripe struct {
 	APISecret     string
 	WebhookSecret string
-	SuccessURL    string
-	CancelURL     string
+	SuccessURL    string `conf:"default:http://mylocal.com:3000/dashboard"`
+	CancelURL     string `conf:"default:http://mylocal.com:3000/cart"`
 }
 
 type Paypal struct {
@@ -58,7 +58,7 @@ type Paypal struct {
 
 type Oauth struct {
 	DiscoveryTimeout time.Duration `conf:"default:30s"`
-	LoginRedirectURL string        `conf:"default:http://mylocal:3000/dashboard"`
+	LoginRedirectURL string        `conf:"default:http://mylocal.com:3000/dashboard"`
 	Google           struct {
 		Client      string
 		Secret      string
