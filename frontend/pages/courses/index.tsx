@@ -97,17 +97,17 @@ export default function Courses() {
     const fetch = useFetch()
 
     useEffect(() => {
+        fetch('http://mylocal.com:8000/courses')
+            .then((res) => res.json())
+            .then((data) => setCourses(data))
+    }, [fetch])
+
+    useEffect(() => {
         if (!isLoggedIn) {
             setCartCourses([])
             setOwnedCourses([])
         }
     }, [isLoggedIn])
-
-    useEffect(() => {
-        fetch('http://mylocal.com:8000/courses')
-            .then((res) => res.json())
-            .then((data) => setCourses(data))
-    }, [fetch])
 
     useEffect(() => {
         if (!isLoggedIn) {
