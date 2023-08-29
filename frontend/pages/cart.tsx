@@ -128,6 +128,17 @@ export default function Cart() {
         }
     }
 
+    const handleStripeCheckout = async (e: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
+        e.preventDefault()
+        try {
+            const res = await fetch(`http://mylocal.com:8000/orders/stripe`, { method: 'POST' })
+            const data = await res.json()
+            window.location.href = data
+        } catch (err) {
+            toast.error('Something went wrong')
+        }
+    }
+
     return (
         <>
             <Head>
@@ -155,7 +166,12 @@ export default function Cart() {
                                     />
                                 )
                             })}
-                        <button className="mt-4 w-full rounded bg-green-500 p-4 text-white">Checkout</button>
+                        <button
+                            onClick={handleStripeCheckout}
+                            className="mt-4 w-full rounded bg-green-500 p-4 text-white"
+                        >
+                            Checkout
+                        </button>
                     </div>
                 </div>
             </Layout>
