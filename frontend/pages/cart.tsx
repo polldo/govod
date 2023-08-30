@@ -7,6 +7,7 @@ import { useSession } from '@/session/context'
 import { useFetch } from '@/services/fetch'
 import Image from 'next/image'
 import { toast } from 'react-hot-toast'
+import { PayPalButtons, usePayPalScriptReducer } from '@paypal/react-paypal-js'
 
 type CartType = {
     items: Item[]
@@ -60,6 +61,7 @@ export default function Cart() {
     const { isLoggedIn, isLoading } = useSession()
     const router = useRouter()
     const fetch = useFetch()
+    const [{ isPending, isResolved }] = usePayPalScriptReducer()
 
     useEffect(() => {
         if (!isLoggedIn) {
@@ -132,8 +134,38 @@ export default function Cart() {
         e.preventDefault()
         try {
             const res = await fetch(`http://mylocal.com:8000/orders/stripe`, { method: 'POST' })
+            if (!res.ok) {
+                throw new Error()
+            }
             const data = await res.json()
             window.location.href = data
+        } catch (err) {
+            toast.error('Something went wrong')
+        }
+    }
+
+    const handlePaypalCheckout = async () => {
+        try {
+            const res = await fetch(`http://mylocal.com:8000/orders/paypal`, { method: 'POST' })
+            if (!res.ok) {
+                throw new Error()
+            }
+            const data = await res.json()
+            return data.id
+        } catch (err) {
+            toast.error('Something went wrong')
+        }
+    }
+
+    const handlePaypalCapture = async (capture: { orderID: string }) => {
+        try {
+            const res = await fetch(`http://mylocal.com:8000/orders/paypal/${capture.orderID}/capture`, {
+                method: 'POST',
+            })
+            if (!res.ok) {
+                throw new Error()
+            }
+            window.location.href = `/dashboard`
         } catch (err) {
             toast.error('Something went wrong')
         }
@@ -166,12 +198,29 @@ export default function Cart() {
                                     />
                                 )
                             })}
-                        <button
-                            onClick={handleStripeCheckout}
-                            className="mt-4 w-full rounded bg-green-500 p-4 text-white"
-                        >
-                            Checkout
-                        </button>
+
+                        <div className="flex flex-col items-center gap-4 md:flex-row md:justify-center">
+                            <button
+                                onClick={handleStripeCheckout}
+                                className="rounded bg-green-500 p-2 text-white md:w-1/3"
+                            >
+                                Checkout
+                            </button>
+
+                            {isPending || !isResolved ? (
+                                <button disabled={true} className="rounded bg-gray-500 p-2 text-white md:w-1/3">
+                                    PayPal ...loading...
+                                </button>
+                            ) : (
+                                <PayPalButtons
+                                    className="rounded p-2 md:w-1/3"
+                                    createOrder={handlePaypalCheckout}
+                                    onApprove={handlePaypalCapture}
+                                    style={{ layout: 'vertical' }}
+                                    fundingSource="paypal"
+                                />
+                            )}
+                        </div>
                     </div>
                 </div>
             </Layout>
