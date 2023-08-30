@@ -11,6 +11,7 @@ import (
 	"github.com/polldo/govod/api/web"
 	"github.com/polldo/govod/api/weberr"
 	"github.com/polldo/govod/core/claims"
+	"github.com/polldo/govod/core/course"
 	"github.com/polldo/govod/database"
 	"github.com/polldo/govod/validate"
 )
@@ -73,6 +74,18 @@ func HandleCreateItem(db *sqlx.DB) web.Handler {
 		clm, err := claims.Get(ctx)
 		if err != nil {
 			return weberr.NotAuthorized(errors.New("user not authenticated"))
+		}
+
+		owned, err := course.FetchByOwner(ctx, db, clm.UserID)
+		if err != nil {
+			return fmt.Errorf("checking if course is already owned by user: %w", err)
+		}
+
+		for _, o := range owned {
+			if itnew.CourseID == o.ID {
+				err := errors.New("course already owned")
+				return weberr.NewError(err, err.Error(), http.StatusUnprocessableEntity)
+			}
 		}
 
 		if _, err := Upsert(ctx, db, clm.UserID); err != nil {
