@@ -202,7 +202,12 @@ export default function Cart() {
                         <div className="flex flex-col items-center gap-4 md:flex-row md:justify-center">
                             <button
                                 onClick={handleStripeCheckout}
-                                className="rounded bg-green-500 p-2 text-white md:w-1/3"
+                                className={`rounded p-2 text-white md:w-1/3 ${
+                                    cart && cart.items.length > 0
+                                        ? 'bg-green-500 hover:bg-green-600'
+                                        : 'bg-green-200 hover:bg-green-300'
+                                }`}
+                                disabled={cart?.items.length === 0}
                             >
                                 Checkout
                             </button>
@@ -213,6 +218,7 @@ export default function Cart() {
                                 </button>
                             ) : (
                                 <PayPalButtons
+                                    disabled={cart?.items.length == 0}
                                     className="rounded p-2 md:w-1/3"
                                     createOrder={handlePaypalCheckout}
                                     onApprove={handlePaypalCapture}

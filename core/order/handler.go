@@ -130,6 +130,11 @@ func HandlePaypalCheckout(db *sqlx.DB, pp *paypal.Client) web.Handler {
 			return fmt.Errorf("fetching details of cart items: %w", err)
 		}
 
+		if len(courses) == 0 {
+			err := errors.New("no items to checkout")
+			return weberr.NewError(err, err.Error(), http.StatusUnprocessableEntity)
+		}
+
 		var tot int
 		items := make([]paypal.Item, 0, len(courses))
 		for _, c := range courses {
@@ -227,6 +232,11 @@ func HandleStripeCheckout(db *sqlx.DB, strp *stripecl.API, cfg config.Stripe) we
 		courses, err := checkout(ctx, db, clm.UserID)
 		if err != nil {
 			return fmt.Errorf("fetching details of cart items: %w", err)
+		}
+
+		if len(courses) == 0 {
+			err := errors.New("no items to checkout")
+			return weberr.NewError(err, err.Error(), http.StatusUnprocessableEntity)
 		}
 
 		li := make([]*stripe.CheckoutSessionLineItemParams, 0, len(courses))
