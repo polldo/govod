@@ -84,6 +84,20 @@ export default function CourseDetails() {
         player.on('dispose', () => {})
     }
 
+    var next = ''
+    var prev = ''
+    if (video && videos) {
+        const sorted = videos.slice().sort((a, b) => a.index - b.index)
+
+        // Videos index starts from 1.
+        const idx = video.index - 1
+        const isLast = idx === sorted.length - 1
+        const isFirst = idx === 0
+
+        next = isLast ? '' : sorted[idx + 1].id
+        prev = isFirst ? '' : sorted[idx - 1].id
+    }
+
     return (
         <>
             <Head>
@@ -113,8 +127,20 @@ export default function CourseDetails() {
                     </div>
 
                     <div className="mx-16 flex justify-between md:hidden">
-                        <button>prev</button>
-                        <button>next</button>
+                        {prev != '' ? (
+                            <Link href={`/dashboard/video/${encodeURIComponent(prev)}`}>prev</Link>
+                        ) : (
+                            <button disabled={true} className="text-gray-400">
+                                prev
+                            </button>
+                        )}
+                        {next != '' ? (
+                            <Link href={`/dashboard/video/${encodeURIComponent(next)}`}>next</Link>
+                        ) : (
+                            <button disabled={true} className="text-gray-400">
+                                next
+                            </button>
+                        )}
                     </div>
 
                     <div className="mt-5 flex flex-col p-4 sm:mx-20">
