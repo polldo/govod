@@ -3,6 +3,7 @@ package test
 import (
 	"bytes"
 	"encoding/json"
+	"io"
 	"net/http"
 	"path"
 	"testing"
@@ -126,15 +127,20 @@ func (ot *orderTest) testStripe(t *testing.T) {
 	}
 	defer w.Body.Close()
 
-	if w.StatusCode != http.StatusSeeOther {
+	if w.StatusCode != http.StatusOK {
 		t.Fatalf("can't create stripe order: status code %s", w.Status)
 	}
 
 	// Now simulate the payment by triggering a stripe webhook.
 	//
 	// Extract the checkout session id from the location returned by the mock.
-	u, err := w.Location()
+	urlBytes, err := io.ReadAll(w.Body)
 	if err != nil {
+		t.Fatal(err)
+	}
+
+	var url string
+	if err := json.Unmarshal(urlBytes, &url); err != nil {
 		t.Fatal(err)
 	}
 
@@ -143,7 +149,7 @@ func (ot *orderTest) testStripe(t *testing.T) {
 	// Set the same checkout id previously obtained.
 	obj := map[string]any{
 		// Mocked stripe returns the id in the URL.
-		"id":   path.Base(u.Path),
+		"id":   path.Base(url),
 		"mode": stripe.CheckoutSessionModePayment,
 	}
 
