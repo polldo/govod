@@ -92,12 +92,13 @@ export default function CourseDetails() {
             <Layout>
                 <div className="h-full w-full">
                     <div className="flex w-full ">
-                        <div className="ml-16 mt-10 flex w-1/2 flex-row ">
+                        <div className="mx-16 mt-10 flex w-full flex-row md:mr-0 md:w-1/2 ">
                             <div className="w-full">
                                 {url && <VideoJS options={videoJsOptions} onReady={handlePlayerReady} />}
                             </div>
                         </div>
-                        <div className="mx-0 mt-10 flex w-1/4 flex-col border border-black">
+
+                        <div className="mx-0 mt-10 hidden w-1/4 flex-col border border-black md:flex">
                             {videos &&
                                 videos
                                     .slice()
@@ -110,13 +111,19 @@ export default function CourseDetails() {
                             {!videos && <p>No videos here.</p>}
                         </div>
                     </div>
-                    <div className="mx-20 mt-5 flex flex-col p-4">
-                        <h2 className="text-xl font-bold">{video?.name}</h2>
-                        <p className="mt-2 text-base italic">{video?.description}</p>
+
+                    <div className="mx-16 flex justify-between md:hidden">
+                        <button>prev</button>
+                        <button>next</button>
+                    </div>
+
+                    <div className="mt-5 flex flex-col p-4 sm:mx-20">
+                        <h2 className="text-xs font-bold sm:text-xl">{video?.name}</h2>
+                        <p className="mt-2 text-xs italic sm:text-xl">{video?.description}</p>
                         {video && (
                             <Link
                                 href={`/dashboard/course/${encodeURIComponent(video?.course_id)}`}
-                                className="mt-2 block cursor-pointer text-sm text-blue-500 underline"
+                                className="mt-2 w-20 cursor-pointer text-sm text-blue-500 underline"
                             >
                                 {course?.name}
                             </Link>
