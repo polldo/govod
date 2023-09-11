@@ -105,20 +105,24 @@ export default function CourseDetails() {
             </Head>
             <Layout>
                 <div className="h-full w-full">
-                    <div className="flex w-full ">
-                        <div className="mx-16 mt-10 flex w-full flex-row md:mr-0 md:w-1/2 ">
+                    <div className="flex w-full">
+                        <div className="mx-16 mt-10 flex w-full lg:mr-0 lg:ml-auto lg:w-[700px] xl:w-[850px]">
                             <div className="w-full">
                                 {url && <VideoJS options={videoJsOptions} onReady={handlePlayerReady} />}
                             </div>
                         </div>
 
-                        <div className="mx-0 mt-10 hidden w-1/4 flex-col border border-black md:flex">
+                        <div className="mx-0 mt-10 hidden w-[300px] flex-col overflow-y-scroll border border-black lg:mr-auto lg:flex lg:max-h-[394px] xl:max-h-[478px]">
                             {videos &&
                                 videos
                                     .slice()
                                     .sort((a, b) => a.index - b.index)
                                     .map((vid) => (
-                                        <Link key={vid.name} href={`/dashboard/video/${encodeURIComponent(vid.id)}`}>
+                                        <Link
+                                            key={vid.name}
+                                            href={`/dashboard/video/${encodeURIComponent(vid.id)}`}
+                                            className="mx-2 my-2 text-sm"
+                                        >
                                             {vid.name} {vid.index == video!.index ? '<' : ''}
                                         </Link>
                                     ))}
@@ -126,7 +130,7 @@ export default function CourseDetails() {
                         </div>
                     </div>
 
-                    <div className="mx-16 flex justify-between md:hidden">
+                    <div className="mx-16 flex justify-between lg:hidden">
                         {prev != '' ? (
                             <Link href={`/dashboard/video/${encodeURIComponent(prev)}`}>prev</Link>
                         ) : (
@@ -143,9 +147,9 @@ export default function CourseDetails() {
                         )}
                     </div>
 
-                    <div className="mt-5 flex flex-col p-4 sm:mx-20">
-                        <h2 className="text-xs font-bold sm:text-xl">{video?.name}</h2>
-                        <p className="mt-2 text-xs italic sm:text-xl">{video?.description}</p>
+                    <div className="mx-16 mt-5 flex flex-col p-4 sm:mx-20">
+                        <h2 className="text-base font-bold sm:text-xl">{video?.name}</h2>
+                        <p className="mt-2 text-base italic sm:text-xl">{video?.description}</p>
                         {video && (
                             <Link
                                 href={`/dashboard/course/${encodeURIComponent(video?.course_id)}`}
