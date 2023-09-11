@@ -15,6 +15,7 @@ type Course = {
 }
 
 type Video = {
+    id: string
     name: string
     description: string
 }
@@ -96,7 +97,7 @@ export default function DashboardCourse() {
 function Card(props: Video) {
     return (
         <a
-            href="#"
+            href={`/dashboard/video/${props.id}`}
             className="flex w-1/2 flex-col items-center rounded-lg border border-gray-200 bg-white shadow hover:bg-gray-100 dark:border-gray-700 dark:bg-gray-800 dark:hover:bg-gray-700 md:max-w-xl md:flex-row"
         >
             <Image

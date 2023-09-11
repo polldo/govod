@@ -10,6 +10,8 @@ import (
 	"github.com/jmoiron/sqlx"
 	"github.com/polldo/govod/api/web"
 	"github.com/polldo/govod/api/weberr"
+	"github.com/polldo/govod/core/claims"
+	"github.com/polldo/govod/core/course"
 	"github.com/polldo/govod/database"
 	"github.com/polldo/govod/validate"
 )
@@ -155,5 +157,67 @@ func HandleShow(db *sqlx.DB) web.Handler {
 		}
 
 		return web.Respond(ctx, w, video, http.StatusOK)
+	}
+}
+
+func HandleShowFull(db *sqlx.DB) web.Handler {
+	return func(ctx context.Context, w http.ResponseWriter, r *http.Request) error {
+		videoID := web.Param(r, "id")
+
+		clm, err := claims.Get(ctx)
+		if err != nil {
+			return weberr.NotAuthorized(errors.New("user not authenticated"))
+		}
+
+		if err := validate.CheckID(videoID); err != nil {
+			err = fmt.Errorf("passed id is not valid: %w", err)
+			return weberr.NewError(err, err.Error(), http.StatusBadRequest)
+		}
+
+		video, err := Fetch(ctx, db, videoID)
+		if err != nil {
+			if errors.Is(err, database.ErrDBNotFound) {
+				return weberr.NewError(err, "video not found", http.StatusBadRequest)
+			}
+			return weberr.InternalError(err)
+		}
+
+		var crs course.Course
+		if video.Free {
+			crs, err = course.Fetch(ctx, db, video.CourseID)
+			if err != nil {
+				return err
+			}
+		} else {
+			crs, err = course.FetchOwned(ctx, db, video.CourseID, clm.UserID)
+			if err != nil {
+				if errors.Is(err, database.ErrDBNotFound) {
+					return weberr.NewError(err, "access forbidden", http.StatusForbidden)
+				}
+				return err
+			}
+		}
+
+		videos, err := FetchAllByCourse(ctx, db, video.CourseID)
+		if err != nil {
+			if errors.Is(err, database.ErrDBNotFound) {
+				return weberr.NewError(err, "no video found", http.StatusBadRequest)
+			}
+			return weberr.InternalError(err)
+		}
+
+		fullVideo := struct {
+			Course    course.Course `json:"course"`
+			Video     Video         `json:"video"`
+			AllVideos []Video       `json:"all_videos"`
+			URL       string        `json:"url"`
+		}{
+			Course:    crs,
+			Video:     video,
+			URL:       video.URL,
+			AllVideos: videos,
+		}
+
+		return web.Respond(ctx, w, fullVideo, http.StatusOK)
 	}
 }

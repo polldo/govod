@@ -129,3 +129,36 @@ func FetchByOwner(ctx context.Context, db sqlx.ExtContext, userID string) ([]Cou
 
 	return cs, nil
 }
+
+func FetchOwned(ctx context.Context, db sqlx.ExtContext, courseID string, userID string) (Course, error) {
+	in := struct {
+		UserID   string `db:"user_id"`
+		CourseID string `db:"course_id"`
+		Status   string `db:"status"`
+	}{
+		UserID:   userID,
+		CourseID: courseID,
+		Status:   "success",
+	}
+
+	const q = `
+	SELECT
+		c.*
+	FROM
+		orders AS o
+	INNER JOIN
+		order_items AS i ON i.order_id = o.order_id
+	INNER JOIN
+		courses AS c ON i.course_id = c.course_id
+	WHERE
+		o.status = :status AND
+		o.user_id = :user_id AND
+		c.course_id = :course_id`
+
+	var cs Course
+	if err := database.NamedQueryStruct(ctx, db, q, in, &cs); err != nil {
+		return Course{}, fmt.Errorf("selecting owned course: %w", err)
+	}
+
+	return cs, nil
+}
