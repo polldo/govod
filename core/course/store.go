@@ -153,9 +153,7 @@ func FetchOwned(ctx context.Context, db sqlx.ExtContext, courseID string, userID
 	WHERE
 		o.status = :status AND
 		o.user_id = :user_id AND
-		c.course_id = :course_id
-	ORDER BY
-		c.course_id`
+		c.course_id = :course_id`
 
 	var cs Course
 	if err := database.NamedQueryStruct(ctx, db, q, in, &cs); err != nil {
