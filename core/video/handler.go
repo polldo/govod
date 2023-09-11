@@ -177,7 +177,7 @@ func HandleShowFull(db *sqlx.DB) web.Handler {
 		video, err := Fetch(ctx, db, videoID)
 		if err != nil {
 			if errors.Is(err, database.ErrDBNotFound) {
-				return weberr.NewError(err, err.Error(), http.StatusBadRequest)
+				return weberr.NewError(err, "video not found", http.StatusBadRequest)
 			}
 			return weberr.InternalError(err)
 		}
@@ -201,7 +201,7 @@ func HandleShowFull(db *sqlx.DB) web.Handler {
 		videos, err := FetchAllByCourse(ctx, db, video.CourseID)
 		if err != nil {
 			if errors.Is(err, database.ErrDBNotFound) {
-				return weberr.NewError(err, err.Error(), http.StatusBadRequest)
+				return weberr.NewError(err, "no video found", http.StatusBadRequest)
 			}
 			return weberr.InternalError(err)
 		}
