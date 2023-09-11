@@ -20,7 +20,6 @@ type Video = {
     course_id: string
     name: string
     description: string
-    free: boolean
 }
 
 export default function CourseDetails() {
@@ -114,6 +113,7 @@ export default function CourseDetails() {
 
                         <div className="mx-0 mt-10 hidden w-[300px] flex-col overflow-y-scroll border border-black lg:mr-auto lg:flex lg:max-h-[394px] xl:max-h-[478px]">
                             {videos &&
+                                video &&
                                 videos
                                     .slice()
                                     .sort((a, b) => a.index - b.index)
@@ -123,7 +123,7 @@ export default function CourseDetails() {
                                             href={`/dashboard/video/${encodeURIComponent(vid.id)}`}
                                             className="mx-2 my-2 text-sm"
                                         >
-                                            {vid.name} {vid.index == video!.index ? '<' : ''}
+                                            {vid.name} {vid.index == video.index ? '<' : ''}
                                         </Link>
                                     ))}
                             {!videos && <p>No videos here.</p>}
@@ -147,18 +147,18 @@ export default function CourseDetails() {
                         )}
                     </div>
 
-                    <div className="mx-16 mt-5 flex flex-col p-4 sm:mx-20">
-                        <h2 className="text-base font-bold sm:text-xl">{video?.name}</h2>
-                        <p className="mt-2 text-base italic sm:text-xl">{video?.description}</p>
-                        {video && (
+                    {video && (
+                        <div className="mx-16 mt-5 flex flex-col p-4 sm:mx-20">
+                            <h2 className="text-base font-bold sm:text-xl">{video.name}</h2>
+                            <p className="mt-2 text-base italic sm:text-xl">{video.description}</p>
                             <Link
-                                href={`/dashboard/course/${encodeURIComponent(video?.course_id)}`}
+                                href={`/dashboard/course/${encodeURIComponent(video.course_id)}`}
                                 className="mt-2 w-20 cursor-pointer text-sm text-blue-500 underline"
                             >
                                 {course?.name}
                             </Link>
-                        )}
-                    </div>
+                        </div>
+                    )}
                 </div>
             </Layout>
         </>
