@@ -142,8 +142,10 @@ export default function Courses() {
                 return res.json()
             })
             .then((data: Course[]) => {
-                const owned = data.map((item: Course) => item.id)
-                setOwnedCourses(owned)
+                if (data) {
+                    const owned = data.map((item: Course) => item.id)
+                    setOwnedCourses(owned)
+                }
                 setIsLoadingOwned(false)
             })
             .catch(() => {
