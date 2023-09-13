@@ -279,24 +279,3 @@ func HandleListProgressByCourse(db *sqlx.DB) web.Handler {
 		return web.Respond(ctx, w, progress, http.StatusOK)
 	}
 }
-
-func HandleShowProgress(db *sqlx.DB) web.Handler {
-	return func(ctx context.Context, w http.ResponseWriter, r *http.Request) error {
-		videoID := web.Param(r, "id")
-
-		if err := validate.CheckID(videoID); err != nil {
-			err = fmt.Errorf("passed id is not valid: %w", err)
-			return weberr.NewError(err, err.Error(), http.StatusBadRequest)
-		}
-
-		video, err := Fetch(ctx, db, videoID)
-		if err != nil {
-			if errors.Is(err, database.ErrDBNotFound) {
-				return weberr.NewError(err, err.Error(), http.StatusBadRequest)
-			}
-			return weberr.InternalError(err)
-		}
-
-		return web.Respond(ctx, w, video, http.StatusOK)
-	}
-}
