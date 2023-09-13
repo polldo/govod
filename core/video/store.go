@@ -178,28 +178,3 @@ func FetchUserProgressByCourse(ctx context.Context, db sqlx.ExtContext, userID s
 
 	return progress, nil
 }
-
-// func FetchProgress(ctx context.Context, db sqlx.ExtContext, videoID string, userID string) (int, error) {
-// 	in := struct {
-// 		videoID string `db:"video_id"`
-// 		userID  string `db:"user_id"`
-// 	}{
-// 		videoID: videoID,
-// 		userID:  userID,
-// 	}
-
-// 	const q = `
-// 	SELECT
-// 		*
-// 	FROM
-// 		videos_progress
-// 	WHERE
-// 		video_id = :video_id AND user_id = :user_id`
-
-// 	var progress int
-// 	if err := database.NamedQueryStruct(ctx, db, q, in, &progress); err != nil {
-// 		return 0, fmt.Errorf("fetching video[%s] and user[%s] progress: %w", videoID, userID, err)
-// 	}
-
-// 	return progress, nil
-// }
