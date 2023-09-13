@@ -119,3 +119,87 @@ func FetchAllByCourse(ctx context.Context, db sqlx.ExtContext, courseID string) 
 
 	return videos, nil
 }
+
+func UpdateProgress(ctx context.Context, db sqlx.ExtContext, userID string, videoID string, value int) error {
+	in := struct {
+		VideoID  string `db:"video_id"`
+		UserID   string `db:"user_id"`
+		Progress int    `db:"progress"`
+	}{
+		VideoID:  videoID,
+		UserID:   userID,
+		Progress: value,
+	}
+
+	const q = `
+	INSERT INTO videos_progress
+		(video_id, user_id, progress, created_at, updated_at)
+	VALUES
+		(:video_id, :user_id, :progress, NOW(), NOW())
+	ON CONFLICT
+		(video_id, user_id)
+	DO UPDATE SET
+		progress = :progress,
+		updated_at = NOW()`
+
+	if err := database.NamedExecContext(ctx, db, q, in); err != nil {
+		return fmt.Errorf("upserting progress: %w", err)
+	}
+
+	return nil
+}
+
+func FetchUserProgressByCourse(ctx context.Context, db sqlx.ExtContext, userID string, courseID string) ([]Progress, error) {
+	in := struct {
+		CourseID string `db:"course_id"`
+		UserID   string `db:"user_id"`
+	}{
+		CourseID: courseID,
+		UserID:   userID,
+	}
+
+	const q = `
+	SELECT
+		p.*
+	FROM
+		videos_progress AS p
+	INNER JOIN 
+		videos AS v ON p.video_id = v.video_id
+	INNER JOIN 
+		courses AS c ON c.course_id = v.course_id
+	WHERE
+		c.course_id = :course_id AND
+		p.user_id = :user_id`
+
+	progress := []Progress{}
+	if err := database.NamedQuerySlice(ctx, db, q, in, &progress); err != nil {
+		return nil, fmt.Errorf("selecting progress: %w", err)
+	}
+
+	return progress, nil
+}
+
+// func FetchProgress(ctx context.Context, db sqlx.ExtContext, videoID string, userID string) (int, error) {
+// 	in := struct {
+// 		videoID string `db:"video_id"`
+// 		userID  string `db:"user_id"`
+// 	}{
+// 		videoID: videoID,
+// 		userID:  userID,
+// 	}
+
+// 	const q = `
+// 	SELECT
+// 		*
+// 	FROM
+// 		videos_progress
+// 	WHERE
+// 		video_id = :video_id AND user_id = :user_id`
+
+// 	var progress int
+// 	if err := database.NamedQueryStruct(ctx, db, q, in, &progress); err != nil {
+// 		return 0, fmt.Errorf("fetching video[%s] and user[%s] progress: %w", videoID, userID, err)
+// 	}
+
+// 	return progress, nil
+// }

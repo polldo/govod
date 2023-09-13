@@ -93,6 +93,7 @@ func APIMux(cfg APIConfig) http.Handler {
 
 	a.Handle(http.MethodGet, "/courses/owned", course.HandleListOwned(cfg.DB), authen)
 	a.Handle(http.MethodGet, "/courses/{course_id}/videos", video.HandleListByCourse(cfg.DB))
+	a.Handle(http.MethodGet, "/courses/{course_id}/progress", video.HandleListProgressByCourse(cfg.DB), authen)
 	a.Handle(http.MethodGet, "/courses/{id}", course.HandleShow(cfg.DB))
 	a.Handle(http.MethodGet, "/courses", course.HandleList(cfg.DB))
 	a.Handle(http.MethodPost, "/courses", course.HandleCreate(cfg.DB), admin)
@@ -102,6 +103,7 @@ func APIMux(cfg APIConfig) http.Handler {
 	a.Handle(http.MethodGet, "/videos/{id}", video.HandleShow(cfg.DB))
 	a.Handle(http.MethodGet, "/videos", video.HandleList(cfg.DB))
 	a.Handle(http.MethodPost, "/videos", video.HandleCreate(cfg.DB), admin)
+	a.Handle(http.MethodPut, "/videos/{id}/progress", video.HandleUpdateProgress(cfg.DB), authen)
 	a.Handle(http.MethodPut, "/videos/{id}", video.HandleUpdate(cfg.DB), admin)
 
 	a.Handle(http.MethodGet, "/cart", cart.HandleShow(cfg.DB), authen)

@@ -14,6 +14,7 @@ export default function VideoJS(props: VideoJSProps) {
     const playerRef = useRef<Player | null>(null)
 
     useEffect(() => {
+        console.log(props.options)
         if (!playerRef.current && videoRef.current) {
             const videoElement = document.createElement('video-js')
             videoRef.current.appendChild(videoElement)
@@ -39,6 +40,14 @@ export default function VideoJS(props: VideoJSProps) {
             }
         }
     }, [playerRef])
+
+    useEffect(() => {
+        console.log('video player mounted')
+
+        return () => {
+            console.log('video player UNmounted')
+        }
+    }, [])
 
     return (
         <div data-vjs-player>

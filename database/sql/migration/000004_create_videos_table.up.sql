@@ -15,3 +15,17 @@ CREATE TABLE IF NOT EXISTS videos
 	FOREIGN KEY (course_id) REFERENCES courses(course_id) ON DELETE CASCADE,
 	UNIQUE(course_id, index)
 );
+
+CREATE TABLE IF NOT EXISTS videos_progress
+(
+	video_id      UUID                        NOT NULL,
+	user_id       UUID                        NOT NULL,
+	progress      INT                         NOT NULL,
+	created_at    TIMESTAMP                   NOT NULL DEFAULT NOW(),
+	updated_at    TIMESTAMP                   NOT NULL DEFAULT NOW(),
+
+	CHECK (progress BETWEEN 0 AND 100),
+	PRIMARY KEY (video_id, user_id),
+	FOREIGN KEY (video_id) REFERENCES videos(video_id) ON DELETE CASCADE,
+	FOREIGN KEY (user_id) REFERENCES users(user_id) ON DELETE CASCADE
+);

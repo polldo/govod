@@ -206,18 +206,97 @@ func HandleShowFull(db *sqlx.DB) web.Handler {
 			return weberr.InternalError(err)
 		}
 
+		progress, err := FetchUserProgressByCourse(ctx, db, clm.UserID, video.CourseID)
+		if err != nil {
+			return err
+		}
+
 		fullVideo := struct {
-			Course    course.Course `json:"course"`
-			Video     Video         `json:"video"`
-			AllVideos []Video       `json:"all_videos"`
-			URL       string        `json:"url"`
+			Course      course.Course `json:"course"`
+			Video       Video         `json:"video"`
+			AllVideos   []Video       `json:"all_videos"`
+			AllProgress []Progress    `json:"all_progress"`
+			URL         string        `json:"url"`
 		}{
-			Course:    crs,
-			Video:     video,
-			URL:       video.URL,
-			AllVideos: videos,
+			Course:      crs,
+			Video:       video,
+			AllVideos:   videos,
+			AllProgress: progress,
+			URL:         video.URL,
 		}
 
 		return web.Respond(ctx, w, fullVideo, http.StatusOK)
+	}
+}
+
+func HandleUpdateProgress(db *sqlx.DB) web.Handler {
+	return func(ctx context.Context, w http.ResponseWriter, r *http.Request) error {
+		videoID := web.Param(r, "id")
+
+		clm, err := claims.Get(ctx)
+		if err != nil {
+			return weberr.NotAuthorized(errors.New("user not authenticated"))
+		}
+
+		var up ProgressUp
+		if err := web.Decode(r, &up); err != nil {
+			err = fmt.Errorf("unable to decode payload: %w", err)
+			return weberr.NewError(err, err.Error(), http.StatusBadRequest)
+		}
+
+		if err := validate.Check(up); err != nil {
+			err = fmt.Errorf("validating data: %w", err)
+			return weberr.NewError(err, err.Error(), http.StatusBadRequest)
+		}
+
+		if err := UpdateProgress(ctx, db, clm.UserID, videoID, up.Progress); err != nil {
+			return weberr.InternalError(fmt.Errorf("updating video progress: %w", err))
+		}
+
+		return web.Respond(ctx, w, nil, http.StatusNoContent)
+	}
+}
+
+func HandleListProgressByCourse(db *sqlx.DB) web.Handler {
+	return func(ctx context.Context, w http.ResponseWriter, r *http.Request) error {
+		courseID := web.Param(r, "course_id")
+
+		if err := validate.CheckID(courseID); err != nil {
+			err = fmt.Errorf("passed id is not valid: %w", err)
+			return weberr.NewError(err, err.Error(), http.StatusBadRequest)
+		}
+
+		clm, err := claims.Get(ctx)
+		if err != nil {
+			return weberr.NotAuthorized(errors.New("user not authenticated"))
+		}
+
+		progress, err := FetchUserProgressByCourse(ctx, db, clm.UserID, courseID)
+		if err != nil {
+			return weberr.InternalError(err)
+		}
+
+		return web.Respond(ctx, w, progress, http.StatusOK)
+	}
+}
+
+func HandleShowProgress(db *sqlx.DB) web.Handler {
+	return func(ctx context.Context, w http.ResponseWriter, r *http.Request) error {
+		videoID := web.Param(r, "id")
+
+		if err := validate.CheckID(videoID); err != nil {
+			err = fmt.Errorf("passed id is not valid: %w", err)
+			return weberr.NewError(err, err.Error(), http.StatusBadRequest)
+		}
+
+		video, err := Fetch(ctx, db, videoID)
+		if err != nil {
+			if errors.Is(err, database.ErrDBNotFound) {
+				return weberr.NewError(err, err.Error(), http.StatusBadRequest)
+			}
+			return weberr.InternalError(err)
+		}
+
+		return web.Respond(ctx, w, video, http.StatusOK)
 	}
 }

@@ -20,9 +20,19 @@ type Video = {
     description: string
 }
 
+type Progress = {
+    video_id: string
+    progress: number
+}
+
+type ProgressMap = {
+    [videoId: string]: number
+}
+
 export default function DashboardCourse() {
     const [course, setCourse] = useState<Course>()
     const [videos, setVideos] = useState<Video[]>()
+    const [progress, setProgress] = useState<ProgressMap>({})
     const { isLoggedIn, isLoading } = useSession()
     const fetch = useFetch()
     const router = useRouter()
@@ -32,7 +42,6 @@ export default function DashboardCourse() {
         if (!router.isReady) {
             return
         }
-
         fetch('http://mylocal.com:8000/courses/' + id)
             .then((res) => {
                 if (!res.ok) {
@@ -50,7 +59,29 @@ export default function DashboardCourse() {
         if (!router.isReady) {
             return
         }
+        fetch('http://mylocal.com:8000/courses/' + id + '/progress')
+            .then((res) => {
+                if (!res.ok) {
+                    throw new Error()
+                }
+                return res.json()
+            })
+            .then((data) => {
+                let map: ProgressMap = {}
+                data.forEach((progress: Progress) => {
+                    map[progress.video_id] = progress.progress
+                })
+                setProgress(map)
+            })
+            .catch(() => {
+                toast.error('Something went wrong')
+            })
+    }, [id, fetch, router.isReady])
 
+    useEffect(() => {
+        if (!router.isReady) {
+            return
+        }
         fetch('http://mylocal.com:8000/courses/' + id + '/videos')
             .then((res) => {
                 if (!res.ok) {
@@ -86,7 +117,10 @@ export default function DashboardCourse() {
                     <p>{course?.description}</p>
 
                     <div className="flex flex-col items-center space-y-5 pt-6 pb-6">
-                        {videos && videos.map((video) => <Card {...video} key={video.name} />)}
+                        {videos &&
+                            videos.map((video) => (
+                                <Card {...video} progress={progress[video.id] || 0} key={video.name} />
+                            ))}
                     </div>
                 </div>
             </Layout>
@@ -94,7 +128,11 @@ export default function DashboardCourse() {
     )
 }
 
-function Card(props: Video) {
+type CardProps = Video & {
+    progress: number
+}
+
+function Card(props: CardProps) {
     return (
         <a
             href={`/dashboard/video/${props.id}`}
@@ -112,6 +150,8 @@ function Card(props: Video) {
                 <h5 className="mb-2 text-2xl font-bold tracking-tight text-gray-900 dark:text-white">{props.name}</h5>
                 <p className="mb-3 font-normal text-gray-700 dark:text-gray-400">{props.description}</p>
             </div>
+
+            <p>progress: {props.progress}</p>
         </a>
     )
 }
