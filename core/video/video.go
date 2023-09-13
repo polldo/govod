@@ -37,3 +37,15 @@ type VideoUp struct {
 	Free        *bool   `json:"free"`
 	URL         *string `json:"url" validate:"omitempty,url"`
 }
+
+type Progress struct {
+	VideoID   string    `json:"video_id" db:"video_id"`
+	UserID    string    `json:"user_id" db:"user_id"`
+	Progress  int       `json:"progress" db:"progress"`
+	CreatedAt time.Time `json:"created_at" db:"created_at"`
+	UpdatedAt time.Time `json:"updated_at" db:"updated_at"`
+}
+
+type ProgressUp struct {
+	Progress int `json:"progress" validate:"gte=0,lte=100"`
+}

@@ -4,6 +4,8 @@ import Head from 'next/head'
 import Link from 'next/link'
 import { useEffect } from 'react'
 import { useState } from 'react'
+import { useRef } from 'react'
+import { useCallback } from 'react'
 import { useRouter } from 'next/router'
 import { useFetch } from '@/services/fetch'
 import { toast } from 'react-hot-toast'
@@ -22,16 +24,33 @@ type Video = {
     description: string
 }
 
+type Progress = {
+    video_id: string
+    progress: number
+}
+
+type ProgressMap = {
+    [videoId: string]: number
+}
+
 export default function CourseDetails() {
     const [video, setVideo] = useState<Video>()
     const [url, setUrl] = useState<string>()
     const [course, setCourse] = useState<Course>()
     const [videos, setVideos] = useState<Video[]>()
+    const [progress, setProgress] = useState<ProgressMap>({})
+    const [completed, setCompleted] = useState<boolean>()
     const { isLoggedIn, isLoading } = useSession()
+
     const fetch = useFetch()
     const router = useRouter()
     const { id } = router.query
+
+    // Refs are needed to synchronise react with the video player.
     const playerRef = React.useRef(null)
+    const progressRef = useRef<number>(0)
+    const lastProgressRef = useRef<number>(0)
+    const startRef = useRef<number>(0)
 
     useEffect(() => {
         if (!router.isReady) {
@@ -49,19 +68,83 @@ export default function CourseDetails() {
                 setCourse(data.course)
                 setVideos(data.all_videos)
                 setUrl(data.url)
+
+                // Keep progress in a map to make data more accessible given a video id.
+                let map: ProgressMap = {}
+                data.all_progress.forEach((progress: Progress) => {
+                    map[progress.video_id] = progress.progress
+                })
+                setProgress(map)
+
+                // The starting time of the video will depend on the user progress.
+                startRef.current = map[data.video.id] || 0
             })
             .catch(() => {
                 toast.error('Something went wrong')
             })
     }, [id, fetch, router.isReady])
 
-    if (isLoading) {
-        return null
-    }
+    const sendProgress = useCallback(
+        (id: string) => {
+            fetch('http://mylocal.com:8000/videos/' + id + '/progress', {
+                method: 'PUT',
+                body: JSON.stringify({ progress: progressRef.current }),
+            })
+                .then(() => {
+                    lastProgressRef.current = progressRef.current
+                })
+                .catch()
+        },
+        [fetch]
+    )
 
-    if (!isLoggedIn) {
-        router.push('/login')
-        return null
+    // Send any NEW progress every 20 seconds.
+    useEffect(() => {
+        if (!video) {
+            return
+        }
+        const interval = setInterval(() => {
+            if (progressRef.current === lastProgressRef.current) {
+                return
+            }
+            sendProgress(video.id)
+        }, 20000)
+        return () => {
+            clearInterval(interval)
+        }
+    }, [fetch, video, sendProgress])
+
+    // Send the progress immediately if the video is completed.
+    useEffect(() => {
+        if (!video) {
+            return
+        }
+        if (!completed) {
+            return
+        }
+        sendProgress(video.id)
+    }, [video, completed, sendProgress])
+
+    const handlePlayerReady = (player: any) => {
+        playerRef.current = player
+        player.on('loadstart', () => {
+            // Setting the poster to empty string seems to be the
+            // only solution to keep it updated when the URL is changed.
+            player.poster('')
+            const tot: number = player.duration()
+            const start = (tot * startRef.current) / 100
+            // if (start > 10) { // Have to decide on this one...
+            player.currentTime(start)
+            player.play()
+            // }
+        })
+        player.on('timeupdate', () => {
+            // Floor is better than ceiling when dealing with long videos (to avoid going too far).
+            progressRef.current = Math.floor((player.currentTime() * 100) / player.duration())
+        })
+        player.on('ended', () => {
+            setCompleted(true)
+        })
     }
 
     const videoJsOptions = {
@@ -77,10 +160,17 @@ export default function CourseDetails() {
         ],
     }
 
-    const handlePlayerReady = (player: any) => {
-        playerRef.current = player
-        player.on('waiting', () => {})
-        player.on('dispose', () => {})
+    if (isLoading) {
+        return null
+    }
+
+    if (!isLoggedIn) {
+        router.push('/login')
+        return null
+    }
+
+    if (!video || !videos) {
+        return null
     }
 
     var next = ''
@@ -112,20 +202,19 @@ export default function CourseDetails() {
                         </div>
 
                         <div className="mx-0 mt-10 hidden w-[300px] flex-col overflow-y-scroll border border-black lg:mr-auto lg:flex lg:max-h-[394px] xl:max-h-[478px]">
-                            {videos &&
-                                video &&
-                                videos
-                                    .slice()
-                                    .sort((a, b) => a.index - b.index)
-                                    .map((vid) => (
-                                        <Link
-                                            key={vid.name}
-                                            href={`/dashboard/video/${encodeURIComponent(vid.id)}`}
-                                            className="mx-2 my-2 text-sm"
-                                        >
-                                            {vid.name} {vid.index == video.index ? '<' : ''}
-                                        </Link>
-                                    ))}
+                            {videos
+                                .slice()
+                                .sort((a, b) => a.index - b.index)
+                                .map((vid) => (
+                                    <Link
+                                        key={vid.name}
+                                        href={`/dashboard/video/${encodeURIComponent(vid.id)}`}
+                                        className="mx-2 my-2 text-sm"
+                                    >
+                                        {vid.name} {vid.index === video.index ? '<' : ''}
+                                        {vid.index !== video.index ? (progress[vid.id] || 0) + '%' : ''}
+                                    </Link>
+                                ))}
                             {!videos && <p>No videos here.</p>}
                         </div>
                     </div>
