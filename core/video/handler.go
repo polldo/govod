@@ -250,7 +250,7 @@ func HandleUpdateProgress(db *sqlx.DB) web.Handler {
 		}
 
 		if err := UpdateProgress(ctx, db, clm.UserID, videoID, up.Progress); err != nil {
-			return weberr.InternalError(fmt.Errorf("updating video progress: %w", err))
+			return fmt.Errorf("updating video progress: %w", err)
 		}
 
 		return web.Respond(ctx, w, nil, http.StatusNoContent)
