@@ -102,10 +102,14 @@ export default function CourseDetails() {
 
     const handlePlayerReady = (player: any) => {
         playerRef.current = player
-        player.on('ratechange', () => {
+        player.on('loadstart', () => {
+            player.poster('')
             const tot: number = player.duration()
             const start = (tot * startRef.current) / 100
-            player.currentTime(start)
+            if (start > 10) {
+                player.currentTime(start)
+                player.play()
+            }
         })
         player.on('timeupdate', () => {
             progressRef.current = Math.floor((player.currentTime() * 100) / player.duration())
