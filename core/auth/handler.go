@@ -175,7 +175,7 @@ func HandleLogout(session *scs.SessionManager) web.Handler {
 	}
 }
 
-func HandleSignup(db *sqlx.DB) web.Handler {
+func HandleSignup(db *sqlx.DB, session *scs.SessionManager, activationRequired bool) web.Handler {
 	return func(ctx context.Context, w http.ResponseWriter, r *http.Request) error {
 		var u user.UserSignup
 		if err := web.Decode(r, &u); err != nil {
@@ -202,7 +202,7 @@ func HandleSignup(db *sqlx.DB) web.Handler {
 			PasswordHash: hash,
 			CreatedAt:    now,
 			UpdatedAt:    now,
-			Active:       false,
+			Active:       !activationRequired,
 		}
 
 		if err := user.Create(ctx, db, usr); err != nil {
@@ -210,6 +210,16 @@ func HandleSignup(db *sqlx.DB) web.Handler {
 				return weberr.NewError(err, err.Error(), http.StatusConflict)
 			}
 			return err
+		}
+
+		if !activationRequired {
+			// TODO: Save the entire user struct in the session
+			// or just some info?
+			session.Put(ctx, userKey, usr.ID)
+			session.Put(ctx, roleKey, usr.Role)
+			if err := session.RenewToken(ctx); err != nil {
+				return err
+			}
 		}
 
 		return web.Respond(ctx, w, usr, http.StatusCreated)

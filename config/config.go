@@ -12,6 +12,7 @@ type Config struct {
 	Paypal Paypal
 	Stripe Stripe
 	Oauth  Oauth
+	Auth   Auth
 }
 
 type Cors struct {
@@ -65,4 +66,8 @@ type Oauth struct {
 		URL         string `conf:"default:https://accounts.google.com"`
 		RedirectURL string `conf:"default:http://mylocal.com:8000/auth/oauth-callback/google"`
 	}
+}
+
+type Auth struct {
+	ActivationRequired bool `conf:"default:false"`
 }

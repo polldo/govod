@@ -3,14 +3,16 @@ import Head from 'next/head'
 import { useState } from 'react'
 import { useRouter } from 'next/router'
 import { useSession } from '@/session/context'
+import { useFetch } from '@/services/fetch'
 
 export default function Signup() {
     const [name, setName] = useState('')
     const [email, setEmail] = useState('')
     const [password, setPassword] = useState('')
     const [error, setError] = useState<string>('')
-    const { isLoggedIn, isLoading } = useSession()
+    const { isLoggedIn, isLoading, updateSession } = useSession()
     const router = useRouter()
+    const fetch = useFetch()
 
     if (isLoading) {
         return null
@@ -46,6 +48,10 @@ export default function Signup() {
                 throw new Error('Something went wrong')
             }
 
+            if (data.active) {
+                updateSession()
+                return
+            }
             router.push({ pathname: '/activate/require', query: { email } })
         } catch (err) {
             if (err instanceof Error) {

@@ -98,17 +98,18 @@ func Run(logger *logrus.Logger) error {
 
 	// Construct the mux for the API calls.
 	mux := api.APIMux(api.APIConfig{
-		CorsOrigin:       cfg.Cors.Origin,
-		Log:              logger,
-		DB:               db,
-		Session:          sessionManager,
-		Mailer:           mail,
-		Background:       bg,
-		Paypal:           pp,
-		Stripe:           strp,
-		StripeCfg:        cfg.Stripe,
-		Providers:        oauthProvs,
-		LoginRedirectURL: cfg.Oauth.LoginRedirectURL,
+		CorsOrigin:         cfg.Cors.Origin,
+		Log:                logger,
+		DB:                 db,
+		Session:            sessionManager,
+		Mailer:             mail,
+		Background:         bg,
+		Paypal:             pp,
+		Stripe:             strp,
+		StripeCfg:          cfg.Stripe,
+		Providers:          oauthProvs,
+		LoginRedirectURL:   cfg.Oauth.LoginRedirectURL,
+		ActivationRequired: cfg.Auth.ActivationRequired,
 	})
 
 	// Construct a server to service the requests against the mux.
