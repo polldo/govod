@@ -15,6 +15,7 @@ type Course = {
 }
 
 type Video = {
+    id: string
     name: string
     description: string
     free: boolean
@@ -126,7 +127,10 @@ function Card(props: Video) {
             </div>
 
             {props.free && (
-                <Link href="#" className="rounded bg-blue-500 p-4 font-semibold text-white">
+                <Link
+                    href={`/courses/video/${encodeURIComponent(props.id)}`}
+                    className="rounded bg-blue-500 p-4 font-semibold text-white"
+                >
                     Play
                 </Link>
             )}

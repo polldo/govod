@@ -100,6 +100,7 @@ func APIMux(cfg APIConfig) http.Handler {
 	a.Handle(http.MethodPut, "/courses/{id}", course.HandleUpdate(cfg.DB), admin)
 
 	a.Handle(http.MethodGet, "/videos/{id}/full", video.HandleShowFull(cfg.DB), authen)
+	a.Handle(http.MethodGet, "/videos/{id}/free", video.HandleShowFree(cfg.DB))
 	a.Handle(http.MethodGet, "/videos/{id}", video.HandleShow(cfg.DB))
 	a.Handle(http.MethodGet, "/videos", video.HandleList(cfg.DB))
 	a.Handle(http.MethodPost, "/videos", video.HandleCreate(cfg.DB), admin)

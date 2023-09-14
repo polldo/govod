@@ -229,6 +229,46 @@ func HandleShowFull(db *sqlx.DB) web.Handler {
 	}
 }
 
+func HandleShowFree(db *sqlx.DB) web.Handler {
+	return func(ctx context.Context, w http.ResponseWriter, r *http.Request) error {
+		videoID := web.Param(r, "id")
+
+		if err := validate.CheckID(videoID); err != nil {
+			err = fmt.Errorf("passed id is not valid: %w", err)
+			return weberr.NewError(err, err.Error(), http.StatusBadRequest)
+		}
+
+		video, err := Fetch(ctx, db, videoID)
+		if err != nil {
+			if errors.Is(err, database.ErrDBNotFound) {
+				return weberr.NewError(err, "video not found", http.StatusBadRequest)
+			}
+			return err
+		}
+
+		if !video.Free {
+			return weberr.NewError(err, "access forbidden", http.StatusForbidden)
+		}
+
+		crs, err := course.Fetch(ctx, db, video.CourseID)
+		if err != nil {
+			return err
+		}
+
+		freeVideo := struct {
+			Course course.Course `json:"course"`
+			Video  Video         `json:"video"`
+			URL    string        `json:"url"`
+		}{
+			Course: crs,
+			Video:  video,
+			URL:    video.URL,
+		}
+
+		return web.Respond(ctx, w, freeVideo, http.StatusOK)
+	}
+}
+
 func HandleUpdateProgress(db *sqlx.DB) web.Handler {
 	return func(ctx context.Context, w http.ResponseWriter, r *http.Request) error {
 		videoID := web.Param(r, "id")
