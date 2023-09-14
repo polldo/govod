@@ -112,7 +112,9 @@ export default function CourseDetails() {
             // only solution to keep it updated when the URL is changed.
             player.poster('')
             const tot: number = player.duration()
-            const start = (tot * startRef.current) / 100
+            // Start the video from the beginning if it was completed, otherwise videojs remains blocked.
+            const adjust = startRef.current === 100 ? 0 : startRef.current
+            const start = (tot * adjust) / 100
             player.currentTime(start)
             player.play()
         })
