@@ -45,7 +45,6 @@ export default function CourseDetails() {
     const { id } = router.query
 
     // Refs are needed to synchronise react with the video player.
-    const playerRef = React.useRef(null)
     const progressRef = useRef<number>(0)
     const lastProgressRef = useRef<number>(0)
     const startRef = useRef<number>(0)
@@ -106,7 +105,6 @@ export default function CourseDetails() {
     }, [fetch, video])
 
     const handlePlayerReady = (player: any) => {
-        playerRef.current = player
         player.on('loadstart', () => {
             // Setting the poster to empty string seems to be the
             // only solution to keep it updated when the URL is changed.
