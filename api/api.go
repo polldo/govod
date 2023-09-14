@@ -27,17 +27,18 @@ import (
 
 // APIConfig contains all the mandatory dependencies required by handlers.
 type APIConfig struct {
-	CorsOrigin       string
-	Log              logrus.FieldLogger
-	DB               *sqlx.DB
-	Session          *scs.SessionManager
-	Mailer           token.Mailer
-	Background       *background.Background
-	Paypal           *paypal.Client
-	Stripe           *stripecl.API
-	StripeCfg        config.Stripe
-	Providers        map[string]auth.Provider
-	LoginRedirectURL string
+	CorsOrigin         string
+	Log                logrus.FieldLogger
+	DB                 *sqlx.DB
+	Session            *scs.SessionManager
+	Mailer             token.Mailer
+	Background         *background.Background
+	Paypal             *paypal.Client
+	Stripe             *stripecl.API
+	StripeCfg          config.Stripe
+	Providers          map[string]auth.Provider
+	LoginRedirectURL   string
+	ActivationRequired bool
 }
 
 // api represents our server api.
@@ -77,7 +78,7 @@ func APIMux(cfg APIConfig) http.Handler {
 	admin := auth.Admin(cfg.Session)
 
 	// Setup the handlers.
-	a.Handle(http.MethodPost, "/auth/signup", auth.HandleSignup(cfg.DB))
+	a.Handle(http.MethodPost, "/auth/signup", auth.HandleSignup(cfg.DB, cfg.Session, cfg.ActivationRequired))
 	a.Handle(http.MethodPost, "/auth/login", auth.HandleLogin(cfg.DB, cfg.Session))
 	a.Handle(http.MethodPost, "/auth/logout", auth.HandleLogout(cfg.Session))
 	a.Handle(http.MethodGet, "/auth/oauth-login/{provider}", auth.HandleOauthLogin(cfg.Session, cfg.Providers))
