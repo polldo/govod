@@ -5,7 +5,6 @@ import Link from 'next/link'
 import { useEffect } from 'react'
 import { useState } from 'react'
 import { useRef } from 'react'
-import { useCallback } from 'react'
 import { useRouter } from 'next/router'
 import { useFetch } from '@/services/fetch'
 import { toast } from 'react-hot-toast'
@@ -39,7 +38,6 @@ export default function CourseDetails() {
     const [course, setCourse] = useState<Course>()
     const [videos, setVideos] = useState<Video[]>()
     const [progress, setProgress] = useState<ProgressMap>({})
-    const [completed, setCompleted] = useState<boolean>()
     const { isLoggedIn, isLoading } = useSession()
 
     const fetch = useFetch()
@@ -47,7 +45,6 @@ export default function CourseDetails() {
     const { id } = router.query
 
     // Refs are needed to synchronise react with the video player.
-    const playerRef = React.useRef(null)
     const progressRef = useRef<number>(0)
     const lastProgressRef = useRef<number>(0)
     const startRef = useRef<number>(0)
@@ -84,20 +81,6 @@ export default function CourseDetails() {
             })
     }, [id, fetch, router.isReady])
 
-    const sendProgress = useCallback(
-        (id: string) => {
-            fetch('http://mylocal.com:8000/videos/' + id + '/progress', {
-                method: 'PUT',
-                body: JSON.stringify({ progress: progressRef.current }),
-            })
-                .then(() => {
-                    lastProgressRef.current = progressRef.current
-                })
-                .catch()
-        },
-        [fetch]
-    )
-
     // Send any NEW progress every 20 seconds.
     useEffect(() => {
         if (!video) {
@@ -107,43 +90,35 @@ export default function CourseDetails() {
             if (progressRef.current === lastProgressRef.current) {
                 return
             }
-            sendProgress(video.id)
+            fetch('http://mylocal.com:8000/videos/' + video.id + '/progress', {
+                method: 'PUT',
+                body: JSON.stringify({ progress: progressRef.current }),
+            })
+                .then(() => {
+                    lastProgressRef.current = progressRef.current
+                })
+                .catch()
         }, 20000)
         return () => {
             clearInterval(interval)
         }
-    }, [fetch, video, sendProgress])
-
-    // Send the progress immediately if the video is completed.
-    useEffect(() => {
-        if (!video) {
-            return
-        }
-        if (!completed) {
-            return
-        }
-        sendProgress(video.id)
-    }, [video, completed, sendProgress])
+    }, [fetch, video])
 
     const handlePlayerReady = (player: any) => {
-        playerRef.current = player
         player.on('loadstart', () => {
             // Setting the poster to empty string seems to be the
             // only solution to keep it updated when the URL is changed.
             player.poster('')
             const tot: number = player.duration()
-            const start = (tot * startRef.current) / 100
-            // if (start > 10) { // Have to decide on this one...
+            // Start the video from the beginning if it was completed, otherwise videojs remains blocked.
+            const adjust = startRef.current === 100 ? 0 : startRef.current
+            const start = (tot * adjust) / 100
             player.currentTime(start)
             player.play()
-            // }
         })
         player.on('timeupdate', () => {
             // Floor is better than ceiling when dealing with long videos (to avoid going too far).
             progressRef.current = Math.floor((player.currentTime() * 100) / player.duration())
-        })
-        player.on('ended', () => {
-            setCompleted(true)
         })
     }
 
