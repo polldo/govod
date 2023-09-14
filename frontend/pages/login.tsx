@@ -5,6 +5,7 @@ import { Buffer } from 'buffer'
 import { useRouter } from 'next/router'
 import { useSession } from '@/session/context'
 import { useFetch } from '@/services/fetch'
+import Link from 'next/link'
 
 export default function Login() {
     const [email, setEmail] = useState('')
@@ -121,6 +122,16 @@ export default function Login() {
                         >
                             Login with Google
                         </button>
+
+                        <div className="mt-4 flex flex-col">
+                            <p className="mx-auto"> -- or --</p>
+                            <Link
+                                href={`/signup`}
+                                className="mt-4 w-full rounded bg-gray-500 p-2 text-center font-semibold text-white"
+                            >
+                                <p>Signup</p>
+                            </Link>
+                        </div>
                     </form>
                 </div>
             </Layout>
