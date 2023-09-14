@@ -136,7 +136,7 @@ func FetchItems(ctx context.Context, db sqlx.ExtContext, userID string) ([]Item,
 	ORDER BY
 		course_id`
 
-	var ci []Item
+	ci := []Item{}
 	if err := database.NamedQuerySlice(ctx, db, q, in, &ci); err != nil {
 		return nil, fmt.Errorf("selecting cart items of user[%s]: %w", userID, err)
 	}

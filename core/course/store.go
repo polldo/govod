@@ -85,7 +85,7 @@ func FetchAll(ctx context.Context, db sqlx.ExtContext) ([]Course, error) {
 	ORDER BY
 		course_id`
 
-	var cs []Course
+	cs := []Course{}
 	if err := database.NamedQuerySlice(ctx, db, q, struct{}{}, &cs); err != nil {
 		return nil, fmt.Errorf("selecting all courses: %w", err)
 	}
@@ -122,7 +122,7 @@ func FetchByOwner(ctx context.Context, db sqlx.ExtContext, userID string) ([]Cou
 	ORDER BY
 		c.course_id`
 
-	var cs []Course
+	cs := []Course{}
 	if err := database.NamedQuerySlice(ctx, db, q, in, &cs); err != nil {
 		return nil, fmt.Errorf("selecting all courses: %w", err)
 	}

@@ -156,7 +156,10 @@ func NamedQuerySlice[T any](ctx context.Context, db sqlx.ExtContext, query strin
 		}
 		slice = append(slice, *v)
 	}
-	*dest = slice
+
+	if slice != nil {
+		*dest = slice
+	}
 
 	return nil
 }

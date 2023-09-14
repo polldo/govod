@@ -38,11 +38,6 @@ func HandleShow(db *sqlx.DB) web.Handler {
 			return err
 		}
 
-		// Return empty slice instead of nil.
-		if cart.Items == nil {
-			cart.Items = []Item{}
-		}
-
 		return web.Respond(ctx, w, cart, http.StatusOK)
 	}
 }
