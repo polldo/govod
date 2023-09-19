@@ -37,7 +37,9 @@ export default function Confirm() {
             }
 
             setActivated(true)
-            router.push('/dashboard')
+            setTimeout(() => {
+                router.push('/login')
+            }, 1500)
         } catch (err) {
             if (err instanceof Error) {
                 setError(err.message)
