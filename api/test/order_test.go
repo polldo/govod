@@ -38,7 +38,7 @@ func TestOrder(t *testing.T) {
 	c4 := ct.createCourseOK(t)
 
 	// Initially the user doesn't own any course.
-	ct.listCoursesOwnedOK(t, nil)
+	ct.listCoursesOwnedOK(t, []course.Course{})
 
 	// Add courses to the cart.
 	rt.createItemOK(t, c1.ID)

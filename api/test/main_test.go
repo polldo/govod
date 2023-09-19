@@ -278,15 +278,16 @@ func NewTestEnv(t *testing.T, dbname string) (*TestEnv, error) {
 	})
 
 	api := api.APIMux(api.APIConfig{
-		CorsOrigin: "",
-		Log:        log,
-		DB:         dbEnv,
-		Session:    sess,
-		Mailer:     mail,
-		Background: bg,
-		Paypal:     pp,
-		Stripe:     strp,
-		StripeCfg:  strpcfg,
+		CorsOrigin:         "",
+		Log:                log,
+		DB:                 dbEnv,
+		Session:            sess,
+		Mailer:             mail,
+		Background:         bg,
+		Paypal:             pp,
+		Stripe:             strp,
+		StripeCfg:          strpcfg,
+		ActivationRequired: true,
 	})
 
 	jar, err := cookiejar.New(nil)
