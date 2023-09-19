@@ -61,7 +61,11 @@ func Run(logger *logrus.Logger) error {
 	sessionManager.Lifetime = 24 * time.Hour
 
 	// Build a mailer.
-	mail := email.New(cfg.Email.Address, cfg.Email.Password, cfg.Email.Host, cfg.Email.Port)
+	links := email.Links{
+		ActivationURL:    cfg.Email.ActivationURL,
+		ResetPasswordURL: cfg.Email.ResetPasswordURL,
+	}
+	mail := email.New(cfg.Email.Address, cfg.Email.Password, cfg.Email.Host, cfg.Email.Port, links)
 
 	// Init a background manager to safely spawn go-routines.
 	bg := background.New(logger)

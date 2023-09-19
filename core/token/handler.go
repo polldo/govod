@@ -19,7 +19,8 @@ import (
 )
 
 type Mailer interface {
-	SendToken(scope string, token string, to string) error
+	SendActivationToken(token string, to string) error
+	SendResetToken(token string, to string) error
 }
 
 // TODO: Rate-limit or introduce a timeout between several requests.
@@ -90,9 +91,17 @@ func HandleToken(db *sqlx.DB, mailer Mailer, bg *background.Background) web.Hand
 		}
 
 		bg.Add(func() error {
-			// Add multiple tries ??
-			if err := mailer.SendToken(scope, text, usr.Email); err != nil {
-				return fmt.Errorf("failed to send token %s to %s: %w", scope, usr.Email, err)
+			switch scope {
+			case ActivationToken:
+				if err := mailer.SendActivationToken(text, usr.Email); err != nil {
+					return fmt.Errorf("failed to send activation token %s to %s: %w", scope, usr.Email, err)
+				}
+			case RecoveryToken:
+				if err := mailer.SendResetToken(text, usr.Email); err != nil {
+					return fmt.Errorf("failed to send reset token %s to %s: %w", scope, usr.Email, err)
+				}
+			default:
+				return fmt.Errorf("scope %s is not supported", scope)
 			}
 			return nil
 		})
