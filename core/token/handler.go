@@ -98,7 +98,7 @@ func HandleToken(db *sqlx.DB, mailer Mailer, bg *background.Background) web.Hand
 				}
 			case RecoveryToken:
 				if err := mailer.SendRecoveryToken(text, usr.Email); err != nil {
-					return fmt.Errorf("failed to send reset token %s to %s: %w", scope, usr.Email, err)
+					return fmt.Errorf("failed to send recovery token %s to %s: %w", scope, usr.Email, err)
 				}
 			default:
 				return fmt.Errorf("scope %s is not supported", scope)
