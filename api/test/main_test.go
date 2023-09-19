@@ -116,7 +116,12 @@ type mockMailer struct {
 	token string
 }
 
-func (m *mockMailer) SendToken(scope string, token string, dst string) error {
+func (m *mockMailer) SendActivationToken(token string, dst string) error {
+	m.token = token
+	return nil
+}
+
+func (m *mockMailer) SendRecoveryToken(token string, dst string) error {
 	m.token = token
 	return nil
 }
