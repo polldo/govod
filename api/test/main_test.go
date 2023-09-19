@@ -121,7 +121,7 @@ func (m *mockMailer) SendActivationToken(token string, dst string) error {
 	return nil
 }
 
-func (m *mockMailer) SendResetToken(token string, dst string) error {
+func (m *mockMailer) SendRecoveryToken(token string, dst string) error {
 	m.token = token
 	return nil
 }

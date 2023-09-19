@@ -20,8 +20,8 @@ type Emailer struct {
 }
 
 type Links struct {
-	ResetPasswordURL string
-	ActivationURL    string
+	RecoveryURL   string
+	ActivationURL string
 }
 
 func New(address string, password string, host string, port string, links Links) *Emailer {
@@ -55,7 +55,7 @@ func (e *Emailer) SendActivationToken(token string, to string) error {
 	return smtp.SendMail(e.host, e.auth, e.from, []string{to}, bytes)
 }
 
-func (e *Emailer) SendResetToken(token string, to string) error {
+func (e *Emailer) SendRecoveryToken(token string, to string) error {
 	t, err := template.New("email").ParseFS(templates, "templates/reset-password.tmpl")
 	if err != nil {
 		return fmt.Errorf("parsing email template: %w", err)
@@ -64,7 +64,7 @@ func (e *Emailer) SendResetToken(token string, to string) error {
 	var data struct {
 		Link string
 	}
-	data.Link = e.links.ResetPasswordURL + token
+	data.Link = e.links.RecoveryURL + token
 
 	var body bytes.Buffer
 	err = t.ExecuteTemplate(&body, "html", data)

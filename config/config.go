@@ -38,12 +38,12 @@ type DB struct {
 }
 
 type Email struct {
-	Host             string
-	Port             string
-	Address          string
-	Password         string
-	ResetPasswordURL string `conf:"default:http://mylocal.com:3000/password/confirm?token="`
-	ActivationURL    string `conf:"default:http://mylocal.com:3000/activate/confirm?token="`
+	Host          string
+	Port          string
+	Address       string
+	Password      string
+	RecoveryURL   string `conf:"default:http://mylocal.com:3000/password/confirm?token="`
+	ActivationURL string `conf:"default:http://mylocal.com:3000/activate/confirm?token="`
 }
 
 type Stripe struct {

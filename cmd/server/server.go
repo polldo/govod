@@ -62,8 +62,8 @@ func Run(logger *logrus.Logger) error {
 
 	// Build a mailer.
 	links := email.Links{
-		ActivationURL:    cfg.Email.ActivationURL,
-		ResetPasswordURL: cfg.Email.ResetPasswordURL,
+		ActivationURL: cfg.Email.ActivationURL,
+		RecoveryURL:   cfg.Email.RecoveryURL,
 	}
 	mail := email.New(cfg.Email.Address, cfg.Email.Password, cfg.Email.Host, cfg.Email.Port, links)
 
