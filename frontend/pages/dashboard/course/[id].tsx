@@ -11,13 +11,14 @@ import { toast } from 'react-hot-toast'
 type Course = {
     name: string
     description: string
-    image: string
+    image_url: string
 }
 
 type Video = {
     id: string
     name: string
     description: string
+    image_url: string
 }
 
 type Progress = {
@@ -141,7 +142,7 @@ function Card(props: CardProps) {
             <Image
                 className="w-full rounded-t-lg border border-red-800 object-contain md:w-20"
                 alt=""
-                src={''}
+                src={props.image_url}
                 width={80}
                 height={32}
             />

@@ -11,7 +11,7 @@ type Course = {
     id: string
     name: string
     description: string
-    image: string
+    image_url: string
 }
 
 type Cart = {
@@ -61,7 +61,7 @@ function Card(props: CardProps) {
             <Image
                 className="w-full rounded-t-lg border border-red-800 object-contain md:w-20"
                 alt=""
-                src={props.image}
+                src={props.image_url}
                 width={80}
                 height={32}
             />
