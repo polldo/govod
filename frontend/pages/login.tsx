@@ -123,7 +123,11 @@ export default function Login() {
                             Login with Google
                         </button>
 
-                        <div className="mt-4 flex flex-col">
+                        <Link href="/password/reset" className="mb-2 text-sm text-blue-500 hover:underline">
+                            Forgot password?
+                        </Link>
+
+                        <div className="mt-2 flex flex-col">
                             <p className="mx-auto"> -- or --</p>
                             <Link
                                 href={`/signup`}
