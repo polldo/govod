@@ -1,0 +1,48 @@
+{{define "html"}}
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>User Activation</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            padding: 20px;
+        }
+
+        .button {
+            display: inline-block;
+            padding: 10px 20px;
+            margin: 20px 0;
+            color: #ffffff;
+            background-color: #28A745;
+            border: none;
+            border-radius: 5px;
+            text-align: center;
+            text-decoration: none;
+            font-size: 16px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+
+        .button:hover {
+            background-color: #1e7e34;
+        }
+    </style>
+  </head>
+
+  <body>
+    <h2>Welcome to Govod</h2>
+    <p>Thank you for registering! To complete your registration and activate your account, please click the button below:</p>
+
+    <a href="{{.Link}}" class="button">Activate Account</a>
+
+    <p>If you did not register for an account, you can safely ignore this email.</p>
+    <p>If you have any questions or concerns, please contact our support team.</p>
+    <p>Thank you,</p>
+    <p>Govod</p>
+  </body>
+
+</html>
+{{end}}
