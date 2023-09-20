@@ -55,6 +55,7 @@ func (vt *videoTest) createVideoOK(t *testing.T, course string, index int) video
 		Description: "This is a test video",
 		Free:        true,
 		URL:         "",
+		ImageURL:    "/images/new.png",
 	}
 
 	body, err := json.Marshal(&v)
@@ -88,6 +89,7 @@ func (vt *videoTest) createVideoOK(t *testing.T, course string, index int) video
 	exp.Name = v.Name
 	exp.Description = v.Description
 	exp.Free = v.Free
+	exp.ImageURL = v.ImageURL
 
 	if diff := cmp.Diff(got, exp); diff != "" {
 		t.Fatalf("wrong video payload. Diff: \n%s", diff)
@@ -109,6 +111,7 @@ func (vt *videoTest) createVideoUnauth(t *testing.T, course course.Course) {
 		Description: "This is a test video",
 		Free:        true,
 		URL:         "",
+		ImageURL:    "/images/new.png",
 	}
 
 	body, err := json.Marshal(&v)
@@ -145,6 +148,7 @@ func (vt *videoTest) createVideoIndexConflict(t *testing.T, course string, index
 		Description: "This is a test video",
 		Free:        true,
 		URL:         "",
+		ImageURL:    "/images/new.png",
 	}
 
 	body, err := json.Marshal(&v)
@@ -180,6 +184,7 @@ func (vt *videoTest) updateVideoOK(t *testing.T, v video.Video) video.Video {
 		Name:        ptr("Video Test" + strconv.Itoa(rand.Intn(1000))),
 		Description: ptr("This is a test video"),
 		Free:        ptr(true),
+		ImageURL:    ptr("/image/updated.png"),
 	}
 
 	body, err := json.Marshal(&vup)
@@ -212,6 +217,7 @@ func (vt *videoTest) updateVideoOK(t *testing.T, v video.Video) video.Video {
 	exp.Name = *vup.Name
 	exp.Description = *vup.Description
 	exp.Free = *vup.Free
+	exp.ImageURL = *vup.ImageURL
 
 	if diff := cmp.Diff(got, exp); diff != "" {
 		t.Fatalf("wrong video payload. Diff: \n%s", diff)

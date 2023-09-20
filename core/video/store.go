@@ -12,9 +12,9 @@ import (
 func Create(ctx context.Context, db sqlx.ExtContext, video Video) error {
 	const q = `
 	INSERT INTO videos
-		(video_id, course_id, index, name, description, free, url, created_at, updated_at)
+		(video_id, course_id, index, name, description, free, url, image_url, created_at, updated_at)
 	VALUES
-	(:video_id, :course_id, :index, :name, :description, :free, :url, :created_at, :updated_at)`
+	(:video_id, :course_id, :index, :name, :description, :free, :url, :image_url, :created_at, :updated_at)`
 
 	if err := database.NamedExecContext(ctx, db, q, video); err != nil {
 		return fmt.Errorf("inserting video: %w", err)
@@ -32,6 +32,8 @@ func Update(ctx context.Context, db sqlx.ExtContext, video Video) (Video, error)
 		name = :name,
 		description = :description,
 		free = :free,
+		url = :url,
+		image_url = :image_url,
 		updated_at = :updated_at,
 		version = version + 1
 	WHERE
