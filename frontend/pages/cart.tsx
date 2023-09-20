@@ -21,6 +21,7 @@ type Course = {
     id: string
     name: string
     price: number
+    image_url: string
 }
 
 type CoursesMap = {
@@ -30,7 +31,7 @@ type CoursesMap = {
 type Product = {
     id: string
     name: string
-    image: string
+    image_url: string
     price: number
 }
 
@@ -48,7 +49,13 @@ function ProductCard(props: ProductCardProps) {
             >
                 x
             </button>
-            <Image src={props.product.image} alt={props.product.name} className="h-20 w-20" />
+            <Image
+                className="h-20 w-20"
+                alt={props.product.name}
+                src={props.product.image_url}
+                width={80}
+                height={32}
+            />
             <div className="ml-4">{props.product.name}</div>
             <div className="font-bold">${props.product.price}</div>
         </div>
@@ -191,7 +198,7 @@ export default function Cart() {
                                         product={{
                                             id: course.id,
                                             name: course.name,
-                                            image: '',
+                                            image_url: course.image_url,
                                             price: course.price,
                                         }}
                                         onDelete={handleDeleteItem}

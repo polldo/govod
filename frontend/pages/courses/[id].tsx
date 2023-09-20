@@ -11,7 +11,7 @@ import { toast } from 'react-hot-toast'
 type Course = {
     name: string
     description: string
-    image: string
+    image_url: string
 }
 
 type Video = {
@@ -19,6 +19,7 @@ type Video = {
     name: string
     description: string
     free: boolean
+    image_url: string
 }
 
 export default function CourseDetails() {
@@ -66,6 +67,10 @@ export default function CourseDetails() {
             })
     }, [id, fetch, router.isReady])
 
+    if (!course) {
+        return null
+    }
+
     return (
         <>
             <Head>
@@ -77,13 +82,13 @@ export default function CourseDetails() {
                         <Image
                             className="mx-20 rounded-t-lg border border-red-800 object-contain md:w-20"
                             alt=""
-                            src={''}
+                            src={course.image_url}
                             width={80}
                             height={32}
                         />
                         <div className="flex flex-col">
-                            <p>{course?.name}</p>
-                            <p>{course?.description}</p>
+                            <p>{course.name}</p>
+                            <p>{course.description}</p>
                         </div>
                     </div>
 
@@ -116,7 +121,7 @@ function Card(props: Video) {
             <Image
                 className="w-full rounded-t-lg border border-red-800 object-contain md:w-20"
                 alt=""
-                src={''}
+                src={props.image_url}
                 width={80}
                 height={32}
             />
