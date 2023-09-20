@@ -52,6 +52,7 @@ func (ct *courseTest) createCourseOK(t *testing.T) course.Course {
 		Name:        "Test" + strconv.Itoa(rand.Intn(1000)),
 		Description: "This is a test course",
 		Price:       rand.Intn(1000),
+		ImageURL:    "/images/test.png",
 	}
 
 	body, err := json.Marshal(&c)
@@ -83,6 +84,7 @@ func (ct *courseTest) createCourseOK(t *testing.T) course.Course {
 	exp.Name = c.Name
 	exp.Description = c.Description
 	exp.Price = c.Price
+	exp.ImageURL = c.ImageURL
 
 	if diff := cmp.Diff(got, exp); diff != "" {
 		t.Fatalf("wrong course payload. Diff: \n%s", diff)
@@ -101,6 +103,7 @@ func (ct *courseTest) createCourseUnauth(t *testing.T) {
 		Name:        "Test",
 		Description: "This is a test course",
 		Price:       100,
+		ImageURL:    "/images/test.png",
 	}
 
 	body, err := json.Marshal(&c)
@@ -138,6 +141,7 @@ func (ct *courseTest) updateCourseOK(t *testing.T, crs course.Course) course.Cou
 		Name:        ptr("Updated Test"),
 		Description: ptr("This is an updated test course"),
 		Price:       ptr(500),
+		ImageURL:    ptr("/images/updated.png"),
 	}
 
 	body, err := json.Marshal(&c)
@@ -169,6 +173,7 @@ func (ct *courseTest) updateCourseOK(t *testing.T, crs course.Course) course.Cou
 	exp.Name = *c.Name
 	exp.Description = *c.Description
 	exp.Price = *c.Price
+	exp.ImageURL = *c.ImageURL
 
 	if diff := cmp.Diff(got, exp); diff != "" {
 		t.Fatalf("wrong course payload. Diff: \n%s", diff)
@@ -194,6 +199,7 @@ func (ct *courseTest) updateCourseConcurrent(t *testing.T, crs course.Course) {
 			Name:        ptr("Updated Test"),
 			Description: ptr("This is an updated test course"),
 			Price:       ptr(500),
+			ImageURL:    ptr("/images/updated.png"),
 		}
 
 		body, err := json.Marshal(&c)
@@ -243,6 +249,7 @@ func (ct *courseTest) updateCourseInexistent(t *testing.T, crs course.Course) {
 		Name:        ptr("Updated Test Course Not Existent"),
 		Description: ptr("This is an updated test course - not exist"),
 		Price:       ptr(300),
+		ImageURL:    ptr("/images/updated.png"),
 	}
 
 	body, err := json.Marshal(&c)
@@ -276,6 +283,7 @@ func (ct *courseTest) updateCourseUnauth(t *testing.T, crs course.Course) {
 		Name:        ptr("Updated Test Unauth"),
 		Description: ptr("This is an updated test course - unauth"),
 		Price:       ptr(300),
+		ImageURL:    ptr("/images/updated.png"),
 	}
 
 	body, err := json.Marshal(&c)
