@@ -39,6 +39,7 @@ func HandleCreate(db *sqlx.DB) web.Handler {
 			Description: v.Description,
 			Free:        v.Free,
 			URL:         v.URL,
+			ImageURL:    v.ImageURL,
 			CreatedAt:   now,
 			UpdatedAt:   now,
 		}
@@ -99,6 +100,9 @@ func HandleUpdate(db *sqlx.DB) web.Handler {
 		}
 		if vup.URL != nil {
 			video.URL = *vup.URL
+		}
+		if vup.ImageURL != nil {
+			video.ImageURL = *vup.ImageURL
 		}
 		video.UpdatedAt = time.Now().UTC()
 

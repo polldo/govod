@@ -10,6 +10,7 @@ type Video struct {
 	Description string    `json:"description" db:"description"`
 	Free        bool      `json:"free" db:"free"`
 	URL         string    `json:"-" db:"url"`
+	ImageURL    string    `json:"image_url" db:"image_url"`
 	CreatedAt   time.Time `json:"created_at" db:"created_at"`
 	UpdatedAt   time.Time `json:"updated_at" db:"updated_at"`
 	Version     int       `json:"-" db:"version"`
@@ -27,6 +28,7 @@ type VideoNew struct {
 	Description string `json:"description" validate:"required"`
 	Free        bool   `json:"free" validate:"required"`
 	URL         string `json:"url" validate:"omitempty,url"`
+	ImageURL    string `json:"image_url" validate:"required"`
 }
 
 type VideoUp struct {
@@ -36,6 +38,7 @@ type VideoUp struct {
 	Description *string `json:"description"`
 	Free        *bool   `json:"free"`
 	URL         *string `json:"url" validate:"omitempty,url"`
+	ImageURL    *string `json:"image_url"`
 }
 
 type Progress struct {

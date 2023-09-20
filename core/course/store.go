@@ -12,9 +12,9 @@ import (
 func Create(ctx context.Context, db sqlx.ExtContext, course Course) error {
 	const q = `
 	INSERT INTO courses
-		(course_id, name, description, price, created_at, updated_at)
+		(course_id, name, description, price, image_url, created_at, updated_at)
 	VALUES
-	(:course_id, :name, :description, :price, :created_at, :updated_at)`
+	(:course_id, :name, :description, :price, :image_url, :created_at, :updated_at)`
 
 	if err := database.NamedExecContext(ctx, db, q, course); err != nil {
 		return fmt.Errorf("inserting course: %w", err)
@@ -30,6 +30,7 @@ func Update(ctx context.Context, db sqlx.ExtContext, course Course) (Course, err
 		name = :name,
 		description = :description,
 		price = :price,
+		image_url = :image_url,
 		updated_at = :updated_at,
 		version = version + 1
 	WHERE

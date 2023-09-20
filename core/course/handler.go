@@ -35,6 +35,7 @@ func HandleCreate(db *sqlx.DB) web.Handler {
 			Name:        c.Name,
 			Description: c.Description,
 			Price:       c.Price,
+			ImageURL:    c.ImageURL,
 			CreatedAt:   now,
 			UpdatedAt:   now,
 		}
@@ -85,6 +86,9 @@ func HandleUpdate(db *sqlx.DB) web.Handler {
 		}
 		if cup.Price != nil {
 			course.Price = *cup.Price
+		}
+		if cup.ImageURL != nil {
+			course.ImageURL = *cup.ImageURL
 		}
 		course.UpdatedAt = time.Now().UTC()
 
