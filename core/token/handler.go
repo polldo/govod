@@ -14,6 +14,7 @@ import (
 	"github.com/polldo/govod/api/weberr"
 	"github.com/polldo/govod/core/user"
 	"github.com/polldo/govod/database"
+	"github.com/polldo/govod/rate"
 	"github.com/polldo/govod/validate"
 	"golang.org/x/crypto/bcrypt"
 )
@@ -23,10 +24,10 @@ type Mailer interface {
 	SendRecoveryToken(token string, to string) error
 }
 
-// TODO: Rate-limit or introduce a timeout between several requests.
-// TODO: If there exists a not expired token, return it instead of creating a new one.
-// Or, in alternative, deletes all tokens only when the user is actually activated.
 func HandleToken(db *sqlx.DB, mailer Mailer, bg *background.Background) web.Handler {
+	rps := rate.Every(10 * time.Second)
+	limiter := rate.NewLimiter(1, 10, float64(rps))
+
 	return func(ctx context.Context, w http.ResponseWriter, r *http.Request) error {
 		var in struct {
 			Email string `json:"email" validate:"required,email"`
@@ -40,6 +41,11 @@ func HandleToken(db *sqlx.DB, mailer Mailer, bg *background.Background) web.Hand
 
 		if err := validate.Check(in); err != nil {
 			return weberr.NewError(err, err.Error(), http.StatusUnprocessableEntity)
+		}
+
+		if !limiter.Check(in.Email) {
+			err := errors.New("too many requests")
+			return weberr.NewError(err, err.Error(), http.StatusTooManyRequests)
 		}
 
 		usr, err := user.FetchByEmail(ctx, db, in.Email)
