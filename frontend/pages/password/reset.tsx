@@ -36,6 +36,9 @@ export default function Require() {
                 const data = await res.json()
                 throw new Error(data.error)
             }
+            if (res.status === 429) {
+                throw new Error('Retry in few seconds')
+            }
             if (!res.ok) {
                 throw new Error('Something went wrong')
             }
