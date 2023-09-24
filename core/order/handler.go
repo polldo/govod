@@ -144,7 +144,7 @@ func HandlePaypalCheckout(db *sqlx.DB, pp *paypal.Client) web.Handler {
 				Description: c.Description,
 
 				UnitAmount: &paypal.Money{
-					Currency: "EUR",
+					Currency: "USD",
 					Value:    strconv.Itoa(c.Price),
 				},
 			})
@@ -156,11 +156,11 @@ func HandlePaypalCheckout(db *sqlx.DB, pp *paypal.Client) web.Handler {
 			Items: items,
 
 			Amount: &paypal.PurchaseUnitAmount{
-				Currency: "EUR",
+				Currency: "USD",
 				Value:    strconv.Itoa(tot),
 
 				Breakdown: &paypal.PurchaseUnitAmountBreakdown{ItemTotal: &paypal.Money{
-					Currency: "EUR",
+					Currency: "USD",
 					Value:    strconv.Itoa(tot),
 				}},
 			},
@@ -245,7 +245,7 @@ func HandleStripeCheckout(db *sqlx.DB, strp *stripecl.API, cfg config.Stripe) we
 				Quantity: stripe.Int64(1),
 
 				PriceData: &stripe.CheckoutSessionLineItemPriceDataParams{
-					Currency:    stripe.String("eur"),
+					Currency:    stripe.String("usd"),
 					TaxBehavior: stripe.String("inclusive"),
 					UnitAmount:  stripe.Int64(int64(c.Price) * 100),
 

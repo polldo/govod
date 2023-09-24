@@ -12,7 +12,7 @@ export default function App({ Component, pageProps }: AppProps) {
             <PayPalScriptProvider
                 options={{
                     clientId: process.env.NEXT_PUBLIC_PAYPAL_CLIENT_ID || '',
-                    currency: 'EUR',
+                    currency: 'USD',
                 }}
             >
                 <Component {...pageProps} />
