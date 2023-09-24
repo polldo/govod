@@ -18,7 +18,7 @@ import (
 func HandleCreate(db *sqlx.DB) web.Handler {
 	return func(ctx context.Context, w http.ResponseWriter, r *http.Request) error {
 		var u UserNew
-		if err := web.Decode(r, &u); err != nil {
+		if err := web.Decode(w, r, &u); err != nil {
 			err = fmt.Errorf("unable to decode payload: %w", err)
 			return weberr.NewError(err, err.Error(), http.StatusBadRequest)
 		}

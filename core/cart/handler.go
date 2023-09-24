@@ -61,7 +61,7 @@ func HandleDelete(db *sqlx.DB) web.Handler {
 func HandleCreateItem(db *sqlx.DB) web.Handler {
 	return func(ctx context.Context, w http.ResponseWriter, r *http.Request) error {
 		var itnew ItemNew
-		if err := web.Decode(r, &itnew); err != nil {
+		if err := web.Decode(w, r, &itnew); err != nil {
 			err = fmt.Errorf("unable to decode payload: %w", err)
 			return weberr.NewError(err, err.Error(), http.StatusBadRequest)
 		}

@@ -19,7 +19,7 @@ import (
 func HandleCreate(db *sqlx.DB) web.Handler {
 	return func(ctx context.Context, w http.ResponseWriter, r *http.Request) error {
 		var c CourseNew
-		if err := web.Decode(r, &c); err != nil {
+		if err := web.Decode(w, r, &c); err != nil {
 			err = fmt.Errorf("unable to decode payload: %w", err)
 			return weberr.NewError(err, err.Error(), http.StatusBadRequest)
 		}
@@ -61,7 +61,7 @@ func HandleUpdate(db *sqlx.DB) web.Handler {
 		}
 
 		var cup CourseUp
-		if err := web.Decode(r, &cup); err != nil {
+		if err := web.Decode(w, r, &cup); err != nil {
 			err = fmt.Errorf("unable to decode payload: %w", err)
 			return weberr.NewError(err, err.Error(), http.StatusBadRequest)
 		}

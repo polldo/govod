@@ -34,7 +34,7 @@ func HandleToken(db *sqlx.DB, mailer Mailer, bg *background.Background) web.Hand
 			Scope string `json:"scope" validate:"required"`
 		}
 
-		if err := web.Decode(r, &in); err != nil {
+		if err := web.Decode(w, r, &in); err != nil {
 			err = fmt.Errorf("unable to decode payload: %w", err)
 			return weberr.NewError(err, err.Error(), http.StatusBadRequest)
 		}
@@ -122,7 +122,7 @@ func HandleActivation(db *sqlx.DB) web.Handler {
 			Token string `json:"token" validate:"required"`
 		}
 
-		if err := web.Decode(r, &in); err != nil {
+		if err := web.Decode(w, r, &in); err != nil {
 			err = fmt.Errorf("unable to decode payload: %w", err)
 			return weberr.NewError(err, err.Error(), http.StatusBadRequest)
 		}
@@ -172,7 +172,7 @@ func HandleRecovery(db *sqlx.DB) web.Handler {
 			PasswordConfirm string `json:"password_confirm" validate:"eqfield=Password"`
 		}
 
-		if err := web.Decode(r, &in); err != nil {
+		if err := web.Decode(w, r, &in); err != nil {
 			err = fmt.Errorf("unable to decode payload: %w", err)
 			return weberr.NewError(err, err.Error(), http.StatusBadRequest)
 		}

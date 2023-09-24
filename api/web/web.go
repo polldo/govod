@@ -72,7 +72,10 @@ func Respond(ctx context.Context, w http.ResponseWriter, data interface{}, statu
 // body is decoded into the provided value.
 //
 // If the provided value is a struct then it is checked for validation tags.
-func Decode(r *http.Request, val interface{}) error {
+func Decode(w http.ResponseWriter, r *http.Request, val interface{}) error {
+	maxBytes := 1048576
+	r.Body = http.MaxBytesReader(w, r.Body, int64(maxBytes))
+
 	decoder := json.NewDecoder(r.Body)
 	decoder.DisallowUnknownFields()
 	if err := decoder.Decode(val); err != nil {

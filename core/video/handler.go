@@ -19,7 +19,7 @@ import (
 func HandleCreate(db *sqlx.DB) web.Handler {
 	return func(ctx context.Context, w http.ResponseWriter, r *http.Request) error {
 		var v VideoNew
-		if err := web.Decode(r, &v); err != nil {
+		if err := web.Decode(w, r, &v); err != nil {
 			err = fmt.Errorf("unable to decode payload: %w", err)
 			return weberr.NewError(err, err.Error(), http.StatusBadRequest)
 		}
@@ -65,7 +65,7 @@ func HandleUpdate(db *sqlx.DB) web.Handler {
 		}
 
 		var vup VideoUp
-		if err := web.Decode(r, &vup); err != nil {
+		if err := web.Decode(w, r, &vup); err != nil {
 			err = fmt.Errorf("unable to decode payload: %w", err)
 			return weberr.NewError(err, err.Error(), http.StatusBadRequest)
 		}
@@ -283,7 +283,7 @@ func HandleUpdateProgress(db *sqlx.DB) web.Handler {
 		}
 
 		var up ProgressUp
-		if err := web.Decode(r, &up); err != nil {
+		if err := web.Decode(w, r, &up); err != nil {
 			err = fmt.Errorf("unable to decode payload: %w", err)
 			return weberr.NewError(err, err.Error(), http.StatusBadRequest)
 		}
