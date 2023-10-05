@@ -26,14 +26,12 @@ func HandleLogin(db *sqlx.DB, session *scs.SessionManager) web.Handler {
 	return func(ctx context.Context, w http.ResponseWriter, r *http.Request) error {
 		email, pass, ok := r.BasicAuth()
 		if !ok {
-			err := errors.New("must provide email and password in Basic auth")
-			return weberr.NewError(err, err.Error(), http.StatusBadRequest)
+			return weberr.BadRequest(errors.New("must provide email and password in Basic auth"))
 		}
 
 		u, err := user.FetchByEmail(ctx, db, email)
 		if err != nil {
-			err := fmt.Errorf("fetching user by email %s: %w", email, err)
-			return weberr.NotAuthorized(err)
+			return weberr.NotAuthorized(fmt.Errorf("fetching user by email %s: %w", email, err))
 		}
 
 		err = bcrypt.CompareHashAndPassword(u.PasswordHash, []byte(pass))
@@ -51,7 +49,7 @@ func HandleLogin(db *sqlx.DB, session *scs.SessionManager) web.Handler {
 		session.Put(ctx, userKey, u.ID)
 		session.Put(ctx, roleKey, u.Role)
 		if err := session.RenewToken(ctx); err != nil {
-			return err
+			return fmt.Errorf("renewing token: %w", err)
 		}
 
 		return web.Respond(ctx, w, nil, http.StatusNoContent)
@@ -68,7 +66,7 @@ func HandleOauthLogin(session *scs.SessionManager, provs map[string]Provider) we
 
 		state, err := random.StringSecure(32)
 		if err != nil {
-			return weberr.InternalError(err)
+			return fmt.Errorf("generating random secure string: %w", err)
 		}
 
 		url := prov.AuthCodeURL(state)
@@ -114,19 +112,18 @@ func HandleOauthCallback(db *sqlx.DB, session *scs.SessionManager, provs map[str
 
 		info := UserInfo{}
 		if err := idTok.Claims(&info); err != nil {
-			return weberr.InternalError(fmt.Errorf("extracting info from oauth claims: %w", err))
+			return fmt.Errorf("extracting info from oauth claims: %w", err)
 		}
 
 		if info.Name == "" || info.Email == "" {
-			return weberr.InternalError(fmt.Errorf("name or email not found in idToken claims: %+v", info))
+			return fmt.Errorf("name or email not found in idToken claims: %+v", info)
 		}
 
 		u, err := user.FetchByEmail(ctx, db, info.Email)
 		if err != nil {
 			// Just fail and return on any unexpected error.
 			if !errors.Is(err, database.ErrDBNotFound) {
-				err := fmt.Errorf("fetching user by email %s: %w", info.Email, err)
-				return weberr.InternalError(err)
+				return fmt.Errorf("fetching user by email %s: %w", info.Email, err)
 			}
 
 			// If user not found instead, create a new user with an unguessable password.
@@ -134,7 +131,7 @@ func HandleOauthCallback(db *sqlx.DB, session *scs.SessionManager, provs map[str
 			now := time.Now().UTC()
 			pass, err := random.StringSecure(16)
 			if err != nil {
-				return weberr.InternalError(err)
+				return fmt.Errorf("generating random secure string: %w", err)
 			}
 
 			u = user.User{
@@ -149,7 +146,7 @@ func HandleOauthCallback(db *sqlx.DB, session *scs.SessionManager, provs map[str
 			}
 
 			if err := user.Create(ctx, db, u); err != nil {
-				return weberr.InternalError(err)
+				return err
 			}
 		}
 
@@ -157,7 +154,7 @@ func HandleOauthCallback(db *sqlx.DB, session *scs.SessionManager, provs map[str
 		session.Put(ctx, userKey, u.ID)
 		session.Put(ctx, roleKey, u.Role)
 		if err := session.RenewToken(ctx); err != nil {
-			return err
+			return fmt.Errorf("renewing token: %w", err)
 		}
 
 		http.Redirect(w, r, redirect, http.StatusFound)
@@ -168,7 +165,7 @@ func HandleOauthCallback(db *sqlx.DB, session *scs.SessionManager, provs map[str
 func HandleLogout(session *scs.SessionManager) web.Handler {
 	return func(ctx context.Context, w http.ResponseWriter, r *http.Request) error {
 		if err := session.Destroy(ctx); err != nil {
-			return err
+			return fmt.Errorf("destroying session: %w", err)
 		}
 
 		return web.Respond(ctx, w, nil, http.StatusNoContent)
@@ -179,8 +176,7 @@ func HandleSignup(db *sqlx.DB, session *scs.SessionManager, activationRequired b
 	return func(ctx context.Context, w http.ResponseWriter, r *http.Request) error {
 		var u user.UserSignup
 		if err := web.Decode(w, r, &u); err != nil {
-			err = fmt.Errorf("unable to decode payload: %w", err)
-			return weberr.NewError(err, err.Error(), http.StatusBadRequest)
+			return weberr.BadRequest(fmt.Errorf("unable to decode payload: %w", err))
 		}
 
 		if err := validate.Check(u); err != nil {
@@ -207,9 +203,9 @@ func HandleSignup(db *sqlx.DB, session *scs.SessionManager, activationRequired b
 
 		if err := user.Create(ctx, db, usr); err != nil {
 			if errors.Is(err, user.ErrUniqueEmail) {
-				return weberr.NewError(err, err.Error(), http.StatusConflict)
+				return weberr.NewError(err, "email already registered", http.StatusConflict)
 			}
-			return err
+			return fmt.Errorf("creating user[%s]: %w", usr.Email, err)
 		}
 
 		if !activationRequired {
@@ -218,7 +214,7 @@ func HandleSignup(db *sqlx.DB, session *scs.SessionManager, activationRequired b
 			session.Put(ctx, userKey, usr.ID)
 			session.Put(ctx, roleKey, usr.Role)
 			if err := session.RenewToken(ctx); err != nil {
-				return err
+				return fmt.Errorf("renewing token: %w", err)
 			}
 		}
 

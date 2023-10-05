@@ -20,13 +20,11 @@ func HandleCreate(db *sqlx.DB) web.Handler {
 	return func(ctx context.Context, w http.ResponseWriter, r *http.Request) error {
 		var v VideoNew
 		if err := web.Decode(w, r, &v); err != nil {
-			err = fmt.Errorf("unable to decode payload: %w", err)
-			return weberr.NewError(err, err.Error(), http.StatusBadRequest)
+			return weberr.BadRequest(fmt.Errorf("unable to decode payload: %w", err))
 		}
 
 		if err := validate.Check(v); err != nil {
-			err = fmt.Errorf("validating data: %w", err)
-			return weberr.NewError(err, err.Error(), http.StatusBadRequest)
+			return weberr.NewError(err, err.Error(), http.StatusUnprocessableEntity)
 		}
 
 		now := time.Now().UTC()
@@ -45,10 +43,11 @@ func HandleCreate(db *sqlx.DB) web.Handler {
 		}
 
 		if err := Create(ctx, db, video); err != nil {
+			err := fmt.Errorf("creating video: %w", err)
 			if errors.Is(err, database.ErrDBDuplicatedEntry) {
-				return weberr.NewError(err, err.Error(), http.StatusBadRequest)
+				return weberr.BadRequest(err)
 			}
-			return weberr.InternalError(err)
+			return err
 		}
 
 		return web.Respond(ctx, w, video, http.StatusCreated)
@@ -60,27 +59,25 @@ func HandleUpdate(db *sqlx.DB) web.Handler {
 		videoID := web.Param(r, "id")
 
 		if err := validate.CheckID(videoID); err != nil {
-			err = fmt.Errorf("passed id is not valid: %w", err)
-			return weberr.NewError(err, err.Error(), http.StatusBadRequest)
+			return weberr.NewError(err, err.Error(), http.StatusUnprocessableEntity)
 		}
 
 		var vup VideoUp
 		if err := web.Decode(w, r, &vup); err != nil {
-			err = fmt.Errorf("unable to decode payload: %w", err)
-			return weberr.NewError(err, err.Error(), http.StatusBadRequest)
+			return weberr.BadRequest(fmt.Errorf("unable to decode payload: %w", err))
 		}
 
 		if err := validate.Check(vup); err != nil {
-			err = fmt.Errorf("validating data: %w", err)
-			return weberr.NewError(err, err.Error(), http.StatusBadRequest)
+			return weberr.NewError(err, err.Error(), http.StatusUnprocessableEntity)
 		}
 
 		video, err := Fetch(ctx, db, videoID)
 		if err != nil {
+			err := fmt.Errorf("fetching video[%s]: %w", videoID, err)
 			if errors.Is(err, database.ErrDBNotFound) {
-				return weberr.NewError(err, err.Error(), http.StatusBadRequest)
+				return weberr.NotFound(err)
 			}
-			return weberr.InternalError(err)
+			return err
 		}
 
 		if vup.CourseID != nil {
@@ -107,7 +104,7 @@ func HandleUpdate(db *sqlx.DB) web.Handler {
 		video.UpdatedAt = time.Now().UTC()
 
 		if video, err = Update(ctx, db, video); err != nil {
-			return weberr.InternalError(err)
+			return fmt.Errorf("updating video[%s]: %w", videoID, err)
 		}
 
 		return web.Respond(ctx, w, video, http.StatusOK)
@@ -118,7 +115,7 @@ func HandleList(db *sqlx.DB) web.Handler {
 	return func(ctx context.Context, w http.ResponseWriter, r *http.Request) error {
 		videos, err := FetchAll(ctx, db)
 		if err != nil {
-			return weberr.InternalError(err)
+			return fmt.Errorf("fetching all videos: %w", err)
 		}
 
 		return web.Respond(ctx, w, videos, http.StatusOK)
@@ -130,13 +127,12 @@ func HandleListByCourse(db *sqlx.DB) web.Handler {
 		courseID := web.Param(r, "course_id")
 
 		if err := validate.CheckID(courseID); err != nil {
-			err = fmt.Errorf("passed id is not valid: %w", err)
-			return weberr.NewError(err, err.Error(), http.StatusBadRequest)
+			return weberr.BadRequest(fmt.Errorf("passed id is not valid: %w", err))
 		}
 
 		videos, err := FetchAllByCourse(ctx, db, courseID)
 		if err != nil {
-			return weberr.InternalError(err)
+			return fmt.Errorf("fetching all videos by course[%s]: %w", courseID, err)
 		}
 
 		return web.Respond(ctx, w, videos, http.StatusOK)
@@ -148,16 +144,16 @@ func HandleShow(db *sqlx.DB) web.Handler {
 		videoID := web.Param(r, "id")
 
 		if err := validate.CheckID(videoID); err != nil {
-			err = fmt.Errorf("passed id is not valid: %w", err)
-			return weberr.NewError(err, err.Error(), http.StatusBadRequest)
+			return weberr.BadRequest(fmt.Errorf("passed id is not valid: %w", err))
 		}
 
 		video, err := Fetch(ctx, db, videoID)
 		if err != nil {
+			err := fmt.Errorf("fetching video[%s]: %w", videoID, err)
 			if errors.Is(err, database.ErrDBNotFound) {
-				return weberr.NewError(err, err.Error(), http.StatusBadRequest)
+				return weberr.NotFound(err)
 			}
-			return weberr.InternalError(err)
+			return err
 		}
 
 		return web.Respond(ctx, w, video, http.StatusOK)
@@ -174,27 +170,28 @@ func HandleShowFull(db *sqlx.DB) web.Handler {
 		}
 
 		if err := validate.CheckID(videoID); err != nil {
-			err = fmt.Errorf("passed id is not valid: %w", err)
-			return weberr.NewError(err, err.Error(), http.StatusBadRequest)
+			return weberr.BadRequest(fmt.Errorf("passed id is not valid: %w", err))
 		}
 
 		video, err := Fetch(ctx, db, videoID)
 		if err != nil {
+			err := fmt.Errorf("fetching video[%s]: %w", videoID, err)
 			if errors.Is(err, database.ErrDBNotFound) {
-				return weberr.NewError(err, "video not found", http.StatusBadRequest)
+				return weberr.NotFound(err)
 			}
-			return weberr.InternalError(err)
+			return err
 		}
 
 		var crs course.Course
 		if video.Free {
 			crs, err = course.Fetch(ctx, db, video.CourseID)
 			if err != nil {
-				return err
+				return fmt.Errorf("fetching course of free video[%s]: %w", video.ID, err)
 			}
 		} else {
 			crs, err = course.FetchOwned(ctx, db, video.CourseID, clm.UserID)
 			if err != nil {
+				err := fmt.Errorf("fetching course[%s] owned by user[%s]: %w", video.CourseID, clm.UserID, err)
 				if errors.Is(err, database.ErrDBNotFound) {
 					return weberr.NewError(err, "access forbidden", http.StatusForbidden)
 				}
@@ -204,15 +201,16 @@ func HandleShowFull(db *sqlx.DB) web.Handler {
 
 		videos, err := FetchAllByCourse(ctx, db, video.CourseID)
 		if err != nil {
+			err := fmt.Errorf("fetching all videos of course[%s]: %w", video.CourseID, err)
 			if errors.Is(err, database.ErrDBNotFound) {
-				return weberr.NewError(err, "no video found", http.StatusBadRequest)
+				return weberr.NotFound(err)
 			}
-			return weberr.InternalError(err)
+			return err
 		}
 
 		progress, err := FetchUserProgressByCourse(ctx, db, clm.UserID, video.CourseID)
 		if err != nil {
-			return err
+			return fmt.Errorf("fetching user[%s] progress by course[%s]: %w", clm.UserID, video.CourseID, err)
 		}
 
 		fullVideo := struct {
@@ -238,14 +236,14 @@ func HandleShowFree(db *sqlx.DB) web.Handler {
 		videoID := web.Param(r, "id")
 
 		if err := validate.CheckID(videoID); err != nil {
-			err = fmt.Errorf("passed id is not valid: %w", err)
-			return weberr.NewError(err, err.Error(), http.StatusBadRequest)
+			return weberr.NewError(err, err.Error(), http.StatusUnprocessableEntity)
 		}
 
 		video, err := Fetch(ctx, db, videoID)
 		if err != nil {
+			err := fmt.Errorf("fetching video[%s]: %w", videoID, err)
 			if errors.Is(err, database.ErrDBNotFound) {
-				return weberr.NewError(err, "video not found", http.StatusBadRequest)
+				return weberr.NotFound(err)
 			}
 			return err
 		}
@@ -256,7 +254,7 @@ func HandleShowFree(db *sqlx.DB) web.Handler {
 
 		crs, err := course.Fetch(ctx, db, video.CourseID)
 		if err != nil {
-			return err
+			return fmt.Errorf("fetching course[%s]: %w", video.CourseID, err)
 		}
 
 		freeVideo := struct {
@@ -284,17 +282,15 @@ func HandleUpdateProgress(db *sqlx.DB) web.Handler {
 
 		var up ProgressUp
 		if err := web.Decode(w, r, &up); err != nil {
-			err = fmt.Errorf("unable to decode payload: %w", err)
-			return weberr.NewError(err, err.Error(), http.StatusBadRequest)
+			return weberr.BadRequest(fmt.Errorf("unable to decode payload: %w", err))
 		}
 
 		if err := validate.Check(up); err != nil {
-			err = fmt.Errorf("validating data: %w", err)
-			return weberr.NewError(err, err.Error(), http.StatusBadRequest)
+			return weberr.NewError(err, err.Error(), http.StatusUnprocessableEntity)
 		}
 
 		if err := UpdateProgress(ctx, db, clm.UserID, videoID, up.Progress); err != nil {
-			return fmt.Errorf("updating video progress: %w", err)
+			return fmt.Errorf("updating video[%s] progress for user[%s]: %w", videoID, clm.UserID, err)
 		}
 
 		return web.Respond(ctx, w, nil, http.StatusNoContent)
@@ -306,8 +302,7 @@ func HandleListProgressByCourse(db *sqlx.DB) web.Handler {
 		courseID := web.Param(r, "course_id")
 
 		if err := validate.CheckID(courseID); err != nil {
-			err = fmt.Errorf("passed id is not valid: %w", err)
-			return weberr.NewError(err, err.Error(), http.StatusBadRequest)
+			return weberr.NewError(err, err.Error(), http.StatusUnprocessableEntity)
 		}
 
 		clm, err := claims.Get(ctx)
@@ -317,7 +312,7 @@ func HandleListProgressByCourse(db *sqlx.DB) web.Handler {
 
 		progress, err := FetchUserProgressByCourse(ctx, db, clm.UserID, courseID)
 		if err != nil {
-			return weberr.InternalError(err)
+			return fmt.Errorf("fetching user[%s] progress by course[%s]: %w", clm.UserID, courseID, err)
 		}
 
 		return web.Respond(ctx, w, progress, http.StatusOK)

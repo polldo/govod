@@ -19,8 +19,7 @@ func HandleCreate(db *sqlx.DB) web.Handler {
 	return func(ctx context.Context, w http.ResponseWriter, r *http.Request) error {
 		var u UserNew
 		if err := web.Decode(w, r, &u); err != nil {
-			err = fmt.Errorf("unable to decode payload: %w", err)
-			return weberr.NewError(err, err.Error(), http.StatusBadRequest)
+			return weberr.BadRequest(fmt.Errorf("unable to decode payload: %w", err))
 		}
 
 		if !claims.IsAdmin(ctx) {
@@ -28,7 +27,7 @@ func HandleCreate(db *sqlx.DB) web.Handler {
 		}
 
 		if err := validate.Check(u); err != nil {
-			return fmt.Errorf("validating data: %w", err)
+			return weberr.NewError(err, err.Error(), http.StatusUnprocessableEntity)
 		}
 
 		hash, err := bcrypt.GenerateFromPassword([]byte(u.Password), bcrypt.DefaultCost)
@@ -50,8 +49,9 @@ func HandleCreate(db *sqlx.DB) web.Handler {
 		}
 
 		if err := Create(ctx, db, usr); err != nil {
+			err := fmt.Errorf("creating user[%s]: %w", u.Email, err)
 			if errors.Is(err, ErrUniqueEmail) {
-				return weberr.NewError(err, err.Error(), http.StatusConflict)
+				return weberr.NewError(err, ErrUniqueEmail.Error(), http.StatusConflict)
 			}
 			return err
 		}
@@ -64,8 +64,7 @@ func HandleShow(db *sqlx.DB) web.Handler {
 	return func(ctx context.Context, w http.ResponseWriter, r *http.Request) error {
 		userID := web.Param(r, "id")
 		if err := validate.CheckID(userID); err != nil {
-			err = fmt.Errorf("passed id is not valid: %w", err)
-			return weberr.NewError(err, err.Error(), http.StatusBadRequest)
+			return weberr.NewError(err, err.Error(), http.StatusUnprocessableEntity)
 		}
 
 		if !claims.IsUser(ctx, userID) && !claims.IsAdmin(ctx) {
@@ -74,7 +73,7 @@ func HandleShow(db *sqlx.DB) web.Handler {
 
 		user, err := Fetch(ctx, db, userID)
 		if err != nil {
-			return fmt.Errorf("ID[%s]: %w", userID, err)
+			return fmt.Errorf("fetching user[%s]: %w", userID, err)
 		}
 
 		return web.Respond(ctx, w, user, http.StatusOK)
@@ -90,7 +89,7 @@ func HandleShowCurrent(db *sqlx.DB) web.Handler {
 
 		user, err := Fetch(ctx, db, clm.UserID)
 		if err != nil {
-			return fmt.Errorf("ID[%s]: %w", clm.UserID, err)
+			return fmt.Errorf("fetching user[%s]: %w", clm.UserID, err)
 		}
 
 		return web.Respond(ctx, w, user, http.StatusOK)
