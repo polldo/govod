@@ -10,6 +10,7 @@ import (
 	"github.com/polldo/govod/database"
 )
 
+// Fetch returns the passed user's cart, if any.
 func Fetch(ctx context.Context, db sqlx.ExtContext, userID string) (Cart, error) {
 	in := struct {
 		ID string `db:"user_id"`
@@ -33,6 +34,7 @@ func Fetch(ctx context.Context, db sqlx.ExtContext, userID string) (Cart, error)
 	return c, nil
 }
 
+// Create inserts a new user's cart.
 func Create(ctx context.Context, db sqlx.ExtContext, cart Cart) error {
 	const q = `
 	INSERT INTO carts
@@ -47,6 +49,7 @@ func Create(ctx context.Context, db sqlx.ExtContext, cart Cart) error {
 	return nil
 }
 
+// Delete deletes a user's cart.
 func Delete(ctx context.Context, db sqlx.ExtContext, userID string) error {
 	in := struct {
 		UserID string `db:"user_id"`
@@ -67,6 +70,8 @@ func Delete(ctx context.Context, db sqlx.ExtContext, userID string) error {
 	return nil
 }
 
+// Update updates a user's cart, relying on optimistic lock to
+// deal with data races.
 func Update(ctx context.Context, db sqlx.ExtContext, cart Cart) (Cart, error) {
 	const q = `
 	UPDATE carts
@@ -94,6 +99,8 @@ func Update(ctx context.Context, db sqlx.ExtContext, cart Cart) (Cart, error) {
 	return cart, nil
 }
 
+// Upsert updates a user's cart if it exists.
+// It creates it otherwise.
 func Upsert(ctx context.Context, db sqlx.ExtContext, userID string) (Cart, error) {
 	cart, err := Fetch(ctx, db, userID)
 	if err != nil {
@@ -119,6 +126,7 @@ func Upsert(ctx context.Context, db sqlx.ExtContext, userID string) (Cart, error
 	return Update(ctx, db, cart)
 }
 
+// FetchItems returns all the user's cart items.
 func FetchItems(ctx context.Context, db sqlx.ExtContext, userID string) ([]Item, error) {
 	in := struct {
 		ID string `db:"user_id"`
@@ -144,6 +152,7 @@ func FetchItems(ctx context.Context, db sqlx.ExtContext, userID string) ([]Item,
 	return ci, nil
 }
 
+// CreateItem inserts a new item in the user's cart.
 func CreateItem(ctx context.Context, db sqlx.ExtContext, item Item) error {
 	const q = `
 	INSERT INTO cart_items
@@ -158,6 +167,7 @@ func CreateItem(ctx context.Context, db sqlx.ExtContext, item Item) error {
 	return nil
 }
 
+// DeleteItem drops an item from the user's cart.
 func DeleteItem(ctx context.Context, db sqlx.ExtContext, userID string, courseID string) error {
 	in := struct {
 		UserID   string `db:"user_id"`

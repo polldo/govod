@@ -16,7 +16,8 @@ import (
 	"github.com/polldo/govod/validate"
 )
 
-// TODO: Evaluate whether a denormalization could be useful to reduce HTTP calls.
+// HandleShow returns the cart of the user.
+// Returns an empty cart if the user has no cart.
 func HandleShow(db *sqlx.DB) web.Handler {
 	return func(ctx context.Context, w http.ResponseWriter, r *http.Request) error {
 		clm, err := claims.Get(ctx)
@@ -42,6 +43,8 @@ func HandleShow(db *sqlx.DB) web.Handler {
 	}
 }
 
+// HandleDelete flushes the user's cart. It also drops
+// all related items in cascade.
 func HandleDelete(db *sqlx.DB) web.Handler {
 	return func(ctx context.Context, w http.ResponseWriter, r *http.Request) error {
 		clm, err := claims.Get(ctx)
@@ -58,6 +61,7 @@ func HandleDelete(db *sqlx.DB) web.Handler {
 	}
 }
 
+// HandleCreateItem adds a new item in the user's cart.
 func HandleCreateItem(db *sqlx.DB) web.Handler {
 	return func(ctx context.Context, w http.ResponseWriter, r *http.Request) error {
 		var itnew ItemNew
@@ -106,6 +110,7 @@ func HandleCreateItem(db *sqlx.DB) web.Handler {
 	}
 }
 
+// HandleDeleteItem deletes an item from the user's cart.
 func HandleDeleteItem(db *sqlx.DB) web.Handler {
 	return func(ctx context.Context, w http.ResponseWriter, r *http.Request) error {
 		courseID := web.Param(r, "course_id")
