@@ -9,6 +9,7 @@ import (
 	"github.com/polldo/govod/database"
 )
 
+// Create inserts a new course.
 func Create(ctx context.Context, db sqlx.ExtContext, course Course) error {
 	const q = `
 	INSERT INTO courses
@@ -23,6 +24,8 @@ func Create(ctx context.Context, db sqlx.ExtContext, course Course) error {
 	return nil
 }
 
+// Update updates the details of a specific course.
+// It relies on optimistic lock to deal with data races.
 func Update(ctx context.Context, db sqlx.ExtContext, course Course) (Course, error) {
 	const q = `
 	UPDATE courses
@@ -54,6 +57,7 @@ func Update(ctx context.Context, db sqlx.ExtContext, course Course) (Course, err
 	return course, nil
 }
 
+// Fetch returns information of a specific course.
 func Fetch(ctx context.Context, db sqlx.ExtContext, id string) (Course, error) {
 	in := struct {
 		ID string `db:"course_id"`
@@ -77,6 +81,7 @@ func Fetch(ctx context.Context, db sqlx.ExtContext, id string) (Course, error) {
 	return course, nil
 }
 
+// FetchAll returns all courses.
 func FetchAll(ctx context.Context, db sqlx.ExtContext) ([]Course, error) {
 	const q = `
 	SELECT
@@ -94,6 +99,7 @@ func FetchAll(ctx context.Context, db sqlx.ExtContext) ([]Course, error) {
 	return cs, nil
 }
 
+// FetchByOwner returns all the courses owned by the passed user.
 func FetchByOwner(ctx context.Context, db sqlx.ExtContext, userID string) ([]Course, error) {
 	in := struct {
 		ID     string `db:"user_id"`
@@ -101,7 +107,6 @@ func FetchByOwner(ctx context.Context, db sqlx.ExtContext, userID string) ([]Cou
 	}{
 		ID: userID,
 
-		// WARNING: This magic string is tech debt.
 		// TODO: Use a const instead of this magic value.
 		// This seems a good reason to move all the handlers in the api package.
 		// Or just create a models package with all the struct and const.
@@ -131,6 +136,7 @@ func FetchByOwner(ctx context.Context, db sqlx.ExtContext, userID string) ([]Cou
 	return cs, nil
 }
 
+// FetchOwned returns the specified course if the passed user owns it.
 func FetchOwned(ctx context.Context, db sqlx.ExtContext, courseID string, userID string) (Course, error) {
 	in := struct {
 		UserID   string `db:"user_id"`

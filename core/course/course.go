@@ -2,6 +2,9 @@ package course
 
 import "time"
 
+// Course models courses.
+// A user can own many courses and a course
+// can be owned by many users.
 type Course struct {
 	ID          string    `json:"id" db:"course_id"`
 	Name        string    `json:"name" db:"name"`
@@ -13,6 +16,8 @@ type Course struct {
 	Version     int       `json:"-" db:"version"`
 }
 
+// CourseNew contains the information needed to
+// create a new course.
 type CourseNew struct {
 	Name        string `json:"name" validate:"required"`
 	Description string `json:"description" validate:"required"`
@@ -20,6 +25,8 @@ type CourseNew struct {
 	ImageURL    string `json:"image_url" validate:"required"`
 }
 
+// CourseUp contains the information of a course
+// that can be updated.
 type CourseUp struct {
 	Name        *string `json:"name"`
 	Description *string `json:"description"`
