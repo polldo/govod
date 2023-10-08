@@ -12,6 +12,8 @@ const (
 	RecoveryToken   = "recovery"
 )
 
+// Token models tokens to be sent to users for
+// activation and recovery purposes.
 type Token struct {
 	Hash   []byte    `json:"-" db:"hash"`
 	UserID string    `json:"user_id" db:"user_id"`
@@ -19,6 +21,7 @@ type Token struct {
 	Scope  string    `json:"scope" db:"scope"`
 }
 
+// GenToken generates a new random token for a user.
 func GenToken(userID string, ttl time.Duration, scope string) (string, Token, error) {
 	token := Token{
 		UserID: userID,

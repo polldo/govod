@@ -19,11 +19,18 @@ import (
 	"golang.org/x/crypto/bcrypt"
 )
 
+// Mailer should be able to send emails to users
+// for handling their activation and their password recovery.
 type Mailer interface {
 	SendActivationToken(token string, to string) error
 	SendRecoveryToken(token string, to string) error
 }
 
+// HandleToken is used to send specific tokens to users via email.
+// A valid scope must be provided by users, together with their email.
+// It doesn't require a user to be logged in, because users who need
+// tokens will probably not be able to login at all.
+// This function leverages a rate limiter to avoid too many emails.
 func HandleToken(db *sqlx.DB, mailer Mailer, timeout time.Duration, bg *background.Background) web.Handler {
 	rps := rate.Every(timeout)
 	limiter := rate.NewLimiter(1, 10, float64(rps))
@@ -58,16 +65,11 @@ func HandleToken(db *sqlx.DB, mailer Mailer, timeout time.Duration, bg *backgrou
 
 		scope := in.Scope
 		switch scope {
-
 		case ActivationToken:
-			fmt.Println("Activation!")
 			if usr.Active {
 				return weberr.BadRequest(fmt.Errorf("user %s is already active", usr.Email))
 			}
-
 		case RecoveryToken:
-			fmt.Println("Reset!")
-
 		default:
 			return weberr.BadRequest(fmt.Errorf("scope %s is not supported", scope))
 		}
@@ -94,6 +96,7 @@ func HandleToken(db *sqlx.DB, mailer Mailer, timeout time.Duration, bg *backgrou
 			return err
 		}
 
+		// Send the email in background.
 		bg.Add(func() error {
 			switch scope {
 			case ActivationToken:
@@ -114,6 +117,8 @@ func HandleToken(db *sqlx.DB, mailer Mailer, timeout time.Duration, bg *backgrou
 	}
 }
 
+// HandleActivation validates the passed token and, if correct,
+// it activates the user.
 func HandleActivation(db *sqlx.DB) web.Handler {
 	return func(ctx context.Context, w http.ResponseWriter, r *http.Request) error {
 		var in struct {
@@ -162,6 +167,8 @@ func HandleActivation(db *sqlx.DB) web.Handler {
 	}
 }
 
+// HandleRecovery validates the passed token and, if correct,
+// changes the user's password with the one provided.
 func HandleRecovery(db *sqlx.DB) web.Handler {
 	return func(ctx context.Context, w http.ResponseWriter, r *http.Request) error {
 		var in struct {

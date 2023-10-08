@@ -8,6 +8,7 @@ import (
 	"github.com/polldo/govod/database"
 )
 
+// Create inserts a new token.
 func Create(ctx context.Context, db sqlx.ExtContext, token Token) error {
 	const q = `
 	INSERT INTO tokens
@@ -22,6 +23,8 @@ func Create(ctx context.Context, db sqlx.ExtContext, token Token) error {
 	return nil
 }
 
+// DeleteByUser drops the token associated to the passed user with a
+// specific scope, if any.
 func DeleteByUser(ctx context.Context, db sqlx.ExtContext, userID string, scope string) error {
 	data := struct {
 		UserID string `db:"user_id"`
