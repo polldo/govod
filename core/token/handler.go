@@ -24,8 +24,8 @@ type Mailer interface {
 	SendRecoveryToken(token string, to string) error
 }
 
-func HandleToken(db *sqlx.DB, mailer Mailer, bg *background.Background) web.Handler {
-	rps := rate.Every(10 * time.Second)
+func HandleToken(db *sqlx.DB, mailer Mailer, timeout time.Duration, bg *background.Background) web.Handler {
+	rps := rate.Every(timeout)
 	limiter := rate.NewLimiter(1, 10, float64(rps))
 
 	return func(ctx context.Context, w http.ResponseWriter, r *http.Request) error {

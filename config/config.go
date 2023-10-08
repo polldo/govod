@@ -42,8 +42,9 @@ type Email struct {
 	Port          string
 	Address       string
 	Password      string
-	RecoveryURL   string `conf:"default:http://mylocal.com:3000/password/confirm?token="`
-	ActivationURL string `conf:"default:http://mylocal.com:3000/activate/confirm?token="`
+	RecoveryURL   string        `conf:"default:http://mylocal.com:3000/password/confirm?token="`
+	ActivationURL string        `conf:"default:http://mylocal.com:3000/activate/confirm?token="`
+	TokenTimeout  time.Duration `conf:"default:10s"`
 }
 
 type Stripe struct {

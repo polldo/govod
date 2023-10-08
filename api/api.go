@@ -5,6 +5,7 @@ package api
 import (
 	"context"
 	"net/http"
+	"time"
 
 	"github.com/alexedwards/scs/v2"
 	"github.com/gorilla/mux"
@@ -32,6 +33,7 @@ type APIConfig struct {
 	DB                 *sqlx.DB
 	Session            *scs.SessionManager
 	Mailer             token.Mailer
+	TokenTimeout       time.Duration
 	Background         *background.Background
 	Paypal             *paypal.Client
 	Stripe             *stripecl.API
@@ -84,7 +86,7 @@ func APIMux(cfg APIConfig) http.Handler {
 	a.Handle(http.MethodGet, "/auth/oauth-login/{provider}", auth.HandleOauthLogin(cfg.Session, cfg.Providers))
 	a.Handle(http.MethodGet, "/auth/oauth-callback/{provider}", auth.HandleOauthCallback(cfg.DB, cfg.Session, cfg.Providers, cfg.LoginRedirectURL))
 
-	a.Handle(http.MethodPost, "/tokens", token.HandleToken(cfg.DB, cfg.Mailer, cfg.Background))
+	a.Handle(http.MethodPost, "/tokens", token.HandleToken(cfg.DB, cfg.Mailer, cfg.TokenTimeout, cfg.Background))
 	a.Handle(http.MethodPost, "/tokens/activate", token.HandleActivation(cfg.DB))
 	a.Handle(http.MethodPost, "/tokens/recover", token.HandleRecovery(cfg.DB))
 

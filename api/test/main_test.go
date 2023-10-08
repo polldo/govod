@@ -283,6 +283,7 @@ func NewTestEnv(t *testing.T, dbname string) (*TestEnv, error) {
 		DB:                 dbEnv,
 		Session:            sess,
 		Mailer:             mail,
+		TokenTimeout:       time.Nanosecond,
 		Background:         bg,
 		Paypal:             pp,
 		Stripe:             strp,

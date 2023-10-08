@@ -107,6 +107,7 @@ func Run(logger *logrus.Logger) error {
 		DB:                 db,
 		Session:            sessionManager,
 		Mailer:             mail,
+		TokenTimeout:       cfg.Email.TokenTimeout,
 		Background:         bg,
 		Paypal:             pp,
 		Stripe:             strp,
