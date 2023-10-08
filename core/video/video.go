@@ -2,6 +2,10 @@ package video
 
 import "time"
 
+// Video models videos.
+// A course can contain many videos.
+// A video can be contained by a course only.
+// URL is not marhsalled to JSON to avoid security issues.
 type Video struct {
 	ID          string    `json:"id" db:"video_id"`
 	CourseID    string    `json:"course_id" db:"course_id"`
@@ -16,11 +20,7 @@ type Video struct {
 	Version     int       `json:"-" db:"version"`
 }
 
-type URL struct {
-	VideoID string `json:"video_id" db:"video_id"`
-	URL     string `json:"url" db:"url"`
-}
-
+// VideoNew contains all the information needed to insert a new video.
 type VideoNew struct {
 	CourseID    string `json:"course_id" validate:"required"`
 	Index       int    `json:"index" validate:"required,gte=0"`
@@ -31,6 +31,7 @@ type VideoNew struct {
 	ImageURL    string `json:"image_url" validate:"required"`
 }
 
+// VideoUp specifies the data of videos that can be updated.
 type VideoUp struct {
 	CourseID    *string `json:"course_id"`
 	Index       *int    `json:"index" validate:"omitempty,gte=0"`
@@ -41,6 +42,7 @@ type VideoUp struct {
 	ImageURL    *string `json:"image_url"`
 }
 
+// Progress models users' progress on videos.
 type Progress struct {
 	VideoID   string    `json:"video_id" db:"video_id"`
 	UserID    string    `json:"user_id" db:"user_id"`
@@ -49,6 +51,7 @@ type Progress struct {
 	UpdatedAt time.Time `json:"updated_at" db:"updated_at"`
 }
 
+// ProgressUp contains the data of a progress which can be updated.
 type ProgressUp struct {
 	Progress int `json:"progress" validate:"gte=0,lte=100"`
 }

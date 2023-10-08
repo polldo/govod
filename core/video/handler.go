@@ -16,6 +16,7 @@ import (
 	"github.com/polldo/govod/validate"
 )
 
+// HandleCreate allows administrators to insert a new video in a course.
 func HandleCreate(db *sqlx.DB) web.Handler {
 	return func(ctx context.Context, w http.ResponseWriter, r *http.Request) error {
 		var v VideoNew
@@ -54,6 +55,7 @@ func HandleCreate(db *sqlx.DB) web.Handler {
 	}
 }
 
+// HandleUpdate allows administrators to update videos' information.
 func HandleUpdate(db *sqlx.DB) web.Handler {
 	return func(ctx context.Context, w http.ResponseWriter, r *http.Request) error {
 		videoID := web.Param(r, "id")
@@ -111,6 +113,8 @@ func HandleUpdate(db *sqlx.DB) web.Handler {
 	}
 }
 
+// HandleList returns all the available videos.
+// It doesn't return the actual URL of videos, so it can be safely exposed.
 func HandleList(db *sqlx.DB) web.Handler {
 	return func(ctx context.Context, w http.ResponseWriter, r *http.Request) error {
 		videos, err := FetchAll(ctx, db)
@@ -122,6 +126,8 @@ func HandleList(db *sqlx.DB) web.Handler {
 	}
 }
 
+// HandleListByCourse returns all the available videos of a course.
+// It doesn't return the actual URL of videos, so it can be safely exposed.
 func HandleListByCourse(db *sqlx.DB) web.Handler {
 	return func(ctx context.Context, w http.ResponseWriter, r *http.Request) error {
 		courseID := web.Param(r, "course_id")
@@ -139,6 +145,8 @@ func HandleListByCourse(db *sqlx.DB) web.Handler {
 	}
 }
 
+// HandleShow returns the information of a specific video.
+// It doesn't return the actual URL of videos, so it can be safely exposed.
 func HandleShow(db *sqlx.DB) web.Handler {
 	return func(ctx context.Context, w http.ResponseWriter, r *http.Request) error {
 		videoID := web.Param(r, "id")
@@ -160,6 +168,8 @@ func HandleShow(db *sqlx.DB) web.Handler {
 	}
 }
 
+// HandleShowFull returns all data useful for presenting the video to users.
+// This returns the URL also, so only owners of a video are allowed to call this.
 func HandleShowFull(db *sqlx.DB) web.Handler {
 	return func(ctx context.Context, w http.ResponseWriter, r *http.Request) error {
 		videoID := web.Param(r, "id")
@@ -231,6 +241,9 @@ func HandleShowFull(db *sqlx.DB) web.Handler {
 	}
 }
 
+// HandleShowFree returns all information useful for presenting the video
+// to users. Only free videos can be retrieved with this function.
+// Thus, it can be safely exposed.
 func HandleShowFree(db *sqlx.DB) web.Handler {
 	return func(ctx context.Context, w http.ResponseWriter, r *http.Request) error {
 		videoID := web.Param(r, "id")
@@ -271,6 +284,7 @@ func HandleShowFree(db *sqlx.DB) web.Handler {
 	}
 }
 
+// HandleUpdateProgress inserts a progress on a video for a specific user.
 func HandleUpdateProgress(db *sqlx.DB) web.Handler {
 	return func(ctx context.Context, w http.ResponseWriter, r *http.Request) error {
 		videoID := web.Param(r, "id")
@@ -297,6 +311,7 @@ func HandleUpdateProgress(db *sqlx.DB) web.Handler {
 	}
 }
 
+// HandleListProgressByCourse returns all the progress of a user on a specific course.
 func HandleListProgressByCourse(db *sqlx.DB) web.Handler {
 	return func(ctx context.Context, w http.ResponseWriter, r *http.Request) error {
 		courseID := web.Param(r, "course_id")
