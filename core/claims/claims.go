@@ -37,6 +37,10 @@ func Get(ctx context.Context) (Claims, error) {
 	return v, nil
 }
 
+// IsAdmin checks if the session contained in the context,
+// if any, belongs to an administrator.
+// Returns false if no session is found or if the user is not
+// an administrator.
 func IsAdmin(ctx context.Context) bool {
 	c, err := Get(ctx)
 	if err != nil {
@@ -46,6 +50,10 @@ func IsAdmin(ctx context.Context) bool {
 	return c.Role == RoleAdmin
 }
 
+// IsAdmin checks if the session contained in the context,
+// if any, belongs to the passed user id.
+// Returns false if no session is found or if the user is not
+// equal to the same passed.
 func IsUser(ctx context.Context, id string) bool {
 	c, err := Get(ctx)
 	if err != nil {
