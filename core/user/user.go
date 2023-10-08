@@ -4,6 +4,7 @@ import (
 	"time"
 )
 
+// User models users. Email address is a unique field.
 type User struct {
 	ID           string    `json:"id" db:"user_id"`
 	Name         string    `json:"name" db:"name"`
@@ -16,6 +17,8 @@ type User struct {
 	Version      int       `json:"-" db:"version"`
 }
 
+// UserNew includes the information an administrator needs
+// to create a new user.
 type UserNew struct {
 	Name            string `json:"name" validate:"required"`
 	Email           string `json:"email" validate:"required,email"`
@@ -24,6 +27,7 @@ type UserNew struct {
 	PasswordConfirm string `json:"password_confirm" validate:"eqfield=Password"`
 }
 
+// UserSignup contains information needed to register a user.
 type UserSignup struct {
 	Name            string `json:"name" validate:"required"`
 	Email           string `json:"email" validate:"required,email"`
@@ -31,6 +35,7 @@ type UserSignup struct {
 	PasswordConfirm string `json:"password_confirm" validate:"omitempty,eqfield=Password"`
 }
 
+// UserUp specifies information of a user which can be updated.
 type UserUp struct {
 	Name            *string `json:"name"`
 	Email           *string `json:"email" validate:"omitempty,email"`
