@@ -19,6 +19,8 @@ import (
 const userKey = "userID"
 const roleKey = "role"
 
+// Authenticate returns a middleware intended to protect
+// routes which require an authenticated user.
 func Authenticate(s *scs.SessionManager) web.Middleware {
 	m := func(handler web.Handler) web.Handler {
 		h := func(ctx context.Context, w http.ResponseWriter, r *http.Request) error {
@@ -41,6 +43,8 @@ func Authenticate(s *scs.SessionManager) web.Middleware {
 	return m
 }
 
+// Authenticate returns a middleware intended to protect
+// routes which require an administrator.
 func Admin(s *scs.SessionManager) web.Middleware {
 	m := func(handler web.Handler) web.Handler {
 		h := func(ctx context.Context, w http.ResponseWriter, r *http.Request) error {
@@ -60,6 +64,8 @@ func Admin(s *scs.SessionManager) web.Middleware {
 	return m
 }
 
+// LoadAndSave updates the user's session if there was
+// a change.
 func LoadAndSave(s *scs.SessionManager) web.Middleware {
 	m := func(handler web.Handler) web.Handler {
 		h := func(ctx context.Context, w http.ResponseWriter, r *http.Request) error {

@@ -8,11 +8,15 @@ import (
 	"golang.org/x/oauth2"
 )
 
+// UserInfo includes the information of a user
+// to be retrieved from external providers.
 type UserInfo struct {
 	Name  string `json:"name"`
 	Email string `json:"email"`
 }
 
+// ProviderConfig contains the information needed
+// to setup an Oauth provider.
 type ProviderConfig struct {
 	Name        string
 	Client      string
@@ -21,11 +25,13 @@ type ProviderConfig struct {
 	RedirectURL string
 }
 
+// Provider wraps an external Oauth provider.
 type Provider struct {
 	*oauth2.Config
 	*oidc.Provider
 }
 
+// MakeProviders builds supported Oauth providers.
 func MakeProviders(ctx context.Context, cfg []ProviderConfig) (map[string]Provider, error) {
 	provs := make(map[string]Provider)
 
