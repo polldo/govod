@@ -72,7 +72,6 @@ func InternalError(err error, opts ...Opt) error {
 }
 
 // BadRequest returns a new `Bad Request` request error.
-// TODO: Maybe pass a WithMsg option to overwrite the error message?
 func BadRequest(err error, opts ...Opt) error {
 	return NewError(
 		err,
