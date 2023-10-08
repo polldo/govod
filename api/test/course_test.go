@@ -268,7 +268,7 @@ func (ct *courseTest) updateCourseInexistent(t *testing.T, crs course.Course) {
 	}
 	defer w.Body.Close()
 
-	if w.StatusCode != http.StatusBadRequest {
+	if w.StatusCode != http.StatusNotFound {
 		t.Fatalf("users should not be able to update not existing courses: status code %s", w.Status)
 	}
 }
@@ -366,8 +366,8 @@ func (ct *courseTest) showCourseNotFound(t *testing.T) {
 	}
 	defer w.Body.Close()
 
-	if w.StatusCode == http.StatusNotFound {
-		t.Fatalf("fetche course should not exist: status code %s", w.Status)
+	if w.StatusCode != http.StatusNotFound {
+		t.Fatalf("fetched course should not exist: status code %s", w.Status)
 	}
 }
 
