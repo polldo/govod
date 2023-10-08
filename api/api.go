@@ -1,5 +1,3 @@
-// This file has been adapted from the excellent ardanlabs repo:
-// https://github.com/ardanlabs/service ardanlabs .
 package api
 
 import (
