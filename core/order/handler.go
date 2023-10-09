@@ -117,7 +117,7 @@ func fulfill(ctx context.Context, db *sqlx.DB, providerID string) error {
 	return nil
 }
 
-// Check if the user has already bought a course in the order?
+// HandlePaypalCheckout starts the purchase flow with paypal.
 func HandlePaypalCheckout(db *sqlx.DB, pp *paypal.Client) web.Handler {
 	return func(ctx context.Context, w http.ResponseWriter, r *http.Request) error {
 		clm, err := claims.Get(ctx)
@@ -185,6 +185,9 @@ func HandlePaypalCheckout(db *sqlx.DB, pp *paypal.Client) web.Handler {
 	}
 }
 
+// HandlePaypalCapture checks if the user's purchase has been
+// successfully completed. After the capture, the money of the user
+// will be transferred to our paypal account.
 func HandlePaypalCapture(db *sqlx.DB, pp *paypal.Client) web.Handler {
 	return func(ctx context.Context, w http.ResponseWriter, r *http.Request) error {
 		providerID := web.Param(r, "id")
@@ -222,6 +225,7 @@ func HandlePaypalCapture(db *sqlx.DB, pp *paypal.Client) web.Handler {
 	}
 }
 
+// HandleStripeCheckout starts the purchase flow with stripe.
 func HandleStripeCheckout(db *sqlx.DB, strp *stripecl.API, cfg config.Stripe) web.Handler {
 	return func(ctx context.Context, w http.ResponseWriter, r *http.Request) error {
 		clm, err := claims.Get(ctx)
@@ -278,8 +282,12 @@ func HandleStripeCheckout(db *sqlx.DB, strp *stripecl.API, cfg config.Stripe) we
 	}
 }
 
+// HandleStripeCapture completes the user's purchase.
+// Stripe webhooks must be configured to call this endpoint when a
+// checkout is completed.
+//
+// TODO: Remember to disable async payments.
 // https://stripe.com/docs/payments/checkout/fulfill-orders#delayed-notification .
-// WARNING: Remember to disable async payments.
 // TODO: rename in HandleStripeWebhooks.
 func HandleStripeCapture(db *sqlx.DB, cfg config.Stripe) web.Handler {
 	return func(ctx context.Context, w http.ResponseWriter, r *http.Request) error {

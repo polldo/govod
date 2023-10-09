@@ -15,6 +15,7 @@ import (
 	"golang.org/x/crypto/bcrypt"
 )
 
+// HandleCreate allows administrators to create new users.
 func HandleCreate(db *sqlx.DB) web.Handler {
 	return func(ctx context.Context, w http.ResponseWriter, r *http.Request) error {
 		var u UserNew
@@ -60,6 +61,7 @@ func HandleCreate(db *sqlx.DB) web.Handler {
 	}
 }
 
+// HandleShow returns the information of a user.
 func HandleShow(db *sqlx.DB) web.Handler {
 	return func(ctx context.Context, w http.ResponseWriter, r *http.Request) error {
 		userID := web.Param(r, "id")
@@ -80,6 +82,8 @@ func HandleShow(db *sqlx.DB) web.Handler {
 	}
 }
 
+// HandleShowCurrent returns the current user's information.
+// Current user is the one retrieved by session cookie.
 func HandleShowCurrent(db *sqlx.DB) web.Handler {
 	return func(ctx context.Context, w http.ResponseWriter, r *http.Request) error {
 		clm, err := claims.Get(ctx)

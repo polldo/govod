@@ -12,6 +12,7 @@ import (
 //go:embed templates
 var templates embed.FS
 
+// Emailer is used to send emails to customers.
 type Emailer struct {
 	auth  smtp.Auth
 	from  string
@@ -19,16 +20,19 @@ type Emailer struct {
 	links Links
 }
 
+// Links contains URLs to be send to customers via email.
 type Links struct {
 	RecoveryURL   string
 	ActivationURL string
 }
 
+// New builds and returns a ready-to-use Emailer.
 func New(address string, password string, host string, port string, links Links) *Emailer {
 	a := smtp.PlainAuth("", address, password, host)
 	return &Emailer{auth: a, host: host + ":" + port, from: address, links: links}
 }
 
+// SendActivationToken attempts to send the passed token to the specified user.
 func (e *Emailer) SendActivationToken(token string, to string) error {
 	t, err := template.New("email").ParseFS(templates, "templates/activation.tmpl")
 	if err != nil {
@@ -55,6 +59,7 @@ func (e *Emailer) SendActivationToken(token string, to string) error {
 	return smtp.SendMail(e.host, e.auth, e.from, []string{to}, bytes)
 }
 
+// SendRecoveryToken attempts to send the passed token to the specified user.
 func (e *Emailer) SendRecoveryToken(token string, to string) error {
 	t, err := template.New("email").ParseFS(templates, "templates/reset-password.tmpl")
 	if err != nil {

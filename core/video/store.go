@@ -9,6 +9,7 @@ import (
 	"github.com/polldo/govod/database"
 )
 
+// Create inserts a new video with the passed information.
 func Create(ctx context.Context, db sqlx.ExtContext, video Video) error {
 	const q = `
 	INSERT INTO videos
@@ -23,6 +24,8 @@ func Create(ctx context.Context, db sqlx.ExtContext, video Video) error {
 	return nil
 }
 
+// Update updates a video with the passed information.
+// It relies on optimistic lock to deal with data races.
 func Update(ctx context.Context, db sqlx.ExtContext, video Video) (Video, error) {
 	const q = `
 	UPDATE videos
@@ -57,6 +60,7 @@ func Update(ctx context.Context, db sqlx.ExtContext, video Video) (Video, error)
 	return video, nil
 }
 
+// Fetch returns a video given its id.
 func Fetch(ctx context.Context, db sqlx.ExtContext, id string) (Video, error) {
 	in := struct {
 		ID string `db:"video_id"`
@@ -80,6 +84,7 @@ func Fetch(ctx context.Context, db sqlx.ExtContext, id string) (Video, error) {
 	return video, nil
 }
 
+// FetchAll returns all available videos.
 func FetchAll(ctx context.Context, db sqlx.ExtContext) ([]Video, error) {
 	const q = `
 	SELECT
@@ -97,6 +102,7 @@ func FetchAll(ctx context.Context, db sqlx.ExtContext) ([]Video, error) {
 	return videos, nil
 }
 
+// FetchAllByCourse returns all available videos belonging to a specific course.
 func FetchAllByCourse(ctx context.Context, db sqlx.ExtContext, courseID string) ([]Video, error) {
 	in := struct {
 		ID string `db:"course_id"`
@@ -122,6 +128,7 @@ func FetchAllByCourse(ctx context.Context, db sqlx.ExtContext, courseID string) 
 	return videos, nil
 }
 
+// UpdateProgress upserts user's progress on a video.
 func UpdateProgress(ctx context.Context, db sqlx.ExtContext, userID string, videoID string, value int) error {
 	in := struct {
 		VideoID  string `db:"video_id"`
@@ -151,6 +158,8 @@ func UpdateProgress(ctx context.Context, db sqlx.ExtContext, userID string, vide
 	return nil
 }
 
+// FetchUserProgressByCourse returns user's progress on videos
+// of a specific course.
 func FetchUserProgressByCourse(ctx context.Context, db sqlx.ExtContext, userID string, courseID string) ([]Progress, error) {
 	in := struct {
 		CourseID string `db:"course_id"`

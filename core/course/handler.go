@@ -15,7 +15,7 @@ import (
 	"github.com/polldo/govod/validate"
 )
 
-// Admin should be able to create and updated courses.
+// HandleCreate allows administrators to add new courses.
 func HandleCreate(db *sqlx.DB) web.Handler {
 	return func(ctx context.Context, w http.ResponseWriter, r *http.Request) error {
 		var c CourseNew
@@ -50,6 +50,7 @@ func HandleCreate(db *sqlx.DB) web.Handler {
 	}
 }
 
+// HandleUpdate allows administrators to update existing courses.
 func HandleUpdate(db *sqlx.DB) web.Handler {
 	return func(ctx context.Context, w http.ResponseWriter, r *http.Request) error {
 		courseID := web.Param(r, "id")
@@ -98,7 +99,7 @@ func HandleUpdate(db *sqlx.DB) web.Handler {
 	}
 }
 
-// Users should be able to list all the courses and to fetch specific ones.
+// HandleList allows users to fetch all available courses.
 func HandleList(db *sqlx.DB) web.Handler {
 	return func(ctx context.Context, w http.ResponseWriter, r *http.Request) error {
 		courses, err := FetchAll(ctx, db)
@@ -110,6 +111,7 @@ func HandleList(db *sqlx.DB) web.Handler {
 	}
 }
 
+// HandleList allows users to fetch courses they own.
 func HandleListOwned(db *sqlx.DB) web.Handler {
 	return func(ctx context.Context, w http.ResponseWriter, r *http.Request) error {
 		clm, err := claims.Get(ctx)
@@ -126,6 +128,7 @@ func HandleListOwned(db *sqlx.DB) web.Handler {
 	}
 }
 
+// HandleShow allows users to fetch the information of a specific course.
 func HandleShow(db *sqlx.DB) web.Handler {
 	return func(ctx context.Context, w http.ResponseWriter, r *http.Request) error {
 		courseID := web.Param(r, "id")

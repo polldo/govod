@@ -4,6 +4,8 @@ import (
 	"time"
 )
 
+// Config contains all the config parameters useful
+// to setup the whole server components.
 type Config struct {
 	Cors   Cors
 	Web    Web
@@ -15,10 +17,12 @@ type Config struct {
 	Auth   Auth
 }
 
+// Cors includes parameters for CORS setup.
 type Cors struct {
 	Origin string `conf:"default="`
 }
 
+// Web contains all the parameters related to the http listener.
 type Web struct {
 	Address         string        `conf:"default:0.0.0.0:8000"`
 	ReadTimeout     time.Duration `conf:"default:5s"`
@@ -27,6 +31,7 @@ type Web struct {
 	ShutdownTimeout time.Duration `conf:"default:120s"`
 }
 
+// DB contains the details of the PostgreSQL to use.
 type DB struct {
 	User         string `conf:"default:postgres"`
 	Password     string `conf:"default:postgres,mask"`
@@ -37,6 +42,8 @@ type DB struct {
 	DisableTLS   bool   `conf:"default:true"`
 }
 
+// Email includes both SMTP information and more business related
+// details which regards the sending of emails.
 type Email struct {
 	Host          string
 	Port          string
@@ -47,6 +54,7 @@ type Email struct {
 	TokenTimeout  time.Duration `conf:"default:10s"`
 }
 
+// Stripe contains parameters to setup the Stripe dependency.
 type Stripe struct {
 	APISecret     string
 	WebhookSecret string
@@ -54,12 +62,14 @@ type Stripe struct {
 	CancelURL     string `conf:"default:http://mylocal.com:3000/cart"`
 }
 
+// Paypal contains parameters to setup the Paypal dependency.
 type Paypal struct {
 	ClientID string
 	Secret   string
 	URL      string `conf:"default:https://api.sandbox.paypal.com"`
 }
 
+// Oauth includes all details needed to setup Oauth authentication.
 type Oauth struct {
 	DiscoveryTimeout time.Duration `conf:"default:30s"`
 	LoginRedirectURL string        `conf:"default:http://mylocal.com:3000/dashboard"`
@@ -71,6 +81,7 @@ type Oauth struct {
 	}
 }
 
+// Auth configures authentication options.
 type Auth struct {
 	ActivationRequired bool `conf:"default:false"`
 }

@@ -22,6 +22,8 @@ import (
 
 const oauthKey = "oauthstate"
 
+// HandleLogin makes a session for the user if the passed credentials
+// are correct.
 func HandleLogin(db *sqlx.DB, session *scs.SessionManager) web.Handler {
 	return func(ctx context.Context, w http.ResponseWriter, r *http.Request) error {
 		email, pass, ok := r.BasicAuth()
@@ -44,8 +46,6 @@ func HandleLogin(db *sqlx.DB, session *scs.SessionManager) web.Handler {
 			return weberr.NewError(err, err.Error(), http.StatusLocked)
 		}
 
-		// TODO: Save the entire user struct in the session
-		// or just some info?
 		session.Put(ctx, userKey, u.ID)
 		session.Put(ctx, roleKey, u.Role)
 		if err := session.RenewToken(ctx); err != nil {
@@ -56,6 +56,8 @@ func HandleLogin(db *sqlx.DB, session *scs.SessionManager) web.Handler {
 	}
 }
 
+// HandleOauthLogin starts the Oauth flow to authenticate the user.
+// It returns the URL to complete the authentication on the specified external provider.
 func HandleOauthLogin(session *scs.SessionManager, provs map[string]Provider) web.Handler {
 	return func(ctx context.Context, w http.ResponseWriter, r *http.Request) error {
 		p := web.Param(r, "provider")
@@ -76,6 +78,7 @@ func HandleOauthLogin(session *scs.SessionManager, provs map[string]Provider) we
 	}
 }
 
+// HandleOauthLogin completes the Oauth flow for the user and creates a new authenticated session.
 func HandleOauthCallback(db *sqlx.DB, session *scs.SessionManager, provs map[string]Provider, redirect string) web.Handler {
 	return func(ctx context.Context, w http.ResponseWriter, r *http.Request) error {
 		p := web.Param(r, "provider")
@@ -162,6 +165,7 @@ func HandleOauthCallback(db *sqlx.DB, session *scs.SessionManager, provs map[str
 	}
 }
 
+// HandleLogout cancels the user's session.
 func HandleLogout(session *scs.SessionManager) web.Handler {
 	return func(ctx context.Context, w http.ResponseWriter, r *http.Request) error {
 		if err := session.Destroy(ctx); err != nil {
@@ -172,6 +176,9 @@ func HandleLogout(session *scs.SessionManager) web.Handler {
 	}
 }
 
+// HandleSignup tries to register the user with the passed information.
+// If activationRequired is true, users need to confirm the registration
+// via email.
 func HandleSignup(db *sqlx.DB, session *scs.SessionManager, activationRequired bool) web.Handler {
 	return func(ctx context.Context, w http.ResponseWriter, r *http.Request) error {
 		var u user.UserSignup
@@ -209,8 +216,6 @@ func HandleSignup(db *sqlx.DB, session *scs.SessionManager, activationRequired b
 		}
 
 		if !activationRequired {
-			// TODO: Save the entire user struct in the session
-			// or just some info?
 			session.Put(ctx, userKey, usr.ID)
 			session.Put(ctx, roleKey, usr.Role)
 			if err := session.RenewToken(ctx); err != nil {

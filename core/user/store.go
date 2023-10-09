@@ -14,6 +14,7 @@ var (
 	ErrUniqueEmail = errors.New("email is not unique")
 )
 
+// Create inserts a new user.
 func Create(ctx context.Context, db sqlx.ExtContext, user User) error {
 	const q = `
 	INSERT INTO users
@@ -31,6 +32,8 @@ func Create(ctx context.Context, db sqlx.ExtContext, user User) error {
 	return nil
 }
 
+// Update updates an existing user with provided information.
+// It relies on optimistic lock to deal with data races.
 func Update(ctx context.Context, db sqlx.ExtContext, user User) (User, error) {
 	const q = `
 	UPDATE users
@@ -63,6 +66,7 @@ func Update(ctx context.Context, db sqlx.ExtContext, user User) (User, error) {
 	return user, nil
 }
 
+// Fetch returns user information.
 func Fetch(ctx context.Context, db sqlx.ExtContext, id string) (User, error) {
 	in := struct {
 		ID string `db:"user_id"`
@@ -86,6 +90,7 @@ func Fetch(ctx context.Context, db sqlx.ExtContext, id string) (User, error) {
 	return user, nil
 }
 
+// FetchByEmail returns the user corresponding to a specific email, if any.
 func FetchByEmail(ctx context.Context, db sqlx.ExtContext, email string) (User, error) {
 	in := struct {
 		Email string `db:"email"`
@@ -109,6 +114,7 @@ func FetchByEmail(ctx context.Context, db sqlx.ExtContext, email string) (User, 
 	return user, nil
 }
 
+// FetchByToken retrieves the user corresponding to the passed token.
 func FetchByToken(ctx context.Context, db sqlx.ExtContext, tokenHash []byte, tokenScope string) (User, error) {
 	in := struct {
 		Hash  []byte    `db:"hash"`

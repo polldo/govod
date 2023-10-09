@@ -1,6 +1,3 @@
-// Package web contains web data structures to compose a minimal framework.
-// This file has been extracted from the excellent ardanlabs repo:
-// https://github.com/ardanlabs/service ardanlabs .
 package web
 
 import (
