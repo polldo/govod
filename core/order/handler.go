@@ -30,14 +30,14 @@ import (
 func checkout(ctx context.Context, db *sqlx.DB, userID string) ([]course.Course, error) {
 	items, err := cart.FetchItems(ctx, db, userID)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("fetching cart items: %w", err)
 	}
 
 	courses := make([]course.Course, 0, len(items))
 	for _, it := range items {
 		c, err := course.Fetch(ctx, db, it.CourseID)
 		if err != nil {
-			return nil, err
+			return nil, fmt.Errorf("fetching course[%s]: %w", it.CourseID, err)
 		}
 
 		courses = append(courses, c)
@@ -61,7 +61,7 @@ func prepare(ctx context.Context, db *sqlx.DB, userID string, providerID string,
 		}
 
 		if err := Create(ctx, tx, ord); err != nil {
-			return err
+			return fmt.Errorf("creating order: %w", err)
 		}
 
 		for _, c := range courses {
@@ -73,7 +73,7 @@ func prepare(ctx context.Context, db *sqlx.DB, userID string, providerID string,
 			}
 
 			if err := CreateItem(ctx, tx, it); err != nil {
-				return err
+				return fmt.Errorf("creating item: %w", err)
 			}
 		}
 
@@ -100,12 +100,12 @@ func fulfill(ctx context.Context, db *sqlx.DB, providerID string) error {
 		}
 
 		if err = UpdateStatus(ctx, tx, up); err != nil {
-			return err
+			return fmt.Errorf("updating status: %w", err)
 		}
 
 		// Finally flush the cart as a last step.
 		if err = cart.Delete(ctx, tx, ord.UserID); err != nil {
-			return err
+			return fmt.Errorf("flushing cart: %w", err)
 		}
 
 		return nil
@@ -191,7 +191,7 @@ func HandlePaypalCapture(db *sqlx.DB, pp *paypal.Client) web.Handler {
 
 		resp, err := pp.CaptureOrder(ctx, providerID, paypal.CaptureOrderRequest{})
 		if err != nil {
-			return err
+			return fmt.Errorf("capturing paypal order[%s]: %w", providerID, err)
 		}
 
 		if resp.Status != "COMPLETED" {
@@ -285,20 +285,17 @@ func HandleStripeCapture(db *sqlx.DB, cfg config.Stripe) web.Handler {
 	return func(ctx context.Context, w http.ResponseWriter, r *http.Request) error {
 		b, err := ioutil.ReadAll(r.Body)
 		if err != nil {
-			err = fmt.Errorf("cannot read the request body: %w", err)
-			return weberr.NewError(err, err.Error(), http.StatusBadRequest)
+			return weberr.BadRequest(fmt.Errorf("cannot read the request body: %w", err))
 		}
 
 		sig := r.Header.Get("Stripe-Signature")
 		if sig == "" {
-			err = errors.New("received stripe event is not signed")
-			return weberr.NewError(err, err.Error(), http.StatusBadRequest)
+			return weberr.BadRequest(errors.New("received stripe event is not signed"))
 		}
 
 		event, err := webhook.ConstructEvent(b, sig, cfg.WebhookSecret)
 		if err != nil {
-			err = fmt.Errorf("cannot construct stripe event: %w", err)
-			return weberr.NewError(err, err.Error(), http.StatusBadRequest)
+			return weberr.BadRequest(fmt.Errorf("cannot construct stripe event: %w", err))
 		}
 
 		// Filter all the events but the checkout completion one.
@@ -308,8 +305,7 @@ func HandleStripeCapture(db *sqlx.DB, cfg config.Stripe) web.Handler {
 
 		var session stripe.CheckoutSession
 		if err = json.Unmarshal(event.Data.Raw, &session); err != nil {
-			err = fmt.Errorf("unable to decode stripe event: %w", err)
-			return weberr.NewError(err, err.Error(), http.StatusBadRequest)
+			return weberr.BadRequest(fmt.Errorf("unable to decode stripe event: %w", err))
 		}
 
 		// Filter out checkouts that are not for one-time payments.

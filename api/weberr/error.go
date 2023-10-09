@@ -70,3 +70,13 @@ func InternalError(err error, opts ...Opt) error {
 		opts...,
 	)
 }
+
+// BadRequest returns a new `Bad Request` request error.
+func BadRequest(err error, opts ...Opt) error {
+	return NewError(
+		err,
+		"bad request",
+		http.StatusBadRequest,
+		opts...,
+	)
+}

@@ -30,12 +30,12 @@ func HandleShow(db *sqlx.DB) web.Handler {
 			if errors.Is(err, database.ErrDBNotFound) {
 				return web.Respond(ctx, w, Cart{Items: []Item{}}, http.StatusOK)
 			}
-			return err
+			return fmt.Errorf("fetching user[%s] cart: %w", clm.UserID, err)
 		}
 
 		cart.Items, err = FetchItems(ctx, db, clm.UserID)
 		if err != nil {
-			return err
+			return fmt.Errorf("fetching user[%s] cart items: %w", clm.UserID, err)
 		}
 
 		return web.Respond(ctx, w, cart, http.StatusOK)
@@ -51,7 +51,7 @@ func HandleDelete(db *sqlx.DB) web.Handler {
 
 		// Just delete the cart. Its items will be deleted in cascade.
 		if err := Delete(ctx, db, clm.UserID); err != nil {
-			return err
+			return fmt.Errorf("deleting user[%s] cart: %w", clm.UserID, err)
 		}
 
 		return web.Respond(ctx, w, nil, http.StatusNoContent)
@@ -62,8 +62,7 @@ func HandleCreateItem(db *sqlx.DB) web.Handler {
 	return func(ctx context.Context, w http.ResponseWriter, r *http.Request) error {
 		var itnew ItemNew
 		if err := web.Decode(w, r, &itnew); err != nil {
-			err = fmt.Errorf("unable to decode payload: %w", err)
-			return weberr.NewError(err, err.Error(), http.StatusBadRequest)
+			return weberr.BadRequest(fmt.Errorf("unable to decode payload: %w", err))
 		}
 
 		clm, err := claims.Get(ctx)
@@ -73,7 +72,11 @@ func HandleCreateItem(db *sqlx.DB) web.Handler {
 
 		owned, err := course.FetchByOwner(ctx, db, clm.UserID)
 		if err != nil {
-			return fmt.Errorf("checking if course is already owned by user: %w", err)
+			return fmt.Errorf("checking if course[%s] is already owned by user[%s]: %w",
+				itnew.CourseID,
+				clm.UserID,
+				err,
+			)
 		}
 
 		for _, o := range owned {
@@ -84,7 +87,7 @@ func HandleCreateItem(db *sqlx.DB) web.Handler {
 		}
 
 		if _, err := Upsert(ctx, db, clm.UserID); err != nil {
-			return err
+			return fmt.Errorf("upserting user[%s] cart: %w", clm.UserID, err)
 		}
 
 		now := time.Now().UTC()
@@ -96,7 +99,7 @@ func HandleCreateItem(db *sqlx.DB) web.Handler {
 		}
 
 		if err := CreateItem(ctx, db, item); err != nil {
-			return err
+			return fmt.Errorf("creating cart item[%s] for user[%s]: %w", item.CourseID, clm.UserID, err)
 		}
 
 		return web.Respond(ctx, w, item, http.StatusCreated)
@@ -108,8 +111,7 @@ func HandleDeleteItem(db *sqlx.DB) web.Handler {
 		courseID := web.Param(r, "course_id")
 
 		if err := validate.CheckID(courseID); err != nil {
-			err = fmt.Errorf("passed id is not valid: %w", err)
-			return weberr.NewError(err, err.Error(), http.StatusBadRequest)
+			return weberr.BadRequest(fmt.Errorf("passed id is not valid: %w", err))
 		}
 
 		clm, err := claims.Get(ctx)
@@ -118,11 +120,11 @@ func HandleDeleteItem(db *sqlx.DB) web.Handler {
 		}
 
 		if _, err := Upsert(ctx, db, clm.UserID); err != nil {
-			return err
+			return fmt.Errorf("upserting user[%s] cart: %w", clm.UserID, err)
 		}
 
 		if err := DeleteItem(ctx, db, clm.UserID, courseID); err != nil {
-			return err
+			return fmt.Errorf("deleting user[%s] cart item: %w", clm.UserID, err)
 		}
 
 		return web.Respond(ctx, w, nil, http.StatusNoContent)
