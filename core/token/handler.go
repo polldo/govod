@@ -8,10 +8,12 @@ import (
 	"net/http"
 	"time"
 
+	"github.com/alexedwards/scs/v2"
 	"github.com/jmoiron/sqlx"
 	"github.com/polldo/govod/api/background"
 	"github.com/polldo/govod/api/web"
 	"github.com/polldo/govod/api/weberr"
+	"github.com/polldo/govod/core/auth"
 	"github.com/polldo/govod/core/user"
 	"github.com/polldo/govod/database"
 	"github.com/polldo/govod/rate"
@@ -119,7 +121,7 @@ func HandleToken(db *sqlx.DB, mailer Mailer, timeout time.Duration, bg *backgrou
 
 // HandleActivation validates the passed token and, if correct,
 // it activates the user.
-func HandleActivation(db *sqlx.DB) web.Handler {
+func HandleActivation(db *sqlx.DB, session *scs.SessionManager) web.Handler {
 	return func(ctx context.Context, w http.ResponseWriter, r *http.Request) error {
 		var in struct {
 			Token string `json:"token" validate:"required"`
@@ -163,7 +165,11 @@ func HandleActivation(db *sqlx.DB) web.Handler {
 			return err
 		}
 
-		return nil
+		if err := auth.SaveUserSession(ctx, session, usr.ID, usr.Role); err != nil {
+			return fmt.Errorf("store user[%s] in session: %w", usr.ID, err)
+		}
+
+		return web.Respond(ctx, w, nil, http.StatusNoContent)
 	}
 }
 

@@ -4,6 +4,7 @@ import { useRouter } from 'next/router'
 import { useEffect } from 'react'
 import { useState } from 'react'
 import { useCallback } from 'react'
+import { useSession } from '@/session/context'
 
 type Token = {
     Token: string
@@ -12,6 +13,7 @@ type Token = {
 export default function Confirm() {
     const [activated, setActivated] = useState<boolean>(false)
     const [error, setError] = useState<string>('')
+    const { updateSession } = useSession()
     const router = useRouter()
 
     const handleSubmit = useCallback(async () => {
@@ -27,6 +29,7 @@ export default function Confirm() {
             const res = await fetch('http://mylocal.com:8000/tokens/activate', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
+                credentials: 'include',
                 body: JSON.stringify(body),
             })
             if (res.status === 422) {
@@ -36,6 +39,7 @@ export default function Confirm() {
                 throw new Error('Something went wrong')
             }
 
+            updateSession()
             setActivated(true)
             setTimeout(() => {
                 router.push('/login')
@@ -47,7 +51,7 @@ export default function Confirm() {
                 setError('Something went wrong')
             }
         }
-    }, [router])
+    }, [router, updateSession])
 
     useEffect(() => {
         handleSubmit()
