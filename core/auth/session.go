@@ -19,6 +19,16 @@ import (
 const userKey = "userID"
 const roleKey = "role"
 
+// SaveUserSession saves the passed user in the current session.
+func SaveUserSession(ctx context.Context, session *scs.SessionManager, userID string, role string) error {
+	session.Put(ctx, userKey, userID)
+	session.Put(ctx, roleKey, role)
+	if err := session.RenewToken(ctx); err != nil {
+		return fmt.Errorf("renewing token: %w", err)
+	}
+	return nil
+}
+
 // Authenticate returns a middleware intended to protect
 // routes which require an authenticated user.
 func Authenticate(s *scs.SessionManager) web.Middleware {

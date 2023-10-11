@@ -46,10 +46,8 @@ func HandleLogin(db *sqlx.DB, session *scs.SessionManager) web.Handler {
 			return weberr.NewError(err, err.Error(), http.StatusLocked)
 		}
 
-		session.Put(ctx, userKey, u.ID)
-		session.Put(ctx, roleKey, u.Role)
-		if err := session.RenewToken(ctx); err != nil {
-			return fmt.Errorf("renewing token: %w", err)
+		if err := SaveUserSession(ctx, session, u.ID, u.Role); err != nil {
+			return fmt.Errorf("store user[%s] in session: %w", u.ID, err)
 		}
 
 		return web.Respond(ctx, w, nil, http.StatusNoContent)
@@ -153,11 +151,8 @@ func HandleOauthCallback(db *sqlx.DB, session *scs.SessionManager, provs map[str
 			}
 		}
 
-		// Create a session for the user.
-		session.Put(ctx, userKey, u.ID)
-		session.Put(ctx, roleKey, u.Role)
-		if err := session.RenewToken(ctx); err != nil {
-			return fmt.Errorf("renewing token: %w", err)
+		if err := SaveUserSession(ctx, session, u.ID, u.Role); err != nil {
+			return fmt.Errorf("store user[%s] in session: %w", u.ID, err)
 		}
 
 		http.Redirect(w, r, redirect, http.StatusFound)
@@ -216,10 +211,8 @@ func HandleSignup(db *sqlx.DB, session *scs.SessionManager, activationRequired b
 		}
 
 		if !activationRequired {
-			session.Put(ctx, userKey, usr.ID)
-			session.Put(ctx, roleKey, usr.Role)
-			if err := session.RenewToken(ctx); err != nil {
-				return fmt.Errorf("renewing token: %w", err)
+			if err := SaveUserSession(ctx, session, usr.ID, usr.Role); err != nil {
+				return fmt.Errorf("store user[%s] in session: %w", usr.ID, err)
 			}
 		}
 

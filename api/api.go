@@ -85,7 +85,7 @@ func APIMux(cfg APIConfig) http.Handler {
 	a.Handle(http.MethodGet, "/auth/oauth-callback/{provider}", auth.HandleOauthCallback(cfg.DB, cfg.Session, cfg.Providers, cfg.LoginRedirectURL))
 
 	a.Handle(http.MethodPost, "/tokens", token.HandleToken(cfg.DB, cfg.Mailer, cfg.TokenTimeout, cfg.Background))
-	a.Handle(http.MethodPost, "/tokens/activate", token.HandleActivation(cfg.DB))
+	a.Handle(http.MethodPost, "/tokens/activate", token.HandleActivation(cfg.DB, cfg.Session))
 	a.Handle(http.MethodPost, "/tokens/recover", token.HandleRecovery(cfg.DB))
 
 	a.Handle(http.MethodGet, "/users/current", user.HandleShowCurrent(cfg.DB), authen)

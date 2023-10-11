@@ -109,7 +109,7 @@ func (tt *tokenTest) activationToken(t *testing.T, u user.UserSignup) {
 	}
 	defer w.Body.Close()
 
-	if w.StatusCode == http.StatusOK {
+	if w.StatusCode == http.StatusNoContent {
 		t.Fatalf("first token shouldn't have been valid")
 	}
 
@@ -134,7 +134,7 @@ func (tt *tokenTest) activationToken(t *testing.T, u user.UserSignup) {
 	}
 	defer w.Body.Close()
 
-	if w.StatusCode != http.StatusOK {
+	if w.StatusCode != http.StatusNoContent {
 		t.Fatalf("second token should have been valid")
 	}
 
