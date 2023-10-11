@@ -87,7 +87,7 @@ func Activate(srv *httptest.Server, email string, mailer *mockMailer) error {
 	}
 	defer w.Body.Close()
 
-	if w.StatusCode != http.StatusOK {
+	if w.StatusCode != http.StatusNoContent {
 		return fmt.Errorf("can't activate user: status code %s", w.Status)
 	}
 
