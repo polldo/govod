@@ -2,6 +2,7 @@ import Layout from '@/components/layout'
 import Head from 'next/head'
 import { useRouter } from 'next/router'
 import { useState } from 'react'
+import { fetcher, ResponseError } from '@/services/fetch'
 
 type ConfirmBody = {
     Token: string
@@ -41,25 +42,18 @@ export default function Confirm() {
         }
 
         try {
-            const res = await fetch('http://mylocal.com:8000/tokens/recover', {
+            await fetcher.fetch('http://mylocal.com:8000/tokens/recover', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(body),
             })
-            if (res.status === 422) {
-                const data = await res.json()
-                throw new Error(data.error)
-            }
-            if (!res.ok) {
-                throw new Error('Something went wrong')
-            }
-
             setSuccess(true)
         } catch (err) {
-            if (err instanceof Error) {
-                setError(err.message)
-            } else {
-                setError('Something went wrong')
+            setError('Something went wrong')
+            if (err instanceof ResponseError) {
+                if (err.status === 422) {
+                    setError(err.message)
+                }
             }
         }
     }

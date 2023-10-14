@@ -5,6 +5,7 @@ import { useEffect } from 'react'
 import { useState } from 'react'
 import { useCallback } from 'react'
 import { useSession } from '@/session/context'
+import { fetcher, ResponseError } from '@/services/fetch'
 
 type Token = {
     Token: string
@@ -26,29 +27,22 @@ export default function Confirm() {
         }
 
         try {
-            const res = await fetch('http://mylocal.com:8000/tokens/activate', {
+            await fetcher.fetch('http://mylocal.com:8000/tokens/activate', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                credentials: 'include',
                 body: JSON.stringify(body),
             })
-            if (res.status === 422) {
-                throw new Error('Invalid token')
-            }
-            if (!res.ok) {
-                throw new Error('Something went wrong')
-            }
-
             updateSession()
             setActivated(true)
             setTimeout(() => {
                 router.push('/login')
             }, 1500)
         } catch (err) {
-            if (err instanceof Error) {
-                setError(err.message)
-            } else {
-                setError('Something went wrong')
+            setError('Something went wrong')
+            if (err instanceof ResponseError) {
+                if (err.status === 422) {
+                    setError('Invalid token')
+                }
             }
         }
     }, [router, updateSession])

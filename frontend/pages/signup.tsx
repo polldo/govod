@@ -3,7 +3,7 @@ import Head from 'next/head'
 import { useState } from 'react'
 import { useRouter } from 'next/router'
 import { useSession } from '@/session/context'
-import { useFetch } from '@/services/fetch'
+import { fetcher, ResponseError } from '@/services/fetch'
 
 export default function Signup() {
     const [name, setName] = useState('')
@@ -12,7 +12,6 @@ export default function Signup() {
     const [error, setError] = useState<string>('')
     const { isLoggedIn, isLoading, updateSession } = useSession()
     const router = useRouter()
-    const fetch = useFetch()
 
     if (isLoading) {
         return null
@@ -28,7 +27,7 @@ export default function Signup() {
         setError('')
 
         try {
-            const res = await fetch('http://mylocal.com:8000/auth/signup', {
+            const res = await fetcher.fetch('http://mylocal.com:8000/auth/signup', {
                 method: 'POST',
                 body: JSON.stringify({
                     email: email,
@@ -36,28 +35,25 @@ export default function Signup() {
                     password: password,
                 }),
             })
+
             const data = await res.json()
-
-            if (res.status === 409) {
-                throw new Error('Email already exists')
-            }
-            if (res.status === 422) {
-                throw new Error(data.error)
-            }
-            if (!res.ok) {
-                throw new Error('Something went wrong')
-            }
-
             if (data.active) {
                 updateSession()
                 return
             }
-            router.push({ pathname: '/activate/require', query: { email } })
+            router.push({
+                pathname: '/activate/require',
+                query: { email },
+            })
         } catch (err) {
-            if (err instanceof Error) {
-                setError(err.message)
-            } else {
-                setError('Something went wrong')
+            setError('Something went wrong')
+            if (err instanceof ResponseError) {
+                if (err.status === 409) {
+                    setError('Email already exists')
+                }
+                if (err.status === 422) {
+                    setError(err.message)
+                }
             }
         }
     }

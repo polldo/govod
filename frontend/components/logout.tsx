@@ -1,20 +1,18 @@
 import { useSession } from '@/session/context'
-import { useFetch } from '@/services/fetch'
+import { fetcher } from '@/services/fetch'
+import { toast } from 'react-hot-toast'
 
 export default function Logout() {
     const { updateSession } = useSession()
-    const fetch = useFetch()
 
     function handleLogout() {
-        fetch('http://mylocal.com:8000/auth/logout', { method: 'POST', credentials: 'include' })
-            .then((response) => {
-                if (!response.ok) {
-                    throw new Error()
-                }
+        fetcher
+            .fetch('http://mylocal.com:8000/auth/logout', { method: 'POST' })
+            .then(() => {
                 updateSession()
             })
-            .catch((err) => {
-                console.log(err)
+            .catch(() => {
+                toast.error('Something went wrong')
             })
     }
 
