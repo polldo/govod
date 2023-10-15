@@ -4,7 +4,7 @@ import { useState } from 'react'
 import { useEffect } from 'react'
 import { useRouter } from 'next/router'
 import { useSession } from '@/session/context'
-import { useFetch } from '@/services/fetch'
+import { fetcher } from '@/services/fetch'
 import Image from 'next/image'
 import { toast } from 'react-hot-toast'
 import { PayPalButtons, usePayPalScriptReducer } from '@paypal/react-paypal-js'
@@ -67,30 +67,25 @@ export default function Cart() {
     const [courses, setCourses] = useState<CoursesMap>({})
     const { isLoggedIn, isLoading } = useSession()
     const router = useRouter()
-    const fetch = useFetch()
     const [{ isPending, isResolved }] = usePayPalScriptReducer()
 
     useEffect(() => {
-        if (!isLoggedIn) {
+        if (isLoading) {
             return
         }
 
-        fetch('http://mylocal.com:8000/cart')
+        fetcher
+            .fetch('http://mylocal.com:8000/cart')
             .then((res) => {
-                if (!res.ok) {
-                    throw new Error()
-                }
                 return res.json()
             })
             .then((data: CartType) => {
                 setCart(data)
 
                 const courseFetches = data.items.map((item) => {
-                    return fetch(`http://mylocal.com:8000/courses/${item.course_id}`)
+                    return fetcher
+                        .fetch(`http://mylocal.com:8000/courses/${item.course_id}`)
                         .then((res) => {
-                            if (!res.ok) {
-                                throw new Error()
-                            }
                             return res.json()
                         })
                         .then((course: Course) => {
@@ -102,10 +97,10 @@ export default function Cart() {
                     toast.error('Something went wrong')
                 })
             })
-            .catch(() => {
+            .catch((err) => {
                 toast.error('Something went wrong')
             })
-    }, [fetch, isLoggedIn])
+    }, [isLoading])
 
     if (isLoading) {
         return null
@@ -118,13 +113,9 @@ export default function Cart() {
 
     const handleDeleteItem = async (id: string) => {
         try {
-            const res = await fetch(`http://mylocal.com:8000/cart/items/${id}`, {
+            await fetcher.fetch(`http://mylocal.com:8000/cart/items/${id}`, {
                 method: 'DELETE',
             })
-
-            if (!res.ok) {
-                throw new Error()
-            }
 
             if (cart) {
                 setCart({
@@ -140,10 +131,7 @@ export default function Cart() {
     const handleStripeCheckout = async (e: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
         e.preventDefault()
         try {
-            const res = await fetch(`http://mylocal.com:8000/orders/stripe`, { method: 'POST' })
-            if (!res.ok) {
-                throw new Error()
-            }
+            const res = await fetcher.fetch(`http://mylocal.com:8000/orders/stripe`, { method: 'POST' })
             const data = await res.json()
             window.location.href = data
         } catch (err) {
@@ -153,10 +141,7 @@ export default function Cart() {
 
     const handlePaypalCheckout = async () => {
         try {
-            const res = await fetch(`http://mylocal.com:8000/orders/paypal`, { method: 'POST' })
-            if (!res.ok) {
-                throw new Error()
-            }
+            const res = await fetcher.fetch(`http://mylocal.com:8000/orders/paypal`, { method: 'POST' })
             const data = await res.json()
             return data.id
         } catch (err) {
@@ -166,12 +151,9 @@ export default function Cart() {
 
     const handlePaypalCapture = async (capture: { orderID: string }) => {
         try {
-            const res = await fetch(`http://mylocal.com:8000/orders/paypal/${capture.orderID}/capture`, {
+            await fetcher.fetch(`http://mylocal.com:8000/orders/paypal/${capture.orderID}/capture`, {
                 method: 'POST',
             })
-            if (!res.ok) {
-                throw new Error()
-            }
             window.location.href = `/dashboard`
         } catch (err) {
             toast.error('Something went wrong')

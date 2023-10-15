@@ -3,6 +3,7 @@ import Head from 'next/head'
 import { useRouter } from 'next/router'
 import { useEffect } from 'react'
 import { useCallback } from 'react'
+import { fetcher } from '@/services/fetch'
 
 type ActivateBody = {
     Email: string
@@ -23,15 +24,11 @@ export default function Require() {
             Scope: 'activation',
         }
 
-        fetch('http://mylocal.com:8000/tokens', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(body),
-        })
-            .then((response) => {
-                if (!response.ok) {
-                    throw new Error()
-                }
+        fetcher
+            .fetch('http://mylocal.com:8000/tokens', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(body),
             })
             .catch((err) => {
                 console.log(err)

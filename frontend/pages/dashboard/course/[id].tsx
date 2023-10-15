@@ -5,8 +5,9 @@ import { useSession } from '@/session/context'
 import { useEffect } from 'react'
 import { useState } from 'react'
 import { useRouter } from 'next/router'
-import { useFetch } from '@/services/fetch'
+import { fetcher } from '@/services/fetch'
 import { toast } from 'react-hot-toast'
+import Link from 'next/link'
 
 type Course = {
     name: string
@@ -35,7 +36,6 @@ export default function DashboardCourse() {
     const [videos, setVideos] = useState<Video[]>()
     const [progress, setProgress] = useState<ProgressMap>({})
     const { isLoggedIn, isLoading } = useSession()
-    const fetch = useFetch()
     const router = useRouter()
     const { id } = router.query
 
@@ -43,28 +43,24 @@ export default function DashboardCourse() {
         if (!router.isReady) {
             return
         }
-        fetch('http://mylocal.com:8000/courses/' + id)
+        fetcher
+            .fetch('http://mylocal.com:8000/courses/' + id)
             .then((res) => {
-                if (!res.ok) {
-                    throw new Error()
-                }
                 return res.json()
             })
             .then((data) => setCourse(data))
             .catch(() => {
                 toast.error('Something went wrong')
             })
-    }, [id, fetch, router.isReady])
+    }, [id, router.isReady])
 
     useEffect(() => {
         if (!router.isReady) {
             return
         }
-        fetch('http://mylocal.com:8000/courses/' + id + '/progress')
+        fetcher
+            .fetch('http://mylocal.com:8000/courses/' + id + '/progress')
             .then((res) => {
-                if (!res.ok) {
-                    throw new Error()
-                }
                 return res.json()
             })
             .then((data) => {
@@ -77,24 +73,22 @@ export default function DashboardCourse() {
             .catch(() => {
                 toast.error('Something went wrong')
             })
-    }, [id, fetch, router.isReady])
+    }, [id, router.isReady])
 
     useEffect(() => {
         if (!router.isReady) {
             return
         }
-        fetch('http://mylocal.com:8000/courses/' + id + '/videos')
+        fetcher
+            .fetch('http://mylocal.com:8000/courses/' + id + '/videos')
             .then((res) => {
-                if (!res.ok) {
-                    throw new Error()
-                }
                 return res.json()
             })
             .then((data) => setVideos(data))
             .catch(() => {
                 toast.error('Something went wrong')
             })
-    }, [id, fetch, router.isReady])
+    }, [id, router.isReady])
 
     if (isLoading) {
         return null
@@ -135,7 +129,7 @@ type CardProps = Video & {
 
 function Card(props: CardProps) {
     return (
-        <a
+        <Link
             href={`/dashboard/video/${props.id}`}
             className="flex w-1/2 flex-col items-center rounded-lg border border-gray-200 bg-white shadow hover:bg-gray-100 dark:border-gray-700 dark:bg-gray-800 dark:hover:bg-gray-700 md:max-w-xl md:flex-row"
         >
@@ -153,6 +147,6 @@ function Card(props: CardProps) {
             </div>
 
             <p>progress: {props.progress}</p>
-        </a>
+        </Link>
     )
 }

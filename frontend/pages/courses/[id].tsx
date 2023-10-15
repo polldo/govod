@@ -5,7 +5,7 @@ import Link from 'next/link'
 import { useEffect } from 'react'
 import { useState } from 'react'
 import { useRouter } from 'next/router'
-import { useFetch } from '@/services/fetch'
+import { fetcher } from '@/services/fetch'
 import { toast } from 'react-hot-toast'
 
 type Course = {
@@ -25,7 +25,6 @@ type Video = {
 export default function CourseDetails() {
     const [course, setCourse] = useState<Course>()
     const [videos, setVideos] = useState<Video[]>()
-    const fetch = useFetch()
     const router = useRouter()
     const { id } = router.query
 
@@ -36,36 +35,32 @@ export default function CourseDetails() {
             return
         }
 
-        fetch('http://mylocal.com:8000/courses/' + id)
+        fetcher
+            .fetch('http://mylocal.com:8000/courses/' + id)
             .then((res) => {
-                if (!res.ok) {
-                    throw new Error()
-                }
                 return res.json()
             })
             .then((data) => setCourse(data))
             .catch(() => {
                 toast.error('Something went wrong')
             })
-    }, [id, fetch, router.isReady])
+    }, [id, router.isReady])
 
     useEffect(() => {
         if (!router.isReady) {
             return
         }
 
-        fetch('http://mylocal.com:8000/courses/' + id + '/videos')
+        fetcher
+            .fetch('http://mylocal.com:8000/courses/' + id + '/videos')
             .then((res) => {
-                if (!res.ok) {
-                    throw new Error()
-                }
                 return res.json()
             })
             .then((data) => setVideos(data))
             .catch(() => {
                 toast.error('Something went wrong')
             })
-    }, [id, fetch, router.isReady])
+    }, [id, router.isReady])
 
     if (!course) {
         return null

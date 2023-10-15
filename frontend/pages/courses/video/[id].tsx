@@ -5,7 +5,7 @@ import Link from 'next/link'
 import { useEffect } from 'react'
 import { useState } from 'react'
 import { useRouter } from 'next/router'
-import { useFetch } from '@/services/fetch'
+import { fetcher } from '@/services/fetch'
 import { toast } from 'react-hot-toast'
 import React from 'react'
 
@@ -26,7 +26,6 @@ export default function CourseDetails() {
     const [url, setUrl] = useState<string>()
     const [course, setCourse] = useState<Course>()
 
-    const fetch = useFetch()
     const router = useRouter()
     const { id } = router.query
 
@@ -34,11 +33,9 @@ export default function CourseDetails() {
         if (!router.isReady) {
             return
         }
-        fetch('http://mylocal.com:8000/videos/' + id + '/free')
+        fetcher
+            .fetch('http://mylocal.com:8000/videos/' + id + '/free')
             .then((res) => {
-                if (!res.ok) {
-                    throw new Error()
-                }
                 return res.json()
             })
             .then((data) => {
@@ -49,7 +46,7 @@ export default function CourseDetails() {
             .catch(() => {
                 toast.error('Something went wrong')
             })
-    }, [id, fetch, router.isReady])
+    }, [id, router.isReady])
 
     const videoJsOptions = {
         controls: true,

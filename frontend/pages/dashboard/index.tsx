@@ -4,7 +4,7 @@ import { useSession } from '@/session/context'
 import { useEffect } from 'react'
 import { useState } from 'react'
 import { useRouter } from 'next/router'
-import { useFetch } from '@/services/fetch'
+import { fetcher } from '@/services/fetch'
 import Image from 'next/image'
 import { toast } from 'react-hot-toast'
 import Link from 'next/link'
@@ -42,21 +42,18 @@ export default function Dashboard() {
     const [courses, setCourses] = useState<Course[]>([])
     const router = useRouter()
     const { isLoggedIn, isLoading } = useSession()
-    const fetch = useFetch()
 
     useEffect(() => {
-        fetch('http://mylocal.com:8000/courses/owned')
+        fetcher
+            .fetch('http://mylocal.com:8000/courses/owned')
             .then((res) => {
-                if (!res.ok) {
-                    throw new Error()
-                }
                 return res.json()
             })
             .then((data) => setCourses(data))
             .catch(() => {
                 toast.error('Something went wrong')
             })
-    }, [fetch])
+    }, [])
 
     if (isLoading) {
         return null

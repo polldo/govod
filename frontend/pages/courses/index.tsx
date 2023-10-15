@@ -5,7 +5,7 @@ import Link from 'next/link'
 import { useEffect, useState } from 'react'
 import { useSession } from '@/session/context'
 import { toast } from 'react-hot-toast'
-import { useFetch } from '@/services/fetch'
+import { fetcher } from '@/services/fetch'
 
 type Course = {
     id: string
@@ -94,13 +94,16 @@ export default function Courses() {
     const [ownedCourses, setOwnedCourses] = useState<string[]>([])
     const [isLoadingOwned, setIsLoadingOwned] = useState<boolean>(true)
     const { isLoggedIn, isLoading } = useSession()
-    const fetch = useFetch()
 
     useEffect(() => {
-        fetch('http://mylocal.com:8000/courses')
+        fetcher
+            .fetch('http://mylocal.com:8000/courses')
             .then((res) => res.json())
             .then((data) => setCourses(data))
-    }, [fetch])
+            .catch(() => {
+                toast.error('Something went wrong')
+            })
+    }, [])
 
     useEffect(() => {
         if (!isLoggedIn) {
@@ -113,11 +116,9 @@ export default function Courses() {
         if (!isLoggedIn) {
             return
         }
-        fetch('http://mylocal.com:8000/cart')
+        fetcher
+            .fetch('http://mylocal.com:8000/cart')
             .then((res) => {
-                if (!res.ok) {
-                    throw new Error()
-                }
                 return res.json()
             })
             .then((data: Cart) => {
@@ -128,17 +129,15 @@ export default function Courses() {
             .catch(() => {
                 toast.error('Something went wrong')
             })
-    }, [fetch, isLoggedIn])
+    }, [isLoggedIn])
 
     useEffect(() => {
         if (!isLoggedIn) {
             return
         }
-        fetch('http://mylocal.com:8000/courses/owned')
+        fetcher
+            .fetch('http://mylocal.com:8000/courses/owned')
             .then((res) => {
-                if (!res.ok) {
-                    throw new Error()
-                }
                 return res.json()
             })
             .then((data: Course[]) => {
@@ -151,17 +150,15 @@ export default function Courses() {
             .catch(() => {
                 toast.error('Something went wrong')
             })
-    }, [fetch, isLoggedIn])
+    }, [isLoggedIn])
 
     const handleAddToCart = (courseID: string) => {
-        fetch('http://mylocal.com:8000/cart/items', {
-            method: 'PUT',
-            body: JSON.stringify({ course_id: courseID }),
-        })
-            .then((res) => {
-                if (!res.ok) {
-                    throw new Error()
-                }
+        fetcher
+            .fetch('http://mylocal.com:8000/cart/items', {
+                method: 'PUT',
+                body: JSON.stringify({ course_id: courseID }),
+            })
+            .then(() => {
                 window.location.href = `/cart`
             })
             .catch(() => {

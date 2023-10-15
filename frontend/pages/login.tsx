@@ -4,7 +4,6 @@ import { useState } from 'react'
 import { Buffer } from 'buffer'
 import { useRouter } from 'next/router'
 import { useSession } from '@/session/context'
-import { useFetch } from '@/services/fetch'
 import Link from 'next/link'
 
 export default function Login() {
@@ -13,7 +12,6 @@ export default function Login() {
     const [error, setError] = useState('')
     const { isLoggedIn, isLoading, updateSession } = useSession()
     const router = useRouter()
-    const fetch = useFetch()
 
     if (isLoading) {
         return null
@@ -31,6 +29,7 @@ export default function Login() {
         try {
             const res = await fetch('http://mylocal.com:8000/auth/login', {
                 method: 'POST',
+                credentials: 'include',
                 headers: {
                     Authorization: `Basic ${Buffer.from(`${email}:${password}`).toString('base64')}`,
                 },
@@ -60,7 +59,10 @@ export default function Login() {
         e.preventDefault()
 
         try {
-            const res = await fetch('http://mylocal.com:8000/auth/oauth-login/google', { method: 'GET' })
+            const res = await fetch('http://mylocal.com:8000/auth/oauth-login/google', {
+                method: 'GET',
+                credentials: 'include',
+            })
             const data = await res.json()
 
             // No need to call 'login', because after the oauth login the user will be

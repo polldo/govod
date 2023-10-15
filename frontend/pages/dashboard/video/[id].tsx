@@ -6,7 +6,7 @@ import { useEffect } from 'react'
 import { useState } from 'react'
 import { useRef } from 'react'
 import { useRouter } from 'next/router'
-import { useFetch } from '@/services/fetch'
+import { fetcher } from '@/services/fetch'
 import { toast } from 'react-hot-toast'
 import React from 'react'
 import { useSession } from '@/session/context'
@@ -40,7 +40,6 @@ export default function CourseDetails() {
     const [progress, setProgress] = useState<ProgressMap>({})
     const { isLoggedIn, isLoading } = useSession()
 
-    const fetch = useFetch()
     const router = useRouter()
     const { id } = router.query
 
@@ -53,11 +52,9 @@ export default function CourseDetails() {
         if (!router.isReady) {
             return
         }
-        fetch('http://mylocal.com:8000/videos/' + id + '/full')
+        fetcher
+            .fetch('http://mylocal.com:8000/videos/' + id + '/full')
             .then((res) => {
-                if (!res.ok) {
-                    throw new Error()
-                }
                 return res.json()
             })
             .then((data) => {
@@ -79,7 +76,7 @@ export default function CourseDetails() {
             .catch(() => {
                 toast.error('Something went wrong')
             })
-    }, [id, fetch, router.isReady])
+    }, [id, router.isReady])
 
     // Send any NEW progress every 20 seconds.
     useEffect(() => {
@@ -90,10 +87,11 @@ export default function CourseDetails() {
             if (progressRef.current === lastProgressRef.current) {
                 return
             }
-            fetch('http://mylocal.com:8000/videos/' + video.id + '/progress', {
-                method: 'PUT',
-                body: JSON.stringify({ progress: progressRef.current }),
-            })
+            fetcher
+                .fetch('http://mylocal.com:8000/videos/' + video.id + '/progress', {
+                    method: 'PUT',
+                    body: JSON.stringify({ progress: progressRef.current }),
+                })
                 .then(() => {
                     lastProgressRef.current = progressRef.current
                 })
@@ -102,7 +100,7 @@ export default function CourseDetails() {
         return () => {
             clearInterval(interval)
         }
-    }, [fetch, video])
+    }, [video])
 
     const handlePlayerReady = (player: any) => {
         player.on('loadstart', () => {
