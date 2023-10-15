@@ -97,7 +97,7 @@ export default function Courses() {
 
     useEffect(() => {
         fetcher
-            .fetch('http://mylocal.com:8000/courses')
+            .fetch('/courses')
             .then((res) => res.json())
             .then((data) => setCourses(data))
             .catch(() => {
@@ -117,7 +117,7 @@ export default function Courses() {
             return
         }
         fetcher
-            .fetch('http://mylocal.com:8000/cart')
+            .fetch('/cart')
             .then((res) => {
                 return res.json()
             })
@@ -136,7 +136,7 @@ export default function Courses() {
             return
         }
         fetcher
-            .fetch('http://mylocal.com:8000/courses/owned')
+            .fetch('/courses/owned')
             .then((res) => {
                 return res.json()
             })
@@ -154,7 +154,7 @@ export default function Courses() {
 
     const handleAddToCart = (courseID: string) => {
         fetcher
-            .fetch('http://mylocal.com:8000/cart/items', {
+            .fetch('/cart/items', {
                 method: 'PUT',
                 body: JSON.stringify({ course_id: courseID }),
             })

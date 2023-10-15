@@ -75,7 +75,7 @@ export default function Cart() {
         }
 
         fetcher
-            .fetch('http://mylocal.com:8000/cart')
+            .fetch('/cart')
             .then((res) => {
                 return res.json()
             })
@@ -84,7 +84,7 @@ export default function Cart() {
 
                 const courseFetches = data.items.map((item) => {
                     return fetcher
-                        .fetch(`http://mylocal.com:8000/courses/${item.course_id}`)
+                        .fetch(`/courses/${item.course_id}`)
                         .then((res) => {
                             return res.json()
                         })
@@ -113,7 +113,7 @@ export default function Cart() {
 
     const handleDeleteItem = async (id: string) => {
         try {
-            await fetcher.fetch(`http://mylocal.com:8000/cart/items/${id}`, {
+            await fetcher.fetch(`/cart/items/${id}`, {
                 method: 'DELETE',
             })
 
@@ -131,7 +131,7 @@ export default function Cart() {
     const handleStripeCheckout = async (e: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
         e.preventDefault()
         try {
-            const res = await fetcher.fetch(`http://mylocal.com:8000/orders/stripe`, { method: 'POST' })
+            const res = await fetcher.fetch(`/orders/stripe`, { method: 'POST' })
             const data = await res.json()
             window.location.href = data
         } catch (err) {
@@ -141,7 +141,7 @@ export default function Cart() {
 
     const handlePaypalCheckout = async () => {
         try {
-            const res = await fetcher.fetch(`http://mylocal.com:8000/orders/paypal`, { method: 'POST' })
+            const res = await fetcher.fetch(`/orders/paypal`, { method: 'POST' })
             const data = await res.json()
             return data.id
         } catch (err) {
@@ -151,7 +151,7 @@ export default function Cart() {
 
     const handlePaypalCapture = async (capture: { orderID: string }) => {
         try {
-            await fetcher.fetch(`http://mylocal.com:8000/orders/paypal/${capture.orderID}/capture`, {
+            await fetcher.fetch(`/orders/paypal/${capture.orderID}/capture`, {
                 method: 'POST',
             })
             window.location.href = `/dashboard`

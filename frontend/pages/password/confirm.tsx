@@ -42,7 +42,7 @@ export default function Confirm() {
         }
 
         try {
-            await fetcher.fetch('http://mylocal.com:8000/tokens/recover', {
+            await fetcher.fetch('/tokens/recover', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(body),

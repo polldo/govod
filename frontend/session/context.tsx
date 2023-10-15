@@ -27,7 +27,7 @@ export function SessionProvider(props: { children: ReactNode }) {
 
     const sync = useCallback(async () => {
         try {
-            const resp = await fetch('http://mylocal.com:8000/users/current', { credentials: 'include' })
+            const resp = await fetch('/users/current', { credentials: 'include' })
             setIsLoggedIn(resp.ok)
             setIsLoading(false)
         } catch {

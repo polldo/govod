@@ -7,7 +7,7 @@ export default function Logout() {
 
     function handleLogout() {
         fetcher
-            .fetch('http://mylocal.com:8000/auth/logout', { method: 'POST' })
+            .fetch('/auth/logout', { method: 'POST' })
             .then(() => {
                 updateSession()
             })

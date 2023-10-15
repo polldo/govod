@@ -28,7 +28,7 @@ export default function Login() {
         setError('')
 
         try {
-            await fetcher.fetch('http://mylocal.com:8000/auth/login', {
+            await fetcher.fetch('/auth/login', {
                 method: 'POST',
                 credentials: 'include',
                 headers: {
@@ -55,7 +55,7 @@ export default function Login() {
         e.preventDefault()
 
         try {
-            const res = await fetcher.fetch('http://mylocal.com:8000/auth/oauth-login/google', {
+            const res = await fetcher.fetch('/auth/oauth-login/google', {
                 method: 'GET',
                 credentials: 'include',
             })

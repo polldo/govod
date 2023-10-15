@@ -27,7 +27,7 @@ export default function Require() {
         }
 
         try {
-            await fetcher.fetch('http://mylocal.com:8000/tokens', {
+            await fetcher.fetch('/tokens', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(body),

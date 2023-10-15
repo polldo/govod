@@ -34,7 +34,7 @@ export default function CourseDetails() {
             return
         }
         fetcher
-            .fetch('http://mylocal.com:8000/videos/' + id + '/free')
+            .fetch('/videos/' + id + '/free')
             .then((res) => {
                 return res.json()
             })

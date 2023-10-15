@@ -44,7 +44,7 @@ export default function DashboardCourse() {
             return
         }
         fetcher
-            .fetch('http://mylocal.com:8000/courses/' + id)
+            .fetch('/courses/' + id)
             .then((res) => {
                 return res.json()
             })
@@ -59,7 +59,7 @@ export default function DashboardCourse() {
             return
         }
         fetcher
-            .fetch('http://mylocal.com:8000/courses/' + id + '/progress')
+            .fetch('/courses/' + id + '/progress')
             .then((res) => {
                 return res.json()
             })
@@ -80,7 +80,7 @@ export default function DashboardCourse() {
             return
         }
         fetcher
-            .fetch('http://mylocal.com:8000/courses/' + id + '/videos')
+            .fetch('/courses/' + id + '/videos')
             .then((res) => {
                 return res.json()
             })
