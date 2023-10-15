@@ -30,7 +30,6 @@ export default function Login() {
         try {
             await fetcher.fetch('/auth/login', {
                 method: 'POST',
-                credentials: 'include',
                 headers: {
                     Authorization: `Basic ${Buffer.from(`${email}:${password}`).toString('base64')}`,
                 },
@@ -55,10 +54,7 @@ export default function Login() {
         e.preventDefault()
 
         try {
-            const res = await fetcher.fetch('/auth/oauth-login/google', {
-                method: 'GET',
-                credentials: 'include',
-            })
+            const res = await fetcher.fetch('/auth/oauth-login/google')
             const data = await res.json()
 
             // No need to call 'login', because after the oauth login the user will be
