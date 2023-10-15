@@ -5,6 +5,7 @@ import { Buffer } from 'buffer'
 import { useRouter } from 'next/router'
 import { useSession } from '@/session/context'
 import Link from 'next/link'
+import { fetcher, ResponseError } from '@/services/fetch'
 
 export default function Login() {
     const [email, setEmail] = useState('')
@@ -27,7 +28,7 @@ export default function Login() {
         setError('')
 
         try {
-            const res = await fetch('http://mylocal.com:8000/auth/login', {
+            await fetcher.fetch('http://mylocal.com:8000/auth/login', {
                 method: 'POST',
                 credentials: 'include',
                 headers: {
@@ -35,22 +36,17 @@ export default function Login() {
                 },
             })
 
-            if (res.status === 401) {
-                throw new Error('Invalid credentials')
-            }
-            if (res.status === 423) {
-                router.push({ pathname: '/activate/require', query: { email } })
-                return
-            }
-            if (!res.ok) {
-                throw new Error('Something went wrong')
-            }
             updateSession()
         } catch (err) {
-            if (err instanceof Error) {
-                setError(err.message)
-            } else {
-                setError('Something went wrong')
+            setError('Something went wrong')
+            if (err instanceof ResponseError) {
+                if (err.status === 401) {
+                    setError('Invalid credentials')
+                }
+                if (err.status === 423) {
+                    router.push({ pathname: '/activate/require', query: { email } })
+                    return
+                }
             }
         }
     }
@@ -59,7 +55,7 @@ export default function Login() {
         e.preventDefault()
 
         try {
-            const res = await fetch('http://mylocal.com:8000/auth/oauth-login/google', {
+            const res = await fetcher.fetch('http://mylocal.com:8000/auth/oauth-login/google', {
                 method: 'GET',
                 credentials: 'include',
             })
@@ -69,11 +65,7 @@ export default function Login() {
             // redirected and the whole app will be reloaded.
             window.location.href = data
         } catch (err) {
-            if (err instanceof Error) {
-                setError(err.message)
-            } else {
-                setError('Something went wrong')
-            }
+            setError('Something went wrong')
         }
     }
 
