@@ -53,7 +53,7 @@ export default function CourseDetails() {
             return
         }
         fetcher
-            .fetch('http://mylocal.com:8000/videos/' + id + '/full')
+            .fetch('/videos/' + id + '/full')
             .then((res) => {
                 return res.json()
             })
@@ -88,7 +88,7 @@ export default function CourseDetails() {
                 return
             }
             fetcher
-                .fetch('http://mylocal.com:8000/videos/' + video.id + '/progress', {
+                .fetch('/videos/' + video.id + '/progress', {
                     method: 'PUT',
                     body: JSON.stringify({ progress: progressRef.current }),
                 })

@@ -27,7 +27,7 @@ export default function Confirm() {
         }
 
         try {
-            await fetcher.fetch('http://mylocal.com:8000/tokens/activate', {
+            await fetcher.fetch('/tokens/activate', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(body),

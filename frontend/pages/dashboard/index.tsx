@@ -45,7 +45,7 @@ export default function Dashboard() {
 
     useEffect(() => {
         fetcher
-            .fetch('http://mylocal.com:8000/courses/owned')
+            .fetch('/courses/owned')
             .then((res) => {
                 return res.json()
             })

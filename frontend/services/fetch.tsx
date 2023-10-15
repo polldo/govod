@@ -11,13 +11,16 @@ export class ResponseError extends Error {
 // - intercept 401 errors and execute a custom callback.
 // - throw ResponseError when fetched status code is not OK.
 export class Fetcher {
+    baseURL: string
     onUnauthenticated: () => void
     f: (input: RequestInfo | URL, init?: RequestInit) => Promise<Response>
 
     constructor(
+        baseURL: string,
         onUnauth: () => void,
         fetchFunction: (input: RequestInfo | URL, init?: RequestInit) => Promise<Response>
     ) {
+        this.baseURL = baseURL
         this.onUnauthenticated = onUnauth
         this.f = fetchFunction
     }
@@ -31,7 +34,7 @@ export class Fetcher {
             options.credentials = 'include'
         }
 
-        const response = await this.f(url, options)
+        const response = await this.f(this.baseURL + url, options)
         if (response.status === 401) {
             this.onUnauthenticated()
             const res = await response.json()
@@ -48,6 +51,7 @@ export class Fetcher {
 }
 
 export const fetcher = new Fetcher(
+    process.env.NEXT_PUBLIC_BASE_URL || 'localhost:8000',
     () => {
         console.log('unauthenticated')
     },
