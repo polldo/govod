@@ -7,7 +7,7 @@ import { fetcher } from '@/services/fetch'
 import { useEffect } from 'react'
 import { useSession } from '@/session/context'
 
-// Set the unauthenticated callback of 'fetch.Fetcher'.
+// Configure the custom fetcher.
 function FetchInterceptor() {
     const { updateSession } = useSession()
 

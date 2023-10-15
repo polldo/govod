@@ -98,7 +98,6 @@ export default function Cart() {
                 })
             })
             .catch((err) => {
-                console.log(err)
                 toast.error('Something went wrong')
             })
     }, [isLoading])

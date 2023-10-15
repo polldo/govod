@@ -6,7 +6,7 @@ export class ResponseError extends Error {
     }
 }
 
-// Fetcher wraps the window fetch function in order to:
+// Fetcher wraps the fetch function in order to:
 // - add the 'credentials' header, to allow sending the session cookie to the backend.
 // - intercept 401 errors and execute a custom callback.
 // - throw ResponseError when fetched status code is not OK.
@@ -27,13 +27,11 @@ export class Fetcher {
     }
 
     async fetch(url: RequestInfo, options: RequestInit = {}): Promise<Response> {
-        console.log('Fetrching')
         if (options.method !== 'OPTIONS') {
             options.credentials = 'include'
         }
 
         const response = await this.f(url, options)
-        console.log('respo')
         if (response.status === 401) {
             this.onUnauthenticated()
             const res = await response.json()
@@ -53,5 +51,5 @@ export const fetcher = new Fetcher(
     () => {
         console.log('unauthenticated')
     },
-    (...args) => window.fetch(...args)
+    (...args) => fetch(...args)
 )
