@@ -3,13 +3,13 @@ import VideoJS from '@/components/videoplayer'
 import Head from 'next/head'
 import Link from 'next/link'
 import { useEffect } from 'react'
-import { useState } from 'react'
+import { useMemo } from 'react'
 import { useRef } from 'react'
 import { useRouter } from 'next/router'
 import { fetcher } from '@/services/fetch'
-import { toast } from 'react-hot-toast'
 import React from 'react'
 import { useSession } from '@/session/context'
+import useSWR from 'swr'
 
 type Course = {
     name: string
@@ -33,15 +33,26 @@ type ProgressMap = {
 }
 
 export default function CourseDetails() {
-    const [video, setVideo] = useState<Video>()
-    const [url, setUrl] = useState<string>()
-    const [course, setCourse] = useState<Course>()
-    const [videos, setVideos] = useState<Video[]>()
-    const [progress, setProgress] = useState<ProgressMap>({})
     const { isLoggedIn, isLoading } = useSession()
 
     const router = useRouter()
     const { id } = router.query
+
+    const { data } = useSWR(id ? `/videos/${id}/full` : null)
+    const video: Video = data?.video
+    const videos: Video[] = data?.all_videos
+    const course: Course = data?.course
+    const url: string = data?.url
+
+    const progress = useMemo(() => {
+        let map: ProgressMap = {}
+        if (data?.all_progress) {
+            data.all_progress.forEach((progressItem: Progress) => {
+                map[progressItem.video_id] = progressItem.progress
+            })
+        }
+        return map
+    }, [data])
 
     // Refs are needed to synchronise react with the video player.
     const progressRef = useRef<number>(0)
@@ -49,34 +60,9 @@ export default function CourseDetails() {
     const startRef = useRef<number>(0)
 
     useEffect(() => {
-        if (!router.isReady) {
-            return
-        }
-        fetcher
-            .fetch('/videos/' + id + '/full')
-            .then((res) => {
-                return res.json()
-            })
-            .then((data) => {
-                setVideo(data.video)
-                setCourse(data.course)
-                setVideos(data.all_videos)
-                setUrl(data.url)
-
-                // Keep progress in a map to make data more accessible given a video id.
-                let map: ProgressMap = {}
-                data.all_progress.forEach((progress: Progress) => {
-                    map[progress.video_id] = progress.progress
-                })
-                setProgress(map)
-
-                // The starting time of the video will depend on the user progress.
-                startRef.current = map[data.video.id] || 0
-            })
-            .catch(() => {
-                toast.error('Something went wrong')
-            })
-    }, [id, router.isReady])
+        // The starting time of the video will depend on the user progress.
+        startRef.current = progress[video?.id] || 0
+    }, [progress, video])
 
     // Send any NEW progress every 20 seconds.
     useEffect(() => {

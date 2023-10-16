@@ -1,13 +1,10 @@
 import Layout from '@/components/layout'
 import Head from 'next/head'
 import { useSession } from '@/session/context'
-import { useEffect } from 'react'
-import { useState } from 'react'
 import { useRouter } from 'next/router'
-import { fetcher } from '@/services/fetch'
 import Image from 'next/image'
-import { toast } from 'react-hot-toast'
 import Link from 'next/link'
+import useSWR from 'swr'
 
 type Course = {
     id: string
@@ -39,21 +36,10 @@ function Card(props: Course) {
 }
 
 export default function Dashboard() {
-    const [courses, setCourses] = useState<Course[]>([])
     const router = useRouter()
     const { isLoggedIn, isLoading } = useSession()
 
-    useEffect(() => {
-        fetcher
-            .fetch('/courses/owned')
-            .then((res) => {
-                return res.json()
-            })
-            .then((data) => setCourses(data))
-            .catch(() => {
-                toast.error('Something went wrong')
-            })
-    }, [])
+    const { data: courses } = useSWR<Course[]>(isLoggedIn ? '/courses/owned' : null)
 
     if (isLoading) {
         return null
@@ -76,8 +62,10 @@ export default function Dashboard() {
                     </div>
 
                     <div className="flex flex-col items-center space-y-5 pt-6 pb-6">
-                        {courses && courses.map((course) => <Card {...course} key={course.name} />)}
-                        {!courses && <p>No courses yet.</p>}
+                        {courses?.map((course) => (
+                            <Card {...course} key={course.name} />
+                        ))}
+                        {courses?.length == 0 && <p>No courses yet.</p>}
                     </div>
                 </div>
             </Layout>
