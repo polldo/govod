@@ -2,12 +2,9 @@ import Layout from '@/components/layout'
 import VideoJS from '@/components/videoplayer'
 import Head from 'next/head'
 import Link from 'next/link'
-import { useEffect } from 'react'
-import { useState } from 'react'
 import { useRouter } from 'next/router'
-import { fetcher } from '@/services/fetch'
-import { toast } from 'react-hot-toast'
 import React from 'react'
+import useSWR from 'swr'
 
 type Course = {
     name: string
@@ -22,31 +19,13 @@ type Video = {
 }
 
 export default function CourseDetails() {
-    const [video, setVideo] = useState<Video>()
-    const [url, setUrl] = useState<string>()
-    const [course, setCourse] = useState<Course>()
-
     const router = useRouter()
     const { id } = router.query
 
-    useEffect(() => {
-        if (!router.isReady) {
-            return
-        }
-        fetcher
-            .fetch('/videos/' + id + '/free')
-            .then((res) => {
-                return res.json()
-            })
-            .then((data) => {
-                setVideo(data.video)
-                setCourse(data.course)
-                setUrl(data.url)
-            })
-            .catch(() => {
-                toast.error('Something went wrong')
-            })
-    }, [id, router.isReady])
+    const { data } = useSWR(id ? `/videos/${id}/free` : null)
+    const video: Video = data?.video
+    const course: Course = data?.course
+    const url: string = data?.url
 
     const videoJsOptions = {
         controls: true,
@@ -61,7 +40,7 @@ export default function CourseDetails() {
         ],
     }
 
-    if (!video) {
+    if (!video || !url) {
         return null
     }
 
