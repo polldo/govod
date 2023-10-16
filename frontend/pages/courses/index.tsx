@@ -2,10 +2,11 @@ import Layout from '@/components/layout'
 import Head from 'next/head'
 import Image from 'next/image'
 import Link from 'next/link'
-import { useEffect, useState } from 'react'
 import { useSession } from '@/session/context'
 import { toast } from 'react-hot-toast'
 import { fetcher } from '@/services/fetch'
+import useSWR from 'swr'
+import { useRouter } from 'next/router'
 
 type Course = {
     id: string
@@ -30,11 +31,13 @@ type CardProps = Course & {
 }
 
 function Card(props: CardProps) {
+    const router = useRouter()
+
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault()
 
         if (props.isOwned) {
-            window.location.href = `/dashboard/course/${props.id}`
+            router.push(`/dashboard/course/${props.id}`)
             return
         }
         if (props.isInCart) {
@@ -42,7 +45,7 @@ function Card(props: CardProps) {
             return
         }
         if (!props.isLoggedIn) {
-            window.location.href = `/login`
+            router.push(`/login`)
             return
         }
 
@@ -88,69 +91,16 @@ function Card(props: CardProps) {
 }
 
 export default function Courses() {
-    const [courses, setCourses] = useState<Course[]>()
-    const [cartCourses, setCartCourses] = useState<string[]>([])
-    const [isLoadingCart, setIsLoadingCart] = useState<boolean>(true)
-    const [ownedCourses, setOwnedCourses] = useState<string[]>([])
-    const [isLoadingOwned, setIsLoadingOwned] = useState<boolean>(true)
+    const router = useRouter()
     const { isLoggedIn, isLoading } = useSession()
 
-    useEffect(() => {
-        fetcher
-            .fetch('/courses')
-            .then((res) => res.json())
-            .then((data) => setCourses(data))
-            .catch(() => {
-                toast.error('Something went wrong')
-            })
-    }, [])
+    const { data: courses } = useSWR<Course[]>('/courses')
 
-    useEffect(() => {
-        if (!isLoggedIn) {
-            setCartCourses([])
-            setOwnedCourses([])
-        }
-    }, [isLoggedIn])
+    const { data: cartData } = useSWR<Cart>(isLoggedIn ? '/cart' : null)
+    const cartCourses = cartData ? cartData.items.map((item: CartItem) => item.course_id) : []
 
-    useEffect(() => {
-        if (!isLoggedIn) {
-            return
-        }
-        fetcher
-            .fetch('/cart')
-            .then((res) => {
-                return res.json()
-            })
-            .then((data: Cart) => {
-                const incart = data.items.map((item: CartItem) => item.course_id)
-                setCartCourses(incart)
-                setIsLoadingCart(false)
-            })
-            .catch(() => {
-                toast.error('Something went wrong')
-            })
-    }, [isLoggedIn])
-
-    useEffect(() => {
-        if (!isLoggedIn) {
-            return
-        }
-        fetcher
-            .fetch('/courses/owned')
-            .then((res) => {
-                return res.json()
-            })
-            .then((data: Course[]) => {
-                if (data) {
-                    const owned = data.map((item: Course) => item.id)
-                    setOwnedCourses(owned)
-                }
-                setIsLoadingOwned(false)
-            })
-            .catch(() => {
-                toast.error('Something went wrong')
-            })
-    }, [isLoggedIn])
+    const { data: ownedData } = useSWR<Course[]>(isLoggedIn ? '/courses/owned' : null)
+    const ownedCourses = ownedData ? ownedData.map((item: Course) => item.id) : []
 
     const handleAddToCart = (courseID: string) => {
         fetcher
@@ -159,22 +109,14 @@ export default function Courses() {
                 body: JSON.stringify({ course_id: courseID }),
             })
             .then(() => {
-                window.location.href = `/cart`
+                router.push('/cart')
             })
             .catch(() => {
                 toast.error('Something went wrong')
             })
     }
 
-    if (isLoading) {
-        return null
-    }
-
-    if (isLoggedIn && (isLoadingCart || isLoadingOwned)) {
-        return null
-    }
-
-    if (!courses) {
+    if (!courses || isLoading) {
         return null
     }
 
