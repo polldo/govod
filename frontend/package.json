@@ -21,6 +21,7 @@
         "react": "18.2.0",
         "react-dom": "18.2.0",
         "react-hot-toast": "^2.4.1",
+        "swr": "^2.2.4",
         "typescript": "4.9.5",
         "video.js": "^8.5.2",
         "videojs-youtube": "^3.0.1"
