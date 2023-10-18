@@ -3,7 +3,7 @@ import type { AppProps } from 'next/app'
 import { SessionProvider } from '@/session/context'
 import { Toaster } from 'react-hot-toast'
 import { PayPalScriptProvider } from '@paypal/react-paypal-js'
-import { fetcher, ResponseError } from '@/services/fetch'
+import { fetcher } from '@/services/fetch'
 import { useEffect } from 'react'
 import { useSession } from '@/session/context'
 import { SWRConfig } from 'swr'
@@ -27,6 +27,7 @@ export default function App({ Component, pageProps }: AppProps) {
         <>
             <SessionProvider {...pageProps}>
                 <Toaster position="bottom-center" />
+                <FetchInterceptor></FetchInterceptor>
                 <SWRConfig
                     value={{
                         fetcher: (url: string) => fetcher.fetch(url).then((res) => res.json()),
@@ -35,7 +36,6 @@ export default function App({ Component, pageProps }: AppProps) {
                         },
                     }}
                 >
-                    <FetchInterceptor></FetchInterceptor>
                     <PayPalScriptProvider
                         options={{
                             clientId: process.env.NEXT_PUBLIC_PAYPAL_CLIENT_ID || '',
