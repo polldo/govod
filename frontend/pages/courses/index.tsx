@@ -96,7 +96,7 @@ export default function Courses() {
 
     const { data: courses } = useSWR<Course[]>('/courses')
 
-    const { data: cartData } = useSWR<Cart>(isLoggedIn ? '/cart' : null)
+    const { data: cartData, mutate: cartMutate } = useSWR<Cart>(isLoggedIn ? '/cart' : null)
     const cartCourses = cartData ? cartData.items.map((item: CartItem) => item.course_id) : []
 
     const { data: ownedData } = useSWR<Course[]>(isLoggedIn ? '/courses/owned' : null)
@@ -109,6 +109,7 @@ export default function Courses() {
                 body: JSON.stringify({ course_id: courseID }),
             })
             .then(() => {
+                cartMutate()
                 router.push('/cart')
             })
             .catch(() => {
