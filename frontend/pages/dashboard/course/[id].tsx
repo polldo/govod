@@ -2,12 +2,9 @@ import Layout from '@/components/layout'
 import Head from 'next/head'
 import Image from 'next/image'
 import { useSession } from '@/session/context'
-import { useEffect } from 'react'
-import { useState } from 'react'
 import { useRouter } from 'next/router'
-import { fetcher } from '@/services/fetch'
-import { toast } from 'react-hot-toast'
 import Link from 'next/link'
+import useSWR from 'swr'
 
 type Course = {
     name: string
@@ -32,63 +29,18 @@ type ProgressMap = {
 }
 
 export default function DashboardCourse() {
-    const [course, setCourse] = useState<Course>()
-    const [videos, setVideos] = useState<Video[]>()
-    const [progress, setProgress] = useState<ProgressMap>({})
     const { isLoggedIn, isLoading } = useSession()
     const router = useRouter()
     const { id } = router.query
 
-    useEffect(() => {
-        if (!router.isReady) {
-            return
-        }
-        fetcher
-            .fetch('/courses/' + id)
-            .then((res) => {
-                return res.json()
-            })
-            .then((data) => setCourse(data))
-            .catch(() => {
-                toast.error('Something went wrong')
-            })
-    }, [id, router.isReady])
+    const { data: course } = useSWR<Course>(id ? `/courses/${id}` : null)
+    const { data: videos } = useSWR<Video[]>(id ? `/courses/${id}/videos` : null)
 
-    useEffect(() => {
-        if (!router.isReady) {
-            return
-        }
-        fetcher
-            .fetch('/courses/' + id + '/progress')
-            .then((res) => {
-                return res.json()
-            })
-            .then((data) => {
-                let map: ProgressMap = {}
-                data.forEach((progress: Progress) => {
-                    map[progress.video_id] = progress.progress
-                })
-                setProgress(map)
-            })
-            .catch(() => {
-                toast.error('Something went wrong')
-            })
-    }, [id, router.isReady])
-
-    useEffect(() => {
-        if (!router.isReady) {
-            return
-        }
-        fetcher
-            .fetch('/courses/' + id + '/videos')
-            .then((res) => {
-                return res.json()
-            })
-            .then((data) => setVideos(data))
-            .catch(() => {
-                toast.error('Something went wrong')
-            })
-    }, [id, router.isReady])
+    const { data: progressData } = useSWR<Progress[]>(id ? `/courses/${id}/progress` : null)
+    let progress: ProgressMap = {}
+    progressData?.forEach((p: Progress) => {
+        progress[p.video_id] = p.progress
+    })
 
     if (isLoading) {
         return null

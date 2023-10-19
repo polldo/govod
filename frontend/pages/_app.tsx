@@ -6,6 +6,8 @@ import { PayPalScriptProvider } from '@paypal/react-paypal-js'
 import { fetcher } from '@/services/fetch'
 import { useEffect } from 'react'
 import { useSession } from '@/session/context'
+import { SWRConfig } from 'swr'
+import { toast } from 'react-hot-toast'
 
 // Configure the custom fetcher.
 function FetchInterceptor() {
@@ -24,16 +26,25 @@ export default function App({ Component, pageProps }: AppProps) {
     return (
         <>
             <SessionProvider {...pageProps}>
-                <FetchInterceptor></FetchInterceptor>
                 <Toaster position="bottom-center" />
-                <PayPalScriptProvider
-                    options={{
-                        clientId: process.env.NEXT_PUBLIC_PAYPAL_CLIENT_ID || '',
-                        currency: 'USD',
+                <FetchInterceptor></FetchInterceptor>
+                <SWRConfig
+                    value={{
+                        fetcher: (url: string) => fetcher.fetch(url).then((res) => res.json()),
+                        onError: () => {
+                            toast.error('Something went wrong')
+                        },
                     }}
                 >
-                    <Component {...pageProps} />
-                </PayPalScriptProvider>
+                    <PayPalScriptProvider
+                        options={{
+                            clientId: process.env.NEXT_PUBLIC_PAYPAL_CLIENT_ID || '',
+                            currency: 'USD',
+                        }}
+                    >
+                        <Component {...pageProps} />
+                    </PayPalScriptProvider>
+                </SWRConfig>
             </SessionProvider>
         </>
     )

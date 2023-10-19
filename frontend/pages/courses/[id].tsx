@@ -2,11 +2,8 @@ import Layout from '@/components/layout'
 import Head from 'next/head'
 import Image from 'next/image'
 import Link from 'next/link'
-import { useEffect } from 'react'
-import { useState } from 'react'
 import { useRouter } from 'next/router'
-import { fetcher } from '@/services/fetch'
-import { toast } from 'react-hot-toast'
+import useSWR from 'swr'
 
 type Course = {
     name: string
@@ -23,46 +20,15 @@ type Video = {
 }
 
 export default function CourseDetails() {
-    const [course, setCourse] = useState<Course>()
-    const [videos, setVideos] = useState<Video[]>()
     const router = useRouter()
     const { id } = router.query
 
+    const { data: course } = useSWR<Course>(id ? `/courses/${id}` : null)
+    const { data: videos } = useSWR<Video[]>(id ? `/courses/${id}/videos` : null)
+
     const free: Video[] = videos?.filter((video) => video.free) || []
 
-    useEffect(() => {
-        if (!router.isReady) {
-            return
-        }
-
-        fetcher
-            .fetch('/courses/' + id)
-            .then((res) => {
-                return res.json()
-            })
-            .then((data) => setCourse(data))
-            .catch(() => {
-                toast.error('Something went wrong')
-            })
-    }, [id, router.isReady])
-
-    useEffect(() => {
-        if (!router.isReady) {
-            return
-        }
-
-        fetcher
-            .fetch('/courses/' + id + '/videos')
-            .then((res) => {
-                return res.json()
-            })
-            .then((data) => setVideos(data))
-            .catch(() => {
-                toast.error('Something went wrong')
-            })
-    }, [id, router.isReady])
-
-    if (!course) {
+    if (!course || !videos) {
         return null
     }
 
