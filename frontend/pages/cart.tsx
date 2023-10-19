@@ -52,7 +52,7 @@ export default function CartPage() {
     const router = useRouter()
     const [{ isPending, isResolved }] = usePayPalScriptReducer()
 
-    const { data: cart, mutate } = useSWR<Cart>(isLoading ? null : '/cart')
+    const { data: cart, mutate } = useSWR<Cart>(isLoggedIn ? '/cart' : null)
 
     if (isLoading) {
         return null
