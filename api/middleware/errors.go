@@ -20,18 +20,6 @@ func Fields(err error) (map[string]interface{}, bool) {
 	return nil, false
 }
 
-type quiet interface{ Quiet() bool }
-
-// IsQuiet indicates whether the error should not be logged as an error.
-// This is useful to deal with physiological errors - like token expirations - that
-// are not interesting to log as errors (perhaps to avoid triggering any alarms) but
-// should be returned in the response anyway.
-// If the error does not implement the Queit behavior, it returns false.
-func IsQuiet(err error) bool {
-	qe, ok := err.(quiet)
-	return ok && qe.Quiet()
-}
-
 type response interface{ Response() (interface{}, int) }
 
 // Response returns a body and status code to use as a web response.
@@ -71,12 +59,8 @@ func Errors(log logrus.FieldLogger) web.Middleware {
 				}
 			}
 
-			// Log the error with the appropriate level.
-			loglvl := log.WithFields(logrus.Fields(fields)).Error
-			if IsQuiet(err) {
-				loglvl = log.WithFields(logrus.Fields(fields)).Info
-			}
-			loglvl("ERROR")
+			// Log the error.
+			log.WithFields(logrus.Fields(fields)).Error("ERROR")
 
 			// Try to retrieve a response from the error.
 			if body, code, ok := Response(err); ok {

@@ -35,19 +35,3 @@ func WithFields(fields map[string]interface{}) Opt {
 		return &fieldsError{error: err, fields: fields}
 	}
 }
-
-// WithQuiet returns a functional option that
-// adds the 'Quiet' behavior to the error.
-func WithQuiet(quiet bool) Opt {
-	return func(err error) error {
-		return &quietError{error: err, quiet: quiet}
-	}
-}
-
-// WithMask returns a functional option that
-// masks all the behaviors of the error.
-func WithMask(quiet bool) Opt {
-	return func(err error) error {
-		return &maskError{Err: err}
-	}
-}

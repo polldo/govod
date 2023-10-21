@@ -9,15 +9,14 @@ import (
 )
 
 func TestWrap(t *testing.T) {
-	// The error is not important, let's make it quiet.
-	auth := func() error {
-		return Wrap(errors.New("token expired"), WithQuiet(true))
+	foo := func() error {
+		return Wrap(errors.New("some err"), WithFields(map[string]any{"info": "bar"}))
 	}
 
 	// Just propagate the error.
 	service := func() error {
-		if err := auth(); err != nil {
-			return fmt.Errorf("cannot run someFunc: %w", err)
+		if err := foo(); err != nil {
+			return fmt.Errorf("cannot run foo: %w", err)
 		}
 		return nil
 	}
@@ -28,11 +27,10 @@ func TestWrap(t *testing.T) {
 			return
 		}
 
-		if IsQuiet(err) {
-			logrus.WithField("error", err).Info("quiet error")
+		if ff, ok := Fields(err); ok {
+			logrus.WithFields(logrus.Fields(ff)).Error(err)
 		} else {
-			logrus.WithField("error", err).Error("error")
-			t.Error("error should have been quiet")
+			t.Error("error should have had fields")
 		}
 	}
 	handler()
