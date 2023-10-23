@@ -18,19 +18,19 @@ export default function Layout(props: PropsWithChildren) {
 function Navbar() {
     const { isLoggedIn, isLoading } = useSession()
     return (
-        <nav className="bg-gray-900 py-4">
+        <nav className="bg-blue-900 py-4">
             <div className="container mx-auto">
                 <div className="flex items-center justify-between">
                     <Link className="text-xl font-bold text-white" href="/">
                         Govod
                     </Link>
                     <div className="flex flex-row items-center">
-                        <Link className="rounded px-3 py-2 text-gray-400 hover:text-white" href="/courses">
+                        <Link className="rounded px-3 py-2 text-gray-300 hover:text-white" href="/courses">
                             Courses
                         </Link>
 
                         {isLoggedIn && (
-                            <Link className="rounded px-3 py-2 text-gray-400 hover:text-white" href="/dashboard">
+                            <Link className="rounded px-3 py-2 text-gray-300 hover:text-white" href="/dashboard">
                                 Dashboard
                             </Link>
                         )}
@@ -48,7 +48,10 @@ function Navbar() {
                         )}
 
                         {!isLoggedIn && (
-                            <Link className="w-full rounded bg-blue-800 p-2 font-semibold text-white" href="/login">
+                            <Link
+                                className="w-full rounded bg-green-700 p-2 font-semibold text-white hover:bg-green-900"
+                                href="/login"
+                            >
                                 Login
                             </Link>
                         )}

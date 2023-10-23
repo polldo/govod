@@ -132,7 +132,7 @@ export default function CartPage() {
                                 onClick={handleStripeCheckout}
                                 className={`rounded p-2 text-white md:w-1/3 ${
                                     cart && cart.items.length > 0
-                                        ? 'bg-green-500 hover:bg-green-600'
+                                        ? 'bg-green-700 hover:bg-green-900'
                                         : 'bg-green-200 hover:bg-green-300'
                                 }`}
                                 disabled={cart?.items.length === 0}
