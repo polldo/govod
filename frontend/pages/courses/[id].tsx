@@ -26,8 +26,6 @@ export default function CourseDetails() {
     const { data: course } = useSWR<Course>(id ? `/courses/${id}` : null)
     const { data: videos } = useSWR<Video[]>(id ? `/courses/${id}/videos` : null)
 
-    const free: Video[] = videos?.filter((video) => video.free) || []
-
     if (!course || !videos) {
         return null
     }
@@ -48,24 +46,12 @@ export default function CourseDetails() {
                             height={32}
                         />
                         <div className="mx-auto flex w-2/3 flex-col">
-                            <h5 className="mx-auto text-2xl font-bold text-gray-900">{course.name}</h5>
+                            <h5 className="mx-auto text-xl font-bold text-gray-900 md:text-2xl">{course.name}</h5>
                             <p className="mx-auto">{course.description}</p>
                         </div>
                     </div>
 
-                    {free && free.length > 0 && (
-                        <div className="flex w-full flex-col">
-                            <p className="mx-auto">Free Samples</p>
-                            <div className="flex w-full flex-col items-center space-y-5 pt-6 pb-6">
-                                {free.map((video) => (
-                                    <Card {...video} key={video.name} />
-                                ))}
-                            </div>
-                        </div>
-                    )}
-
                     <div className="flex w-full flex-col">
-                        <p className="mx-auto">All videos contained in this course</p>
                         <div className="flex flex-col items-center space-y-5 pt-6 pb-6">
                             {videos && videos.map((video) => <Card {...video} key={video.name} />)}
                         </div>
@@ -78,28 +64,38 @@ export default function CourseDetails() {
 
 function Card(props: Video) {
     return (
-        <div className="flex w-1/2 flex-col items-center rounded-lg border border-gray-200 bg-white shadow hover:bg-gray-100 md:max-w-xl md:flex-row">
-            <Image
-                className="w-full rounded-t-lg border border-red-800 object-contain md:w-20"
-                alt=""
-                src={props.image_url}
-                width={80}
-                height={32}
-            />
-
-            <div className="flex flex-col justify-between p-4 leading-normal">
-                <h5 className="mb-2 text-2xl font-bold tracking-tight text-gray-900 dark:text-white">{props.name}</h5>
-                <p className="mb-3 font-normal text-gray-700 dark:text-gray-400">{props.description}</p>
-            </div>
-
+        <div className="flex w-full flex-col items-center">
             {props.free && (
-                <Link
-                    href={`/courses/video/${encodeURIComponent(props.id)}`}
-                    className="rounded bg-blue-700 p-4 font-semibold text-white hover:bg-blue-900"
-                >
-                    Play
-                </Link>
+                <div className="w-2/3 rounded-t-lg border bg-green-600 text-xs text-white md:max-w-3xl">
+                    <p className="mx-5 font-semibold">Free</p>
+                </div>
             )}
+
+            <div className="flex w-2/3 flex-col items-center rounded-lg border border-gray-200 bg-white shadow md:max-w-3xl md:flex-row">
+                <Image
+                    className="m-2 w-20 object-contain md:w-20"
+                    alt=""
+                    src={props.image_url}
+                    width={80}
+                    height={32}
+                />
+
+                <div className="flex w-full flex-col items-center justify-between md:flex-row">
+                    <div className="flex flex-col p-4 leading-normal">
+                        <h5 className="mb-2 text-2xl font-bold tracking-tight text-gray-900">{props.name}</h5>
+                        <p className="mb-3 font-normal text-gray-700">{props.description}</p>
+                    </div>
+
+                    {props.free && (
+                        <Link
+                            href={`/courses/video/${encodeURIComponent(props.id)}`}
+                            className="m-2 h-1/2 rounded bg-blue-700 p-4 font-semibold text-white hover:bg-blue-900"
+                        >
+                            Play
+                        </Link>
+                    )}
+                </div>
+            </div>
         </div>
     )
 }
