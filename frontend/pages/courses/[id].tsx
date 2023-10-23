@@ -95,7 +95,7 @@ function Card(props: Video) {
             {props.free && (
                 <Link
                     href={`/courses/video/${encodeURIComponent(props.id)}`}
-                    className="rounded bg-blue-500 p-4 font-semibold text-white"
+                    className="rounded bg-blue-700 p-4 font-semibold text-white hover:bg-blue-900"
                 >
                     Play
                 </Link>

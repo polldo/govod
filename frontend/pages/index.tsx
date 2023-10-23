@@ -34,7 +34,7 @@ function Hero() {
                             </p>
                             <Link
                                 href="/courses"
-                                className="mx-auto my-10 block w-1/3 rounded bg-blue-900 p-2 font-semibold text-white"
+                                className="mx-auto my-10 block w-1/3 rounded bg-blue-700 p-2 font-semibold text-white hover:bg-blue-900"
                             >
                                 Go
                             </Link>

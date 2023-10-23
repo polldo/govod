@@ -75,7 +75,7 @@ function Card(props: CardProps) {
                 {props.isOwned ? (
                     <button
                         onClick={handleSubmit}
-                        className="mx-auto w-1/2 rounded bg-blue-800 p-2 font-semibold text-white md:mx-0"
+                        className="mx-auto w-1/2 rounded bg-blue-700 p-2 font-semibold text-white hover:bg-blue-900 md:mx-0"
                     >
                         Go to Course
                     </button>

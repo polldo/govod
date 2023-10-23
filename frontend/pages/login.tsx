@@ -88,7 +88,7 @@ export default function Login() {
                             type="email"
                             value={email}
                             onChange={handleEmailChange}
-                            className="mb-4 block w-full rounded bg-gray-100 p-2"
+                            className="mb-4 block w-full rounded bg-gray-100 p-2 hover:bg-gray-200"
                             placeholder="Email"
                             required
                         />
@@ -97,12 +97,15 @@ export default function Login() {
                             type="password"
                             value={password}
                             onChange={handlePasswordChange}
-                            className="mb-4 block w-full rounded bg-gray-100 p-2"
+                            className="mb-4 block w-full rounded bg-gray-100 p-2 hover:bg-gray-200"
                             placeholder="Password"
                             required
                         />
 
-                        <button type="submit" className="w-full rounded bg-blue-500 p-2 font-semibold text-white">
+                        <button
+                            type="submit"
+                            className="w-full rounded bg-blue-700 p-2 font-semibold text-white hover:bg-blue-900"
+                        >
                             Login
                         </button>
 

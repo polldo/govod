@@ -55,7 +55,7 @@ export default function Require() {
                         </p>
                         <button
                             onClick={handleEmail}
-                            className="w-full rounded bg-blue-500 p-2 font-semibold text-white"
+                            className="w-full rounded bg-blue-700 p-2 font-semibold text-white hover:bg-blue-900"
                         >
                             Send email again
                         </button>
