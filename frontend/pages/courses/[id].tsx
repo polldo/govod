@@ -38,18 +38,18 @@ export default function CourseDetails() {
                 <title>Course - {course?.name}</title>
             </Head>
             <Layout>
-                <div className="flex w-1/2 flex-col ">
-                    <div className="mx-auto my-20 flex flex-row">
+                <div className="flex w-full flex-col">
+                    <div className="my-10 mx-auto flex w-2/3 flex-col ">
                         <Image
-                            className="mx-20 rounded-t-lg border border-red-800 object-contain md:w-20"
+                            className="my-5 mx-auto object-contain "
                             alt=""
                             src={course.image_url}
                             width={80}
                             height={32}
                         />
-                        <div className="flex flex-col">
-                            <p>{course.name}</p>
-                            <p>{course.description}</p>
+                        <div className="mx-auto flex w-2/3 flex-col">
+                            <h5 className="mx-auto text-2xl font-bold text-gray-900">{course.name}</h5>
+                            <p className="mx-auto">{course.description}</p>
                         </div>
                     </div>
 
