@@ -17,10 +17,10 @@ function Card(props: Course) {
     return (
         <Link
             href={`/dashboard/course/${encodeURIComponent(props.id)}`}
-            className="flex w-2/3 max-w-3xl flex-col items-center rounded-lg border border-gray-200 bg-white shadow hover:bg-gray-100 md:flex-row"
+            className="mx-auto flex w-2/3 max-w-3xl flex-col items-center rounded-lg border border-gray-200 bg-white pt-5 shadow hover:bg-gray-100 md:w-1/2 lg:w-2/3"
         >
             <Image
-                className="max-w-1/6 w-2/3 rounded-t-lg object-contain md:m-8 md:w-1/6"
+                className="max-w-1/6 w-2/3 rounded-t-lg object-contain md:m-8 "
                 alt=""
                 src={props.image_url}
                 width={80}
@@ -57,11 +57,11 @@ export default function Dashboard() {
             </Head>
             <Layout>
                 <div className="flex w-full flex-col">
-                    <div>
-                        <p>Hello, this is your dashboard!</p>
+                    <div className="flex w-full p-10">
+                        <p className="mx-auto text-xl">Hello, this is your dashboard!</p>
                     </div>
 
-                    <div className="flex w-full flex-col items-center space-y-5 pt-6 ">
+                    <div className="grid items-stretch space-y-5 p-4 pt-6 md:grid-cols-2 md:gap-y-10 md:space-y-0 lg:grid-cols-3">
                         {courses?.map((course) => (
                             <Card {...course} key={course.name} />
                         ))}
