@@ -59,7 +59,7 @@ function Card(props: CardProps) {
     return (
         <Link
             href={linkURL}
-            className="flex w-2/3 flex-col items-center rounded-lg border border-gray-200 bg-white shadow hover:bg-gray-100 md:flex-row"
+            className="flex w-2/3 max-w-3xl flex-col items-center rounded-lg border border-gray-200 bg-white shadow hover:bg-gray-100 md:flex-row"
         >
             <Image
                 className="max-w-1/6 w-2/3 rounded-t-lg object-contain md:m-8 md:w-1/6"
