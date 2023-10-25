@@ -6,6 +6,7 @@ import { CourseCard } from '@/components/coursecard'
 import { useRouter } from 'next/router'
 import Link from 'next/link'
 import useSWR from 'swr'
+import { ProgressBar } from '@/components/progressbar'
 
 type Course = {
     name: string
@@ -103,12 +104,7 @@ function Card(props: CardProps) {
                 </div>
 
                 <p>Progress: {props.progress}%</p>
-                <div className="mt-1 h-2.5 w-full rounded-full bg-gray-200 dark:bg-gray-700">
-                    <div
-                        className="h-2.5 rounded-full bg-blue-600"
-                        style={{ width: props.progress.toString() + '%' }}
-                    ></div>
-                </div>
+                <ProgressBar percent={props.progress || 0} />
             </div>
         </Link>
     )
