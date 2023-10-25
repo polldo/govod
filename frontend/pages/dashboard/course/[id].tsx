@@ -84,22 +84,32 @@ function Card(props: CardProps) {
     return (
         <Link
             href={`/dashboard/video/${props.id}`}
-            className="flex w-1/2 flex-col items-center rounded-lg border border-gray-200 bg-white shadow hover:bg-gray-100 dark:border-gray-700 dark:bg-gray-800 dark:hover:bg-gray-700 md:max-w-xl md:flex-row"
+            className="flex w-2/3 flex-col items-center rounded-lg border border-gray-200 bg-white shadow hover:bg-gray-100 md:max-w-xl md:flex-row"
         >
-            <Image
-                className="w-full rounded-t-lg border border-red-800 object-contain md:w-20"
-                alt=""
-                src={props.image_url}
-                width={80}
-                height={32}
-            />
+            <div className="flex w-full flex-col items-center">
+                <Image
+                    className="m-2 w-20 rounded-t-lg object-contain"
+                    alt=""
+                    src={props.image_url}
+                    width={80}
+                    height={32}
+                />
 
-            <div className="flex flex-col justify-between p-4 leading-normal">
-                <h5 className="mb-2 text-2xl font-bold tracking-tight text-gray-900 dark:text-white">{props.name}</h5>
-                <p className="mb-3 font-normal text-gray-700 dark:text-gray-400">{props.description}</p>
+                <div className="flex flex-col justify-between p-4 leading-normal">
+                    <h5 className="mb-2 text-2xl font-bold tracking-tight text-gray-900 dark:text-white">
+                        {props.name}
+                    </h5>
+                    <p className="mb-3 font-normal text-gray-700 dark:text-gray-400">{props.description}</p>
+                </div>
+
+                <p>Progress: {props.progress}%</p>
+                <div className="mt-1 h-2.5 w-full rounded-full bg-gray-200 dark:bg-gray-700">
+                    <div
+                        className="h-2.5 rounded-full bg-blue-600"
+                        style={{ width: props.progress.toString() + '%' }}
+                    ></div>
+                </div>
             </div>
-
-            <p>progress: {props.progress}</p>
         </Link>
     )
 }
