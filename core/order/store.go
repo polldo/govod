@@ -8,11 +8,7 @@ import (
 	"github.com/polldo/govod/database"
 )
 
-// Create order during checkout -> create also items with the current price.
-// Let's assume that order items cannot be modified at the moment. This simplifies a lot. Otherwise
-// we need to be extremely careful when a user checkouts but then go back and modifies the order.
-// Orders are then fetched to assess if a user owns a course -> join order item + order + payment.
-
+// Create inserts a new order with the passed information.
 func Create(ctx context.Context, db sqlx.ExtContext, order Order) error {
 	const q = `
 	INSERT INTO orders
@@ -44,6 +40,7 @@ func UpdateStatus(ctx context.Context, db sqlx.ExtContext, up StatusUp) error {
 	return nil
 }
 
+// FetchByProviderID retrieves the order with the specified provider id, if any.
 func FetchByProviderID(ctx context.Context, db sqlx.ExtContext, provID string) (Order, error) {
 	in := struct {
 		ProviderID string `db:"provider_id"`
@@ -67,6 +64,7 @@ func FetchByProviderID(ctx context.Context, db sqlx.ExtContext, provID string) (
 	return order, nil
 }
 
+// CreateItem adds a new item in an order.
 func CreateItem(ctx context.Context, db sqlx.ExtContext, item Item) error {
 	const q = `
 	INSERT INTO order_items
