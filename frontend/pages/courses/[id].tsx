@@ -4,6 +4,7 @@ import Image from 'next/image'
 import Link from 'next/link'
 import { useRouter } from 'next/router'
 import useSWR from 'swr'
+import { CourseCard } from '@/components/coursecard'
 
 type Course = {
     name: string
@@ -37,19 +38,7 @@ export default function CourseDetails() {
             </Head>
             <Layout>
                 <div className="flex w-full flex-col">
-                    <div className="my-10 mx-auto flex w-2/3 flex-col ">
-                        <Image
-                            className="my-5 mx-auto object-contain "
-                            alt=""
-                            src={course.image_url}
-                            width={80}
-                            height={32}
-                        />
-                        <div className="mx-auto flex w-2/3 flex-col">
-                            <h5 className="mx-auto text-xl font-bold text-gray-900 md:text-2xl">{course.name}</h5>
-                            <p className="mx-auto">{course.description}</p>
-                        </div>
-                    </div>
+                    <CourseCard course={course}></CourseCard>
 
                     <div className="flex w-full flex-col">
                         <div className="flex flex-col items-center space-y-5 pt-6 pb-6">

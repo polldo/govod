@@ -2,6 +2,7 @@ import Layout from '@/components/layout'
 import Head from 'next/head'
 import Image from 'next/image'
 import { useSession } from '@/session/context'
+import { CourseCard } from '@/components/coursecard'
 import { useRouter } from 'next/router'
 import Link from 'next/link'
 import useSWR from 'swr'
@@ -46,6 +47,10 @@ export default function DashboardCourse() {
         return null
     }
 
+    if (!course || !videos) {
+        return null
+    }
+
     if (!isLoggedIn) {
         router.push('/login')
         return null
@@ -54,16 +59,12 @@ export default function DashboardCourse() {
     return (
         <>
             <Head>
-                <title>Course - {course?.name}</title>
+                <title>Course - {course.name}</title>
             </Head>
             <Layout>
-                <div className="flex w-1/2 flex-col">
-                    <p>Enjoy the course</p>
-                    <p>{course?.name}</p>
-                    <br></br>
-                    <p>{course?.description}</p>
-
-                    <div className="flex flex-col items-center space-y-5 pt-6 pb-6">
+                <div className="flex w-full flex-col">
+                    <CourseCard course={course}></CourseCard>
+                    <div className="flex w-full flex-col items-center space-y-5 pt-6 pb-6">
                         {videos &&
                             videos.map((video) => (
                                 <Card {...video} progress={progress[video.id] || 0} key={video.name} />
