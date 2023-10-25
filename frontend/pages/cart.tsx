@@ -127,6 +127,8 @@ export default function CartPage() {
                                 )
                             })}
 
+                        {cart?.items.length === 0 && <p className="p-5 text-center">Nothing in the cart..</p>}
+
                         <div className="flex flex-col items-center gap-4 md:flex-row md:justify-center">
                             <button
                                 onClick={handleStripeCheckout}

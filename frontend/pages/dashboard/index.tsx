@@ -65,8 +65,13 @@ export default function Dashboard() {
                         {courses?.map((course) => (
                             <Card {...course} key={course.name} />
                         ))}
-                        {courses?.length == 0 && <p>No courses yet.</p>}
                     </div>
+
+                    {courses?.length == 0 && (
+                        <div className="mx-auto flex w-1/2 rounded-sm border border-blue-900 p-2">
+                            <p>No courses yet...</p>
+                        </div>
+                    )}
                 </div>
             </Layout>
         </>
