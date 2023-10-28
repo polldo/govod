@@ -88,7 +88,7 @@ export default function Login() {
                             type="email"
                             value={email}
                             onChange={handleEmailChange}
-                            className="mb-4 block w-full rounded bg-gray-100 p-2"
+                            className="mb-4 block w-full rounded bg-gray-100 p-2 hover:bg-gray-200"
                             placeholder="Email"
                             required
                         />
@@ -97,18 +97,21 @@ export default function Login() {
                             type="password"
                             value={password}
                             onChange={handlePasswordChange}
-                            className="mb-4 block w-full rounded bg-gray-100 p-2"
+                            className="mb-4 block w-full rounded bg-gray-100 p-2 hover:bg-gray-200"
                             placeholder="Password"
                             required
                         />
 
-                        <button type="submit" className="w-full rounded bg-blue-500 p-2 font-semibold text-white">
+                        <button
+                            type="submit"
+                            className="w-full rounded bg-blue-700 p-2 font-semibold text-white hover:bg-blue-900"
+                        >
                             Login
                         </button>
 
                         <button
                             onClick={handleGoogleLogin}
-                            className="w-full rounded bg-red-500 p-2 font-semibold text-white"
+                            className="w-full rounded bg-red-500 p-2 font-semibold text-white hover:bg-red-700"
                         >
                             Login with Google
                         </button>
@@ -121,7 +124,7 @@ export default function Login() {
                             <p className="mx-auto"> -- or --</p>
                             <Link
                                 href={`/signup`}
-                                className="mt-4 w-full rounded bg-gray-500 p-2 text-center font-semibold text-white"
+                                className="mt-4 w-full rounded bg-gray-500 p-2 text-center font-semibold text-white hover:bg-gray-700"
                             >
                                 <p>Signup</p>
                             </Link>

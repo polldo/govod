@@ -73,7 +73,10 @@ export default function Require() {
                                 An email has been sent to your email address. Please follow the instructions.
                             </p>
                         ) : (
-                            <button type="submit" className="w-full rounded bg-blue-500 p-2 font-semibold text-white">
+                            <button
+                                type="submit"
+                                className="w-full rounded bg-blue-700 p-2 font-semibold text-white hover:bg-blue-900"
+                            >
                                 Send
                             </button>
                         )}

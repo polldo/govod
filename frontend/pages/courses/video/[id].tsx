@@ -53,7 +53,7 @@ export default function CourseDetails() {
                 <div className="mt-10 flex w-2/4 flex-col">
                     <div className="w-full">{url && <VideoJS options={videoJsOptions} onReady={() => {}} />}</div>
 
-                    <div className="mx-16 mt-5 flex flex-col p-4 sm:mx-20">
+                    <div className="mx-auto mt-5 flex w-full flex-col p-4">
                         <h2 className="text-base font-bold sm:text-xl">{video.name}</h2>
                         <p className="mt-2 text-base italic sm:text-xl">{video.description}</p>
                         <Link

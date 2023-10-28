@@ -104,7 +104,10 @@ export default function Signup() {
                             placeholder="Password"
                             required
                         />
-                        <button type="submit" className="w-full rounded bg-blue-500 p-2 font-semibold text-white">
+                        <button
+                            type="submit"
+                            className="w-full rounded bg-blue-700 p-2 font-semibold text-white hover:bg-blue-900"
+                        >
                             Signup
                         </button>
                     </form>

@@ -59,29 +59,35 @@ function Card(props: CardProps) {
     return (
         <Link
             href={linkURL}
-            className="flex w-1/2 flex-col items-center rounded-lg border border-gray-200 bg-white shadow hover:bg-gray-100 dark:border-gray-700 dark:bg-gray-800 dark:hover:bg-gray-700 md:max-w-xl md:flex-row"
+            className="flex w-2/3 max-w-3xl flex-col items-center rounded-lg border border-gray-200 bg-white shadow hover:bg-gray-100 md:flex-row"
         >
             <Image
-                className="w-full rounded-t-lg border border-red-800 object-contain md:w-20"
+                className="max-w-1/6 w-2/3 rounded-t-lg object-contain md:m-8 md:w-1/6"
                 alt=""
                 src={props.image_url}
                 width={80}
                 height={32}
             />
 
-            <div className="flex flex-col justify-between p-4 leading-normal">
-                <h5 className="mb-2 text-2xl font-bold tracking-tight text-gray-900 dark:text-white">{props.name}</h5>
-                <p className="mb-3 font-normal text-gray-700 dark:text-gray-400">{props.description}</p>
+            <div className="flex w-full flex-col justify-between p-4 leading-normal">
+                <h5 className="text-2xl font-bold tracking-tight text-gray-900 dark:text-white">{props.name}</h5>
+                <p className="mb-6 mt-2 font-normal text-gray-700 dark:text-gray-400">{props.description}</p>
                 {props.isOwned ? (
-                    <button onClick={handleSubmit} className="w-full rounded bg-blue-500 p-2 font-semibold text-white">
+                    <button
+                        onClick={handleSubmit}
+                        className="mx-auto w-1/2 rounded bg-blue-700 p-2 font-semibold text-white hover:bg-blue-900 md:mx-0"
+                    >
                         Go to Course
                     </button>
                 ) : props.isInCart ? (
-                    <button disabled className="w-full rounded bg-gray-500 p-2 font-semibold text-white">
+                    <button disabled className="mx-auto w-1/2 rounded bg-gray-500 p-2 font-semibold text-white md:mx-0">
                         In Cart
                     </button>
                 ) : (
-                    <button onClick={handleSubmit} className="w-full rounded bg-green-500 p-2 font-semibold text-white">
+                    <button
+                        onClick={handleSubmit}
+                        className="mx-auto w-1/2 rounded bg-green-700 p-2 font-semibold text-white hover:bg-green-900 md:mx-0"
+                    >
                         {props.isLoggedIn ? 'Add to Cart' : 'Login to buy'}
                     </button>
                 )}
@@ -141,7 +147,7 @@ export default function Courses() {
                 <title>Courses</title>
             </Head>
             <Layout>
-                <div className="flex flex-col items-center space-y-5 pt-6 pb-6">
+                <div className="flex w-full flex-col items-center space-y-5 pt-6">
                     {sortedCourses.map((course) => (
                         <Card
                             {...course}

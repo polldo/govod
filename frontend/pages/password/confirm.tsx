@@ -92,13 +92,16 @@ export default function Confirm() {
                                 <p className="rounded-lg bg-blue-300 p-4">Your password has been correctly reset.</p>
                                 <button
                                     onClick={handleClick}
-                                    className="w-full rounded bg-blue-500 p-2 font-semibold text-white"
+                                    className="w-full rounded bg-blue-700 p-2 font-semibold text-white hover:bg-blue-900"
                                 >
                                     Go to Login
                                 </button>
                             </>
                         ) : (
-                            <button type="submit" className="w-full rounded bg-blue-500 p-2 font-semibold text-white">
+                            <button
+                                type="submit"
+                                className="w-full rounded bg-blue-700 p-2 font-semibold text-white hover:bg-blue-900"
+                            >
                                 Reset password
                             </button>
                         )}

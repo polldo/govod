@@ -10,6 +10,8 @@ import { fetcher } from '@/services/fetch'
 import React from 'react'
 import { useSession } from '@/session/context'
 import useSWR from 'swr'
+import Image from 'next/image'
+import { ProgressBar } from '@/components/progressbar'
 
 type Course = {
     name: string
@@ -21,6 +23,7 @@ type Video = {
     course_id: string
     name: string
     description: string
+    image_url: string
 }
 
 type Progress = {
@@ -168,10 +171,26 @@ export default function CourseDetails() {
                                     <Link
                                         key={vid.name}
                                         href={`/dashboard/video/${encodeURIComponent(vid.id)}`}
-                                        className="mx-2 my-2 text-sm"
+                                        className={`flex flex-row items-center p-2 py-2 text-sm ${
+                                            vid.index % 2 ? 'bg-gray-200' : 'bg-gray-300'
+                                        }`}
                                     >
-                                        {vid.name} {vid.index === video.index ? '<' : ''}
-                                        {vid.index !== video.index ? (progress[vid.id] || 0) + '%' : ''}
+                                        {vid.index === video.index ? '> ' : ''}
+                                        <Image
+                                            className="m-2 mr-4 w-10"
+                                            alt=""
+                                            src={video.image_url}
+                                            width={80}
+                                            height={32}
+                                        />
+                                        <div className="flex w-full flex-col">
+                                            {vid.name}
+                                            {vid.index !== video.index ? (
+                                                <div className="w-2/3">
+                                                    <ProgressBar percent={progress[vid.id] || 0} />
+                                                </div>
+                                            ) : null}
+                                        </div>
                                     </Link>
                                 ))}
                             {!videos && <p>No videos here.</p>}
@@ -201,7 +220,7 @@ export default function CourseDetails() {
                             <p className="mt-2 text-base italic sm:text-xl">{video.description}</p>
                             <Link
                                 href={`/dashboard/course/${encodeURIComponent(video.course_id)}`}
-                                className="mt-2 w-20 cursor-pointer text-sm text-blue-500 underline"
+                                className="mt-2 cursor-pointer text-sm text-blue-500 underline"
                             >
                                 {course?.name}
                             </Link>
