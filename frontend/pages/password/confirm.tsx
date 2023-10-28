@@ -98,7 +98,10 @@ export default function Confirm() {
                                 </button>
                             </>
                         ) : (
-                            <button type="submit" className="w-full rounded bg-blue-500 p-2 font-semibold text-white">
+                            <button
+                                type="submit"
+                                className="w-full rounded bg-blue-700 p-2 font-semibold text-white hover:bg-blue-900"
+                            >
                                 Reset password
                             </button>
                         )}

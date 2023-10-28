@@ -111,7 +111,7 @@ export default function Login() {
 
                         <button
                             onClick={handleGoogleLogin}
-                            className="w-full rounded bg-red-500 p-2 font-semibold text-white"
+                            className="w-full rounded bg-red-500 p-2 font-semibold text-white hover:bg-red-700"
                         >
                             Login with Google
                         </button>
@@ -124,7 +124,7 @@ export default function Login() {
                             <p className="mx-auto"> -- or --</p>
                             <Link
                                 href={`/signup`}
-                                className="mt-4 w-full rounded bg-gray-500 p-2 text-center font-semibold text-white"
+                                className="mt-4 w-full rounded bg-gray-500 p-2 text-center font-semibold text-white hover:bg-gray-700"
                             >
                                 <p>Signup</p>
                             </Link>

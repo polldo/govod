@@ -1,8 +1,10 @@
 import Layout from '@/components/layout'
+import { Spinner } from '@/components/spinner'
 import Head from 'next/head'
 import { useRouter } from 'next/router'
 import { useEffect } from 'react'
 import { useCallback } from 'react'
+import { useState } from 'react'
 import { fetcher } from '@/services/fetch'
 
 type ActivateBody = {
@@ -13,6 +15,7 @@ type ActivateBody = {
 export default function Require() {
     const router = useRouter()
     const { email } = router.query
+    const [reloading, setReloading] = useState<boolean>(false)
 
     const handleEmail = useCallback(() => {
         if (!router.isReady) {
@@ -33,7 +36,14 @@ export default function Require() {
             .catch((err) => {
                 console.log(err)
             })
+        setReloading(true)
     }, [router.query, router.isReady])
+
+    useEffect(() => {
+        if (!reloading) return
+        const timer = setTimeout(() => setReloading(false), 1500)
+        return () => clearTimeout(timer)
+    }, [reloading])
 
     useEffect(() => {
         handleEmail()
@@ -46,19 +56,26 @@ export default function Require() {
             </Head>
             <Layout>
                 <div className="flex items-center justify-center py-32">
-                    <div className="rounded-lg border border-gray-300 bg-gray-100 p-6 text-center">
+                    <div className="flex flex-col rounded-lg border border-gray-300 bg-gray-100 p-6 text-center">
                         <h1 className="mb-4 text-2xl font-bold">Account Activation Required</h1>
-                        <p className="text-lg">
-                            An account has been created with the email{' '}
-                            <strong className="text-blue-600">{email}</strong>. <br></br>Please check your email to
+                        <p className="p-2 text-lg">
+                            An account has been created with the email
+                            <strong className="ml-1 text-blue-600">{email}</strong>. <br></br>Please check your email to
                             activate your account.
                         </p>
-                        <button
-                            onClick={handleEmail}
-                            className="w-full rounded bg-blue-700 p-2 font-semibold text-white hover:bg-blue-900"
-                        >
-                            Send email again
-                        </button>
+
+                        {reloading ? (
+                            <div className="mx-auto flex ">
+                                <Spinner />
+                            </div>
+                        ) : (
+                            <button
+                                onClick={handleEmail}
+                                className="mx-auto w-1/2 rounded bg-blue-700 p-2 font-semibold text-white hover:bg-blue-900"
+                            >
+                                Send email again
+                            </button>
+                        )}
                     </div>
                 </div>
             </Layout>
