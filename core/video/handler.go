@@ -226,8 +226,8 @@ func HandleShowFull(db *sqlx.DB) web.Handler {
 		fullVideo := struct {
 			Course      course.Course `json:"course"`
 			Video       Video         `json:"video"`
-			AllVideos   []Video       `json:"all_videos"`
-			AllProgress []Progress    `json:"all_progress"`
+			AllVideos   []Video       `json:"allVideos"`
+			AllProgress []Progress    `json:"allProgress"`
 			URL         string        `json:"url"`
 		}{
 			Course:      crs,

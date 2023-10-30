@@ -24,7 +24,7 @@ export default function DashboardCourse() {
     const { data: progressData } = useSWR<Progress[]>(id ? `/courses/${id}/progress` : null)
     let progress: ProgressMap = {}
     progressData?.forEach((p: Progress) => {
-        progress[p.video_id] = p.progress
+        progress[p.videoId] = p.progress
     })
 
     if (isLoading || !course || !videos) {
@@ -70,7 +70,7 @@ function Card(props: CardProps) {
                 <Image
                     className="m-2 w-20 rounded-t-lg object-contain"
                     alt=""
-                    src={props.image_url}
+                    src={props.imageUrl}
                     width={80}
                     height={32}
                 />

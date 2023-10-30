@@ -16,7 +16,7 @@ const (
 // activation and recovery purposes.
 type Token struct {
 	Hash   []byte    `json:"-" db:"hash"`
-	UserID string    `json:"user_id" db:"user_id"`
+	UserID string    `json:"userId" db:"user_id"`
 	Expiry time.Time `json:"expiry" db:"expiry"`
 	Scope  string    `json:"scope" db:"scope"`
 }

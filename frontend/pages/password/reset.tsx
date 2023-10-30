@@ -18,8 +18,8 @@ export default function Require() {
         setError('')
 
         const body: TokenRequest = {
-            Email: email,
-            Scope: 'recovery',
+            email: email,
+            scope: 'recovery',
         }
 
         try {

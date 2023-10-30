@@ -31,9 +31,9 @@ export default function Confirm() {
 
         const { token } = router.query
         const body: PasswordToken = {
-            Token: typeof token === 'string' ? token : '',
-            Password: password,
-            Password_Confirm: passwordConfirm,
+            token: typeof token === 'string' ? token : '',
+            password: password,
+            passwordConfirm: passwordConfirm,
         }
 
         try {

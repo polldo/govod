@@ -16,7 +16,7 @@ function Card(props: Course) {
             <Image
                 className="max-w-1/6 w-2/3 rounded-t-lg object-contain md:m-8 "
                 alt=""
-                src={props.image_url}
+                src={props.imageUrl}
                 width={80}
                 height={32}
             />

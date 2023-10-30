@@ -48,7 +48,7 @@ function Card(props: Video) {
             )}
 
             <div className="flex w-2/3 flex-col items-center rounded-lg border border-gray-200 bg-white shadow md:max-w-3xl md:flex-row">
-                <Image className="m-2 w-20 object-contain" alt="" src={props.image_url} width={80} height={32} />
+                <Image className="m-2 w-20 object-contain" alt="" src={props.imageUrl} width={80} height={32} />
 
                 <div className="flex w-full flex-col items-center justify-between md:flex-row">
                     <div className="flex flex-col p-4 leading-normal">

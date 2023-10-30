@@ -46,7 +46,7 @@ export default function CourseDetails() {
                         <h2 className="text-base font-bold sm:text-xl">{video.name}</h2>
                         <p className="mt-2 text-base italic sm:text-xl">{video.description}</p>
                         <Link
-                            href={`/courses/${encodeURIComponent(video.course_id)}`}
+                            href={`/courses/${encodeURIComponent(video.courseId)}`}
                             className="mt-2 w-20 cursor-pointer text-sm text-blue-500 underline"
                         >
                             {course?.name}

@@ -163,7 +163,7 @@ func (tt *tokenTest) recoveryToken(t *testing.T, u user.UserSignup) {
 	body, err := json.Marshal(&struct {
 		Token           string `json:"token"`
 		Password        string `json:"password"`
-		PasswordConfirm string `json:"password_confirm"`
+		PasswordConfirm string `json:"passwordConfirm"`
 	}{
 		Token:           tokst,
 		Password:        newPassword,
@@ -196,7 +196,7 @@ func (tt *tokenTest) recoveryToken(t *testing.T, u user.UserSignup) {
 	body, err = json.Marshal(&struct {
 		Token           string `json:"token"`
 		Password        string `json:"password"`
-		PasswordConfirm string `json:"password_confirm"`
+		PasswordConfirm string `json:"passwordConfirm"`
 	}{
 		Token:           toknd,
 		Password:        newPassword,

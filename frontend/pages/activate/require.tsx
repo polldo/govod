@@ -19,8 +19,8 @@ export default function Require() {
         }
         const { email } = router.query
         const body: TokenRequest = {
-            Email: typeof email === 'string' ? email : '',
-            Scope: 'activation',
+            email: typeof email === 'string' ? email : '',
+            scope: 'activation',
         }
 
         fetcher

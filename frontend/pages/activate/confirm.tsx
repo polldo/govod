@@ -20,7 +20,7 @@ export default function Confirm() {
         }
         const { token } = router.query
         const body: ActivationToken = {
-            Token: typeof token === 'string' ? token : '',
+            token: typeof token === 'string' ? token : '',
         }
 
         try {
