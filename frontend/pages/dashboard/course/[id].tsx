@@ -27,11 +27,7 @@ export default function DashboardCourse() {
         progress[p.video_id] = p.progress
     })
 
-    if (isLoading) {
-        return null
-    }
-
-    if (!course || !videos) {
+    if (isLoading || !course || !videos) {
         return null
     }
 

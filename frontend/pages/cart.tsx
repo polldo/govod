@@ -7,21 +7,7 @@ import Image from 'next/image'
 import { toast } from 'react-hot-toast'
 import { PayPalButtons, usePayPalScriptReducer } from '@paypal/react-paypal-js'
 import useSWR from 'swr'
-
-type Cart = {
-    items: Item[]
-}
-
-type Item = {
-    course_id: string
-}
-
-type Course = {
-    id: string
-    name: string
-    price: number
-    image_url: string
-}
+import { Cart, Course } from '@/services/types'
 
 type CartCourseProps = {
     course: string

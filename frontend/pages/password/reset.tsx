@@ -2,11 +2,7 @@ import Layout from '@/components/layout'
 import Head from 'next/head'
 import { useState } from 'react'
 import { fetcher, ResponseError } from '@/services/fetch'
-
-type ResetBody = {
-    Email: string
-    Scope: string
-}
+import { TokenRequest } from '@/services/types'
 
 export default function Require() {
     const [email, setEmail] = useState<string>('')
@@ -21,7 +17,7 @@ export default function Require() {
         e.preventDefault()
         setError('')
 
-        const body: ResetBody = {
+        const body: TokenRequest = {
             Email: email,
             Scope: 'recovery',
         }
