@@ -7,21 +7,7 @@ import { toast } from 'react-hot-toast'
 import { fetcher } from '@/services/fetch'
 import useSWR from 'swr'
 import { useRouter } from 'next/router'
-
-type Course = {
-    id: string
-    name: string
-    description: string
-    image_url: string
-}
-
-type Cart = {
-    items: CartItem[]
-}
-
-type CartItem = {
-    course_id: string
-}
+import { Course, Cart, CartItem } from '@/services/types'
 
 type CardProps = Course & {
     isOwned: boolean
@@ -64,7 +50,7 @@ function Card(props: CardProps) {
             <Image
                 className="max-w-1/6 w-2/3 rounded-t-lg object-contain md:m-8 md:w-1/6"
                 alt=""
-                src={props.image_url}
+                src={props.imageUrl}
                 width={80}
                 height={32}
             />
@@ -103,7 +89,7 @@ export default function Courses() {
     const { data: courses } = useSWR<Course[]>('/courses')
 
     const { data: cartData, mutate: cartMutate } = useSWR<Cart>(isLoggedIn ? '/cart' : null)
-    const cartCourses = cartData ? cartData.items.map((item: CartItem) => item.course_id) : []
+    const cartCourses = cartData ? cartData.items.map((item: CartItem) => item.courseId) : []
 
     const { data: ownedData } = useSWR<Course[]>(isLoggedIn ? '/courses/owned' : null)
     const ownedCourses = ownedData ? ownedData.map((item: Course) => item.id) : []
@@ -112,7 +98,7 @@ export default function Courses() {
         fetcher
             .fetch('/cart/items', {
                 method: 'PUT',
-                body: JSON.stringify({ course_id: courseID }),
+                body: JSON.stringify({ courseId: courseID }),
             })
             .then(() => {
                 cartMutate()

@@ -5,18 +5,7 @@ import Link from 'next/link'
 import { useRouter } from 'next/router'
 import React from 'react'
 import useSWR from 'swr'
-
-type Course = {
-    name: string
-}
-
-type Video = {
-    id: string
-    index: number
-    course_id: string
-    name: string
-    description: string
-}
+import { Video, Course } from '@/services/types'
 
 export default function CourseDetails() {
     const router = useRouter()
@@ -57,7 +46,7 @@ export default function CourseDetails() {
                         <h2 className="text-base font-bold sm:text-xl">{video.name}</h2>
                         <p className="mt-2 text-base italic sm:text-xl">{video.description}</p>
                         <Link
-                            href={`/courses/${encodeURIComponent(video.course_id)}`}
+                            href={`/courses/${encodeURIComponent(video.courseId)}`}
                             className="mt-2 w-20 cursor-pointer text-sm text-blue-500 underline"
                         >
                             {course?.name}

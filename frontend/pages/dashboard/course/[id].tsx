@@ -7,24 +7,7 @@ import { useRouter } from 'next/router'
 import Link from 'next/link'
 import useSWR from 'swr'
 import { ProgressBar } from '@/components/progressbar'
-
-type Course = {
-    name: string
-    description: string
-    image_url: string
-}
-
-type Video = {
-    id: string
-    name: string
-    description: string
-    image_url: string
-}
-
-type Progress = {
-    video_id: string
-    progress: number
-}
+import { Course, Video, Progress } from '@/services/types'
 
 type ProgressMap = {
     [videoId: string]: number
@@ -41,14 +24,10 @@ export default function DashboardCourse() {
     const { data: progressData } = useSWR<Progress[]>(id ? `/courses/${id}/progress` : null)
     let progress: ProgressMap = {}
     progressData?.forEach((p: Progress) => {
-        progress[p.video_id] = p.progress
+        progress[p.videoId] = p.progress
     })
 
-    if (isLoading) {
-        return null
-    }
-
-    if (!course || !videos) {
+    if (isLoading || !course || !videos) {
         return null
     }
 
@@ -91,7 +70,7 @@ function Card(props: CardProps) {
                 <Image
                     className="m-2 w-20 rounded-t-lg object-contain"
                     alt=""
-                    src={props.image_url}
+                    src={props.imageUrl}
                     width={80}
                     height={32}
                 />

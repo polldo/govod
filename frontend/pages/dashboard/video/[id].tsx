@@ -12,24 +12,7 @@ import { useSession } from '@/session/context'
 import useSWR from 'swr'
 import Image from 'next/image'
 import { ProgressBar } from '@/components/progressbar'
-
-type Course = {
-    name: string
-}
-
-type Video = {
-    id: string
-    index: number
-    course_id: string
-    name: string
-    description: string
-    image_url: string
-}
-
-type Progress = {
-    video_id: string
-    progress: number
-}
+import { Course, Video, Progress } from '@/services/types'
 
 type ProgressMap = {
     [videoId: string]: number
@@ -43,15 +26,15 @@ export default function CourseDetails() {
 
     const { data } = useSWR(id ? `/videos/${id}/full` : null)
     const video: Video = data?.video
-    const videos: Video[] = data?.all_videos
+    const videos: Video[] = data?.allVideos
     const course: Course = data?.course
     const url: string = data?.url
 
     const progress = useMemo(() => {
         let map: ProgressMap = {}
-        if (data?.all_progress) {
-            data.all_progress.forEach((progressItem: Progress) => {
-                map[progressItem.video_id] = progressItem.progress
+        if (data?.allProgress) {
+            data.allProgress.forEach((progressItem: Progress) => {
+                map[progressItem.videoId] = progressItem.progress
             })
         }
         return map
@@ -179,7 +162,7 @@ export default function CourseDetails() {
                                         <Image
                                             className="m-2 mr-4 w-10"
                                             alt=""
-                                            src={video.image_url}
+                                            src={video.imageUrl}
                                             width={80}
                                             height={32}
                                         />
@@ -219,7 +202,7 @@ export default function CourseDetails() {
                             <h2 className="text-base font-bold sm:text-xl">{video.name}</h2>
                             <p className="mt-2 text-base italic sm:text-xl">{video.description}</p>
                             <Link
-                                href={`/dashboard/course/${encodeURIComponent(video.course_id)}`}
+                                href={`/dashboard/course/${encodeURIComponent(video.courseId)}`}
                                 className="mt-2 cursor-pointer text-sm text-blue-500 underline"
                             >
                                 {course?.name}

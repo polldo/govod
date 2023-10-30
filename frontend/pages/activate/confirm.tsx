@@ -6,10 +6,7 @@ import { useState } from 'react'
 import { useCallback } from 'react'
 import { useSession } from '@/session/context'
 import { fetcher, ResponseError } from '@/services/fetch'
-
-type Token = {
-    Token: string
-}
+import { ActivationToken } from '@/services/types'
 
 export default function Confirm() {
     const [activated, setActivated] = useState<boolean>(false)
@@ -22,8 +19,8 @@ export default function Confirm() {
             return
         }
         const { token } = router.query
-        const body: Token = {
-            Token: typeof token === 'string' ? token : '',
+        const body: ActivationToken = {
+            token: typeof token === 'string' ? token : '',
         }
 
         try {

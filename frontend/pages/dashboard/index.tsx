@@ -5,13 +5,7 @@ import { useRouter } from 'next/router'
 import Image from 'next/image'
 import Link from 'next/link'
 import useSWR from 'swr'
-
-type Course = {
-    id: string
-    name: string
-    description: string
-    image_url: string
-}
+import { Course } from '@/services/types'
 
 function Card(props: Course) {
     return (
@@ -22,7 +16,7 @@ function Card(props: Course) {
             <Image
                 className="max-w-1/6 w-2/3 rounded-t-lg object-contain md:m-8 "
                 alt=""
-                src={props.image_url}
+                src={props.imageUrl}
                 width={80}
                 height={32}
             />

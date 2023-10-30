@@ -3,12 +3,7 @@ import Head from 'next/head'
 import { useRouter } from 'next/router'
 import { useState } from 'react'
 import { fetcher, ResponseError } from '@/services/fetch'
-
-type ConfirmBody = {
-    Token: string
-    Password: string
-    Password_Confirm: string
-}
+import { PasswordToken } from '@/services/types'
 
 export default function Confirm() {
     const [password, setPassword] = useState<string>('')
@@ -35,10 +30,10 @@ export default function Confirm() {
         setError('')
 
         const { token } = router.query
-        const body: ConfirmBody = {
-            Token: typeof token === 'string' ? token : '',
-            Password: password,
-            Password_Confirm: passwordConfirm,
+        const body: PasswordToken = {
+            token: typeof token === 'string' ? token : '',
+            password: password,
+            passwordConfirm: passwordConfirm,
         }
 
         try {

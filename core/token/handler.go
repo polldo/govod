@@ -180,7 +180,7 @@ func HandleRecovery(db *sqlx.DB) web.Handler {
 		var in struct {
 			Token           string `json:"token" validate:"required"`
 			Password        string `json:"password" validate:"required,gte=8,lte=50"`
-			PasswordConfirm string `json:"password_confirm" validate:"eqfield=Password"`
+			PasswordConfirm string `json:"passwordConfirm" validate:"eqfield=Password"`
 		}
 
 		if err := web.Decode(w, r, &in); err != nil {

@@ -6,11 +6,7 @@ import { useEffect } from 'react'
 import { useCallback } from 'react'
 import { useState } from 'react'
 import { fetcher } from '@/services/fetch'
-
-type ActivateBody = {
-    Email: string
-    Scope: string
-}
+import { TokenRequest } from '@/services/types'
 
 export default function Require() {
     const router = useRouter()
@@ -22,9 +18,9 @@ export default function Require() {
             return
         }
         const { email } = router.query
-        const body: ActivateBody = {
-            Email: typeof email === 'string' ? email : '',
-            Scope: 'activation',
+        const body: TokenRequest = {
+            email: typeof email === 'string' ? email : '',
+            scope: 'activation',
         }
 
         fetcher
