@@ -7,21 +7,7 @@ import { toast } from 'react-hot-toast'
 import { fetcher } from '@/services/fetch'
 import useSWR from 'swr'
 import { useRouter } from 'next/router'
-
-type Course = {
-    id: string
-    name: string
-    description: string
-    image_url: string
-}
-
-type Cart = {
-    items: CartItem[]
-}
-
-type CartItem = {
-    course_id: string
-}
+import { Course, Cart, CartItem } from '@/services/types'
 
 type CardProps = Course & {
     isOwned: boolean

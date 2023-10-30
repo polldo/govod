@@ -12,24 +12,7 @@ import { useSession } from '@/session/context'
 import useSWR from 'swr'
 import Image from 'next/image'
 import { ProgressBar } from '@/components/progressbar'
-
-type Course = {
-    name: string
-}
-
-type Video = {
-    id: string
-    index: number
-    course_id: string
-    name: string
-    description: string
-    image_url: string
-}
-
-type Progress = {
-    video_id: string
-    progress: number
-}
+import { Course, Video, Progress } from '@/services/types'
 
 type ProgressMap = {
     [videoId: string]: number

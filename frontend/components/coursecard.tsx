@@ -1,10 +1,5 @@
 import Image from 'next/image'
-
-type Course = {
-    name: string
-    description: string
-    image_url: string
-}
+import { Course } from '@/services/types'
 
 type CourseCardProps = {
     course: Course

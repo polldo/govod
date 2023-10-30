@@ -5,20 +5,7 @@ import Link from 'next/link'
 import { useRouter } from 'next/router'
 import useSWR from 'swr'
 import { CourseCard } from '@/components/coursecard'
-
-type Course = {
-    name: string
-    description: string
-    image_url: string
-}
-
-type Video = {
-    id: string
-    name: string
-    description: string
-    free: boolean
-    image_url: string
-}
+import { Course, Video } from '@/services/types'
 
 export default function CourseDetails() {
     const router = useRouter()

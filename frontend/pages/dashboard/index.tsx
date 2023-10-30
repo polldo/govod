@@ -5,13 +5,7 @@ import { useRouter } from 'next/router'
 import Image from 'next/image'
 import Link from 'next/link'
 import useSWR from 'swr'
-
-type Course = {
-    id: string
-    name: string
-    description: string
-    image_url: string
-}
+import { Course } from '@/services/types'
 
 function Card(props: Course) {
     return (

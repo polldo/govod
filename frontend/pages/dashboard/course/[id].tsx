@@ -7,24 +7,7 @@ import { useRouter } from 'next/router'
 import Link from 'next/link'
 import useSWR from 'swr'
 import { ProgressBar } from '@/components/progressbar'
-
-type Course = {
-    name: string
-    description: string
-    image_url: string
-}
-
-type Video = {
-    id: string
-    name: string
-    description: string
-    image_url: string
-}
-
-type Progress = {
-    video_id: string
-    progress: number
-}
+import { Course, Video, Progress } from '@/services/types'
 
 type ProgressMap = {
     [videoId: string]: number
