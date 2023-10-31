@@ -176,7 +176,7 @@ func (ct *cartTest) showCartOK(t *testing.T, exp cart.Cart) {
 
 	// Don't care about dates.
 	now := got.UpdatedAt
-	cmp.Transformer("", func(in cart.Item) cart.Item {
+	nodates := cmp.Transformer("", func(in cart.Item) cart.Item {
 		out := in
 		out.CreatedAt = now
 		out.UpdatedAt = now
@@ -184,7 +184,7 @@ func (ct *cartTest) showCartOK(t *testing.T, exp cart.Cart) {
 	})
 
 	less := func(a, b cart.Item) bool { return a.CourseID < b.CourseID }
-	if diff := cmp.Diff(got, exp, cmpopts.SortSlices(less)); diff != "" {
+	if diff := cmp.Diff(got, exp, cmpopts.SortSlices(less), nodates); diff != "" {
 		t.Fatalf("wrong cart payload. Diff: \n%s", diff)
 	}
 }
