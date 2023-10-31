@@ -7,6 +7,7 @@ import (
 	"net/http"
 	"strconv"
 	"testing"
+	"time"
 
 	"github.com/google/go-cmp/cmp"
 	"github.com/google/go-cmp/cmp/cmpopts"
@@ -246,6 +247,9 @@ func (vt *videoTest) showVideoOK(t *testing.T, v video.Video) {
 		t.Fatalf("cannot unmarshal fetched video: %v", err)
 	}
 
+	v.CreatedAt = got.CreatedAt
+	v.UpdatedAt = got.UpdatedAt
+
 	if diff := cmp.Diff(got, v); diff != "" {
 		t.Fatalf("wrong video payload. Diff: \n%s", diff)
 	}
@@ -272,8 +276,17 @@ func (vt *videoTest) listVideosOK(t *testing.T, vs []video.Video) {
 		t.Fatalf("cannot unmarshal fetched videos: %v", err)
 	}
 
+	// Don't care about dates.
+	now := time.Now()
+	nodates := cmp.Transformer("", func(in video.Video) video.Video {
+		out := in
+		out.CreatedAt = now
+		out.UpdatedAt = now
+		return out
+	})
+
 	less := func(a, b video.Video) bool { return a.ID < b.ID }
-	if diff := cmp.Diff(got, vs, cmpopts.SortSlices(less)); diff != "" {
+	if diff := cmp.Diff(got, vs, cmpopts.SortSlices(less), nodates); diff != "" {
 		t.Fatalf("wrong videos payload. Diff: \n%s", diff)
 	}
 }

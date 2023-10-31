@@ -7,6 +7,7 @@ import (
 	"net/http"
 	"strconv"
 	"testing"
+	"time"
 
 	"github.com/google/go-cmp/cmp"
 	"github.com/google/go-cmp/cmp/cmpopts"
@@ -328,6 +329,10 @@ func (ct *courseTest) showCourseOK(t *testing.T, crs course.Course) {
 		t.Fatalf("cannot unmarshal fetched course: %v", err)
 	}
 
+	// Don't care about dates.
+	crs.CreatedAt = got.CreatedAt
+	crs.UpdatedAt = got.UpdatedAt
+
 	if diff := cmp.Diff(got, crs); diff != "" {
 		t.Fatalf("wrong course payload. Diff: \n%s", diff)
 	}
@@ -392,8 +397,17 @@ func (ct *courseTest) listCoursesOK(t *testing.T, crs []course.Course) {
 		t.Fatalf("cannot unmarshal fetched courses: %v", err)
 	}
 
+	// Don't care about dates.
+	now := time.Now()
+	nodates := cmp.Transformer("", func(in course.Course) course.Course {
+		out := in
+		out.CreatedAt = now
+		out.UpdatedAt = now
+		return out
+	})
+
 	less := func(a, b course.Course) bool { return a.ID < b.ID }
-	if diff := cmp.Diff(got, crs, cmpopts.SortSlices(less)); diff != "" {
+	if diff := cmp.Diff(got, crs, cmpopts.SortSlices(less), nodates); diff != "" {
 		t.Fatalf("wrong courses payload. Diff: \n%s", diff)
 	}
 }
@@ -424,8 +438,17 @@ func (ct *courseTest) listCoursesOwnedOK(t *testing.T, crs []course.Course) {
 		t.Fatalf("cannot unmarshal fetched courses: %v", err)
 	}
 
+	// Don't care about dates.
+	now := time.Now()
+	nodates := cmp.Transformer("", func(in course.Course) course.Course {
+		out := in
+		out.CreatedAt = now
+		out.UpdatedAt = now
+		return out
+	})
+
 	less := func(a, b course.Course) bool { return a.ID < b.ID }
-	if diff := cmp.Diff(got, crs, cmpopts.SortSlices(less)); diff != "" {
+	if diff := cmp.Diff(got, crs, cmpopts.SortSlices(less), nodates); diff != "" {
 		t.Fatalf("wrong courses payload. Diff: \n%s", diff)
 	}
 }
