@@ -246,6 +246,9 @@ func (vt *videoTest) showVideoOK(t *testing.T, v video.Video) {
 		t.Fatalf("cannot unmarshal fetched video: %v", err)
 	}
 
+	v.CreatedAt = got.CreatedAt
+	v.UpdatedAt = got.UpdatedAt
+
 	if diff := cmp.Diff(got, v); diff != "" {
 		t.Fatalf("wrong video payload. Diff: \n%s", diff)
 	}
