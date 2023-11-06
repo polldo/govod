@@ -162,7 +162,7 @@ export default function CourseDetails() {
                                         <Image
                                             className="m-2 mr-4 w-10"
                                             alt=""
-                                            src={video.imageUrl}
+                                            src={vid.imageUrl}
                                             width={80}
                                             height={32}
                                         />
